@@ -1,0 +1,43 @@
+.SubCategory {
+    display: flex;
+    padding: 1rem;
+    background-color: lightblue;
+    align-items: center;
+}
+
+.SubCategory:not(:last-child) {
+    border-bottom: 2px solid rgb(73, 136, 187);
+}
+
+.PushRight {
+    margin-right: auto;
+}
+
+.PostCount {
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 3rem;
+}
+
+.LastThreadInfo {
+    width: 8rem;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.Name {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.Part1 {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+}

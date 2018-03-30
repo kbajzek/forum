@@ -1,0 +1,32 @@
+.Category {
+    margin: 2rem;
+    border-radius: 3px;
+    
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .2);
+    position: relative;
+}
+
+.Header {
+    font-size: 2rem;
+    padding: .5rem;
+    background-color: rgb(56, 121, 173);
+    color: white;
+    cursor: pointer;
+}
+
+.Opened{
+    transition: all .5s;
+    overflow: hidden;
+}
+
+.Closed{
+    transition: all .5s;
+    max-height: 0px;
+    visibility: hidden;
+    overflow: hidden;
+}
+
+.Wrap {
+    overflow: hidden;
+    height: 100%;
+}

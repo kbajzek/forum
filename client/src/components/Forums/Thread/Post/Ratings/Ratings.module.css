@@ -1,0 +1,14 @@
+.Ratings {
+    display: flex;
+}
+
+.Rating {
+    display: flex;
+    padding: 0 .5rem;
+    align-items: center;
+}
+
+.RatingCount {
+    font-size: 2rem;
+    padding: 0 .5rem;
+}

@@ -1,0 +1,15 @@
+.Post {
+    display: flex;
+    margin: 5rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .2);
+}
+
+.RightSide {
+    display: flex;
+    flex-flow: column;
+    padding: 1rem;
+}
+
+.Content {
+    margin-bottom: auto;
+}
