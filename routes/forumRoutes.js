@@ -1,3 +1,6 @@
+var requireDir = require('require-dir');
+var models = requireDir('../models');
+
 module.exports = app => {
 
     const example_categories = [
@@ -150,6 +153,7 @@ module.exports = app => {
 
     app.get('/api/forums', (req, res) => {
 
+        
         res.send(example_categories);
     })
 

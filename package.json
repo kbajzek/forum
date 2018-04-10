@@ -21,7 +21,9 @@
     "concurrently": "^3.5.1",
     "express": "^4.16.2",
     "mongoose": "^5.0.9",
+    "mongoose-auto-increment": "^5.0.1",
     "mysql": "^2.15.0",
-    "nodemon": "^1.17.1"
+    "nodemon": "^1.17.1",
+    "require-dir": "^1.0.0"
   }
 }

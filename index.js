@@ -1,11 +1,20 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const routes = require('./routes/forumRoutes');
+
 
 const app = express();
 
+mongoose.Promise = global.Promise;
 app.use(bodyParser.json());
 
-require('./routes/forumRoutes')(app);
+let connection;
+if (process.env.NODE_ENV !== 'production') {
+    mongoose.connect('mongodb://localhost/muber');
+}
+
+routes(app);
 
 if (process.env.NODE_ENV === 'production') {
     // Express will serve up production assets

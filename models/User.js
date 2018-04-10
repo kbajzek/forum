@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-// const Schema = mongoose.Schema;
+const autoIncrement = require('mongoose-auto-increment');
 const {Schema} = mongoose;
 
 const userSchema = new Schema({
-    googleId: String,
-    credits: {type: Number, default: 0}
+    name: {type: String}
 });
 
-mongoose.model('users', userSchema);
+userSchema.plugin(autoIncrement.plugin, {model: 'User', field: 'userId'});
+mongoose.model('User', userSchema);
