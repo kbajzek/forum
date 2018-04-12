@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 
 let connection;
 if (process.env.NODE_ENV !== 'production') {
-    mongoose.connect('mongodb://localhost/muber');
+    mongoose.connect('mongodb://localhost/forum_test');
 }
 
 routes(app);

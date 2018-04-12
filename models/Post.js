@@ -1,26 +1,17 @@
 const mongoose = require('mongoose');
-const Incrementer = require('./Incrementer');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 const {Schema} = mongoose;
 
 const postSchema = new Schema({
-    postId: {type: Number, default: 1},
     creator: {
         type: Schema.Types.ObjectId,
-        ref: 'Post'
+        ref: 'User'
     },
     createdOn: {type: Date},
     content: {type: String}
 });
 
-postSchema.pre('save', function(next) {
-    let post = this;
-    Incrementer.findByIdAndUpdate({_id: 'postId'}, {$inc: { seq: 1} }, function(error, incrementer)   {
-        if(error) {
-            return next(error);
-        }
-        post.postId = incrementer.seq;
-        next();
-    });
-});
+postSchema.plugin(AutoIncrement, {id: 'post_seq', inc_field: 'postId'});
 
-mongoose.model('Post', postSchema);
+const post = mongoose.model('Post', postSchema);
+module.exports = post;

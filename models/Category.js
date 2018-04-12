@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const autoIncrement = require('mongoose-auto-increment');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 const {Schema} = mongoose;
 
 const categorySchema = new Schema({
@@ -10,5 +10,7 @@ const categorySchema = new Schema({
     }]
 });
 
-categorySchema.plugin(autoIncrement.plugin, {model: 'Category', field: 'categoryId'});
-mongoose.model('Category', categorySchema);
+categorySchema.plugin(AutoIncrement, {id: 'category_seq', inc_field: 'categoryId'});
+
+const category = mongoose.model('Category', categorySchema);
+module.exports = category;

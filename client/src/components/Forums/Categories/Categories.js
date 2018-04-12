@@ -17,13 +17,13 @@ class Categories extends Component {
         let categories = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
 
         if (this.props.categoryData) {
-            categories = this.props.categoryData.map(({id, name, subcategories}) => {
+            categories = this.props.categoryData.map(({id, name, subCategories}) => {
 
                 return (
                     <Category 
                         key={id}
                         name={name} 
-                        subcategories={subcategories} />
+                        subcategories={subCategories} />
                 );
             });
         }

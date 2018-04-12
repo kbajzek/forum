@@ -1,5 +1,14 @@
-var requireDir = require('require-dir');
-var models = requireDir('../models');
+const requireDir = require('require-dir');
+const models = requireDir('../models');
+const mongoose = require('mongoose');
+const assert = require('assert');
+const slugify = require('slugify');
+const timeago = require('time-ago');
+const User = require('../models/User');
+const Post = require('../models/Post');
+const Thread = require('../models/Thread');
+const SubCategory = require('../models/SubCategory');
+const Category = require('../models/Category');
 
 module.exports = app => {
 
@@ -7,7 +16,7 @@ module.exports = app => {
         {
             id: 1,
             name: "Category 1",
-            subcategories: [
+            subCategories: [
                 {
                     id: 1,
                     path: "/1/subcategory-1",
@@ -49,7 +58,7 @@ module.exports = app => {
         {
             id: 2,
             name: "Category 2",
-            subcategories: [
+            subCategories: [
                 {
                     id: 4,
                     path: "/4/subcategory-4",
@@ -142,7 +151,7 @@ module.exports = app => {
                 totalReplies: "353",
                 totalViews: "242",
                 lastPost: {
-                    name: "last fuckface 2",
+                    name: "last ff 2",
                     user: "username2",
                     lastUpdated: "23 minutes ago"
                 }
@@ -153,8 +162,84 @@ module.exports = app => {
 
     app.get('/api/forums', (req, res) => {
 
-        
-        res.send(example_categories);
+        const Category = mongoose.model('Category');
+        let category_ex;
+        Category.find({})
+        .populate({
+            path: 'subCategories',
+            populate: {
+            path: 'threads',
+            model: 'Thread',
+            populate: {
+                path: 'posts',
+                model: 'Post',
+                populate: {
+                path: 'creator',
+                model: 'User'
+                }
+            }
+            }
+        })
+        .lean()
+        .then((categories) => {
+            const filledCategories = categories.map((category) => {
+            const subCategories = category.subCategories.map((subCategory) => {
+                const totalPosts = subCategory.threads.reduce((total, thread) => {
+                return total + thread.posts.length;
+                }, 0);
+                const { _id, __v, subCategoryId, threads, ...rest} = subCategory;
+                const path = `/${subCategoryId}/${slugify(subCategory.name)}`;
+                let lastThread = subCategory.threads.sort((aa, bb) => {
+                const aaa = aa.posts.sort((a, b) => {
+                    return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
+                })[0];
+                const bbb = bb.posts.sort((a, b) => {
+                    return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
+                })[0];
+                return new Date(bbb.createdOn).getTime() - new Date(aaa.createdOn).getTime() ;
+                })[0];
+
+                let lastPost, lastUpdated;
+
+                if (lastThread) {
+                lastPost = lastThread.posts.sort((a, b) => {
+                    return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
+                })[0];
+                if (lastPost) {
+                    lastUpdated = timeago.ago(new Date(lastPost.createdOn));
+                } else {
+                    lastPost = {creator: {name: 'none'}};
+                    lastUpdated = 'none';
+                }
+                } else {
+                lastThread = {name: 'none'};
+                lastPost = {creator: {name: 'none'}};
+                lastUpdated = 'none';
+                };
+                
+                const lastActiveThread = {
+                name: lastThread.name,
+                user: lastPost.creator.name,
+                lastUpdated 
+                };
+
+                return {
+                ...rest,
+                id: subCategory.subCategoryId,
+                totalPosts,
+                path,
+                lastActiveThread
+                }
+            });
+            const { _id, __v, categoryId, ...rest} = category;
+            return {
+                ...rest,
+                id: category.categoryId,
+                subCategories
+            }
+            });
+            res.send(filledCategories);
+        });
     })
 
     app.get('/api/forums/:id/:slug', (req, res) => {

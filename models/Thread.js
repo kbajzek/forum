@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
-const autoIncrement = require('mongoose-auto-increment');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 const {Schema} = mongoose;
 
 const threadSchema = new Schema({
     name: {type: String},
-    totalViews: {type: Number},
+    totalViews: {type: Number, default: 0},
     posts: [{
         type: Schema.Types.ObjectId,
         ref: 'Post'
     }]
 });
 
-threadSchema.plugin(autoIncrement.plugin, {model: 'Thread', field: 'threadId'});
-mongoose.model('Thread', threadSchema);
+threadSchema.plugin(AutoIncrement, {id: 'thread_seq', inc_field: 'threadId'});
+
+const thread = mongoose.model('Thread', threadSchema);
+module.exports = thread;
