@@ -8,7 +8,11 @@ const postSchema = new Schema({
         ref: 'User'
     },
     createdOn: {type: Date},
-    content: {type: String}
+    content: {type: String},
+    parentThread: {
+        type: Schema.Types.ObjectId,
+        ref: 'Thread'
+    }
 });
 
 postSchema.plugin(AutoIncrement, {id: 'post_seq', inc_field: 'postId'});

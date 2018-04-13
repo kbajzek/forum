@@ -165,81 +165,58 @@ module.exports = app => {
         const Category = mongoose.model('Category');
         let category_ex;
         Category.find({})
-            .populate({
-                path: 'subCategories',
+        .populate({
+            path: 'subCategories',
+            select: 'name description lastPost postCount subCategoryId -_id',
+            populate: {
+                path: 'lastPost',
+                select: 'createdOn creator parentThread -_id',
                 populate: {
-                    path: 'threads',
-                    model: 'Thread',
-                    populate: {
-                        path: 'posts',
-                        model: 'Post',
-                        populate: {
-                            path: 'creator',
-                            model: 'User'
-                        }
-                    }
+                    path: 'parentThread creator',
+                    select: 'name -_id'
                 }
-            })
-            .lean()
-            .then((categories) => {
-                const filledCategories = categories.map((category) => {
-                    const subCategories = category.subCategories.map((subCategory) => {
-                        const totalPosts = subCategory.threads.reduce((total, thread) => {
-                            return total + thread.posts.length;
-                        }, 0);
-                        const { _id, __v, subCategoryId, threads, ...rest} = subCategory;
-                        const path = `/${subCategoryId}/${slugify(subCategory.name)}`;
-                        let lastThread = subCategory.threads.sort((aa, bb) => {
-                            const aaa = aa.posts.sort((a, b) => {
-                                return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
-                            })[0];
-                            const bbb = bb.posts.sort((a, b) => {
-                                return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
-                            })[0];
-                            return new Date(bbb.createdOn).getTime() - new Date(aaa.createdOn).getTime() ;
-                        })[0];
+            }
+        })
+        .lean()
+        .then((categories) => {
+            const filledCategories = categories.map((category) => {
+                const filledSubCategories = category.subCategories.map((subCategory) => {
+                    const { subCategoryId, postCount, lastPost, ...rest} = subCategory;
+                    const path = `/${subCategoryId}/${slugify(subCategory.name).toLowerCase()}`;
 
-                        let lastPost, lastUpdated;
+                    let lastUpdated = 'none';
+                    let lastThreadName = 'none';
+                    let lastUser = 'none';
 
-                        if (lastThread) {
-                            lastPost = lastThread.posts.sort((a, b) => {
-                                return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
-                            })[0];
-                            if (lastPost) {
-                                lastUpdated = timeago.ago(new Date(lastPost.createdOn));
-                            } else {
-                                lastPost = {creator: {name: 'none'}};
-                                lastUpdated = 'none';
-                            }
-                        } else {
-                            lastThread = {name: 'none'};
-                            lastPost = {creator: {name: 'none'}};
-                            lastUpdated = 'none';
-                        };
-                        
-                        const lastActiveThread = {
-                            name: lastThread.name,
-                            user: lastPost.creator.name,
-                            lastUpdated 
-                        };
+                    if (subCategory.lastPost) {
+                        lastUpdated = timeago.ago(new Date(subCategory.lastPost.createdOn));
+                        lastThreadName = subCategory.lastPost.parentThread.name;
+                        lastUser = subCategory.lastPost.creator.name;
+                    }
+                    
+                    const lastActiveThread = {
+                        name: lastThreadName,
+                        user: lastUser,
+                        lastUpdated
+                    };
 
-                        return {
-                            ...rest,
-                            id: subCategory.subCategoryId,
-                            totalPosts,
-                            path,
-                            lastActiveThread
-                        }
-                    });
-                    const { _id, __v, categoryId, ...rest} = category;
                     return {
+                        id: subCategory.subCategoryId,
+                        path,
                         ...rest,
-                        id: category.categoryId,
-                        subCategories
+                        totalPosts: subCategory.postCount,
+                        lastActiveThread
                     }
                 });
-                res.send(filledCategories);
+                const { _id, __v, categoryId, subCategories, ...rest} = category;
+                return {
+                    ...rest,
+                    id: category.categoryId,
+                    subCategories: filledSubCategories
+                }
             });
+            res.send(filledCategories);
+        });
     })
 
     app.get('/api/forums/:id/:slug', (req, res) => {
@@ -248,70 +225,103 @@ module.exports = app => {
         let subcategorypage;
         SubCategory.findOne({subCategoryId: req.params.id})
             .populate({
-                path: 'threads',
+                path: 'subCategories',
+                select: 'name description lastPost postCount subCategoryId -_id',
                 populate: {
-                    path: 'posts',
-                    model: 'Post',
+                    path: 'lastPost',
+                    select: 'createdOn creator parentThread -_id',
                     populate: {
-                        path: 'creator',
-                        model: 'User'
+                        path: 'parentThread creator',
+                        select: 'name -_id'
+                    }
+                }
+            })
+            .populate({
+                path: 'threads',
+                select: 'name creator createdOn threadId totalViews lastPost posts -_id',
+                populate: {
+                    path: 'creator lastPost',
+                    select: 'createdOn creator parentThread name -_id',
+                    populate: {
+                        path: 'parentThread creator',
+                        select: 'name -_id'
                     }
                 }
             })
             .lean()
-            .then((subCategory) => {
-                
-                
-                const totalPosts = subCategory.threads.reduce((total, thread) => {
-                    return total + thread.posts.length;
-                }, 0);
-                const { _id, __v, subCategoryId, threads, ...rest} = subCategory;
-                const path = `/${subCategoryId}/${slugify(subCategory.name)}`;
-                let lastThread = subCategory.threads.sort((aa, bb) => {
-                    const aaa = aa.posts.sort((a, b) => {
-                        return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
-                    })[0];
-                    const bbb = bb.posts.sort((a, b) => {
-                        return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
-                    })[0];
-                    return new Date(bbb.createdOn).getTime() - new Date(aaa.createdOn).getTime() ;
-                })[0];
+            .then((subCat) => {
+                const subCats = subCat.subCategories.map((subCategory) => {
+                    const { subCategoryId, postCount, lastPost, ...rest} = subCategory;
+                    const path = `/${subCategoryId}/${slugify(subCategory.name).toLowerCase()}`;
 
-                let lastPost, lastUpdated;
+                    let lastUpdated = 'none';
+                    let lastThreadName = 'none';
+                    let lastUser = 'none';
 
-                if (lastThread) {
-                    lastPost = lastThread.posts.sort((a, b) => {
-                        return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
-                    })[0];
-                    if (lastPost) {
-                        lastUpdated = timeago.ago(new Date(lastPost.createdOn));
-                    } else {
-                        lastPost = {creator: {name: 'none'}};
-                        lastUpdated = 'none';
+                    if (subCategory.lastPost) {
+                        lastUpdated = timeago.ago(new Date(subCategory.lastPost.createdOn));
+                        lastThreadName = subCategory.lastPost.parentThread.name;
+                        lastUser = subCategory.lastPost.creator.name;
                     }
-                } else {
-                    lastThread = {name: 'none'};
-                    lastPost = {creator: {name: 'none'}};
-                    lastUpdated = 'none';
-                };
-                
-                const lastActiveThread = {
-                    name: lastThread.name,
-                    user: lastPost.creator.name,
-                    lastUpdated 
-                };
+                    
+                    const lastActiveThread = {
+                        name: lastThreadName,
+                        user: lastUser,
+                        lastUpdated
+                    };
+
+                    return {
+                        id: subCategory.subCategoryId,
+                        path,
+                        ...rest,
+                        totalPosts: subCategory.postCount,
+                        lastActiveThread
+                    }
+                });
+
+                const threads = subCat.threads.map((thread) => {
+                    const { name, creator, createdOn, threadId, totalViews, lastPost, ...rest} = thread;
+                    const path = `/thread/${threadId}/${slugify(name).toLowerCase()}`;
+
+                    let lastUpdated = 'none';
+                    let lastThreadName = 'none';
+                    let lastUser = 'none';
+
+                    if (thread.lastPost) {
+                        lastUpdated = timeago.ago(new Date(thread.lastPost.createdOn));
+                        lastThreadName = thread.lastPost.parentThread.name;
+                        lastUser = thread.lastPost.creator.name;
+                    }
+                    
+                    const last_post = {
+                        name: lastThreadName,
+                        user: lastUser,
+                        lastUpdated
+                    };
+
+                    const totalReplies = thread.posts.length;
+
+                    return {
+                        id: thread.threadId,
+                        path,
+                        name,
+                        creator: creator.name,
+                        createdOn,
+                        totalReplies,
+                        totalViews,
+                        lastPost: last_post
+                    }
+                });
 
                 const filledSubCategory = {
-                    ...rest,
-                    id: subCategory.subCategoryId,
-                    totalPosts,
-                    path,
-                    lastActiveThread
+                    id: subCat.subCategoryId,
+                    name: subCat.name,
+                    subCategories: subCats,
+                    threads
                 }
-
                 
 
-                res.send(subcategorypage);
+                res.send(filledSubCategory);
             });
     })
 }

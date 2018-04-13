@@ -10,10 +10,19 @@ const subCategorySchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'SubCategory'
         }],
+        ancestors: [{
+            type: Schema.Types.ObjectId,
+            ref: 'SubCategory'
+        }],
         threads: [{
             type: Schema.Types.ObjectId,
             ref: 'Thread'
-        }]
+        }],
+        postCount: {type: Number, default: 0},
+        lastPost: {
+            type: Schema.Types.ObjectId,
+            ref: 'Post'
+        }
     }
 );
 

@@ -8,7 +8,22 @@ const threadSchema = new Schema({
     posts: [{
         type: Schema.Types.ObjectId,
         ref: 'Post'
-    }]
+    }],
+    parentSubCategory: {
+        type: Schema.Types.ObjectId,
+        ref: 'SubCategory'
+    },
+    creator: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    createdOn: {
+        type: Date
+    },
+    lastPost: {
+        type: Schema.Types.ObjectId,
+        ref: 'Post'
+    }
 });
 
 threadSchema.plugin(AutoIncrement, {id: 'thread_seq', inc_field: 'threadId'});

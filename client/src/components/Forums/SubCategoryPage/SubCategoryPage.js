@@ -20,7 +20,7 @@ class SubCategoryPage extends Component {
         let subcategorypage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
 
         if (this.props.subCategoryPageData) {
-            const subcat_markup = this.props.subCategoryPageData.subcategories.map(({id, name, description, totalPosts, lastActiveThread, path}) => {
+            const subcat_markup = this.props.subCategoryPageData.subCategories.map(({id, name, description, totalPosts, lastActiveThread, path}) => {
                 return (
                     <SubCategory 
                         key={id}
