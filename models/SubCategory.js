@@ -6,22 +6,16 @@ const subCategorySchema = new Schema(
     {
         name: {type: String},
         description: {type: String},
+        subCategories: [{
+            type: Schema.Types.ObjectId,
+            ref: 'SubCategory'
+        }],
         threads: [{
             type: Schema.Types.ObjectId,
             ref: 'Thread'
         }]
     }
-); 
-
-subCategorySchema.methods.getPostCount = function(callback) {
-    this.populate('threads', function(err, subCategories) {
-        const postcount = subCategories.threads.reduce((total, thread) => {
-            return total + thread.posts.length;
-        });
-        if (err) {return callback(err)}
-        callback(null, postcount);
-    });
-};
+);
 
 subCategorySchema.plugin(AutoIncrement, {id: 'subCategory_seq', inc_field: 'subCategoryId'});
 

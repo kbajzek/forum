@@ -74,94 +74,83 @@ describe('Tests', () => {
       });
   });
 
-  it('postCount works', (done) => {
-    Category.findOne({ name: 'Category 1' })
-      .populate('subCategories')
-      .then((category) => {
-        category.subCategories[0].getPostCount(function(err, total) {
-          assert(total === 4);
-        });
-        done();
-      });
-  });
-
   it('just checking', (done) => {
     Category.find({})
-      .populate({
-        path: 'subCategories',
-        populate: {
-          path: 'threads',
-          model: 'Thread',
-          populate: {
-            path: 'posts',
-            model: 'Post',
+        .populate({
+            path: 'subCategories',
             populate: {
-              path: 'creator',
-              model: 'User'
+                path: 'threads',
+                model: 'Thread',
+                populate: {
+                    path: 'posts',
+                    model: 'Post',
+                    populate: {
+                        path: 'creator',
+                        model: 'User'
+                    }
+                }
             }
-          }
-        }
-      })
-      .lean()
-      .then((categories) => {
-        const filledCategories = categories.map((category) => {
-          const subCategories = category.subCategories.map((subCategory) => {
-            const totalPosts = subCategory.threads.reduce((total, thread) => {
-              return total + thread.posts.length;
-            }, 0);
-            const { _id, __v, subCategoryId, threads, ...rest} = subCategory;
-            const path = `/${subCategoryId}/${slugify(subCategory.name)}`;
-            let lastThread = subCategory.threads.sort((aa, bb) => {
-              const aaa = aa.posts.sort((a, b) => {
-                return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
-              })[0];
-              const bbb = bb.posts.sort((a, b) => {
-                return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
-              })[0];
-              return new Date(bbb.createdOn).getTime() - new Date(aaa.createdOn).getTime() ;
-            })[0];
+        })
+        .lean()
+        .then((categories) => {
+            const filledCategories = categories.map((category) => {
+                const subCategories = category.subCategories.map((subCategory) => {
+                    const totalPosts = subCategory.threads.reduce((total, thread) => {
+                        return total + thread.posts.length;
+                    }, 0);
+                    const { _id, __v, subCategoryId, threads, ...rest} = subCategory;
+                    const path = `/${subCategoryId}/${slugify(subCategory.name).toLowerCase()}`;
+                    let lastThread = subCategory.threads.sort((aa, bb) => {
+                        const aaa = aa.posts.sort((a, b) => {
+                            return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
+                        })[0];
+                        const bbb = bb.posts.sort((a, b) => {
+                            return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime() ;
+                        })[0];
+                        return new Date(bbb.createdOn).getTime() - new Date(aaa.createdOn).getTime() ;
+                    })[0];
 
-            let lastPost, lastUpdated;
+                    let lastPost, lastUpdated;
 
-            if (lastThread) {
-              lastPost = lastThread.posts.sort((a, b) => {
-                return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
-              })[0];
-              if (lastPost) {
-                lastUpdated = timeago.ago(new Date(lastPost.createdOn));
-              } else {
-                lastPost = {creator: {name: 'none'}};
-                lastUpdated = 'none';
-              }
-            } else {
-              lastThread = {name: 'none'};
-              lastPost = {creator: {name: 'none'}};
-              lastUpdated = 'none';
-            };
-            
-            const lastActiveThread = {
-              name: lastThread.name,
-              user: lastPost.creator.name,
-              lastUpdated 
-            };
+                    if (lastThread) {
+                        lastPost = lastThread.posts.sort((a, b) => {
+                            return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
+                        })[0];
+                        if (lastPost) {
+                            lastUpdated = timeago.ago(new Date(lastPost.createdOn));
+                        } else {
+                            lastPost = {creator: {name: 'none'}};
+                            lastUpdated = 'none';
+                        }
+                    } else {
+                        lastThread = {name: 'none'};
+                        lastPost = {creator: {name: 'none'}};
+                        lastUpdated = 'none';
+                    };
+                    
+                    const lastActiveThread = {
+                        name: lastThread.name,
+                        user: lastPost.creator.name,
+                        lastUpdated 
+                    };
 
-            return {
-              ...rest,
-              id: subCategory.subCategoryId,
-              totalPosts,
-              path,
-              lastActiveThread
-            }
-          });
-          const { _id, __v, categoryId, ...rest} = category;
-          return {
-            ...rest,
-            id: category.categoryId,
-            subCategories
-          }
+                    return {
+                        ...rest,
+                        id: subCategory.subCategoryId,
+                        totalPosts,
+                        path,
+                        lastActiveThread
+                    }
+                });
+                const { _id, __v, categoryId, ...rest} = category;
+                return {
+                    ...rest,
+                    id: category.categoryId,
+                    subCategories
+                }
+            });
+            console.log(JSON.stringify(filledCategories, null, 2));
+            done();
         });
-        console.log(JSON.stringify(filledCategories, null, 2));
-        done();
-      });
   });
 });
