@@ -17,6 +17,7 @@ class SubCategoryPage extends Component {
     }
     
     render() {
+        
         let subcategorypage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
 
         if (this.props.subCategoryPageData) {

@@ -8,42 +8,63 @@ const Thread = require('../models/Thread');
 const SubCategory = require('../models/SubCategory');
 const Category = require('../models/Category');
 
-describe('Tests', () => {
-  let user, post, post2, post3, post4, thread, thread2, subCategory, subCategory2, subCategory3, subCategory4, category;
+const forumController = require('../controllers/forumController');
 
-  beforeEach((done) => {
-    category = new Category({ name: 'Category 1' });
-    subCategory = new SubCategory({ name: 'SubCategory 1', description: 'first subcategory' });
-    subCategory2 = new SubCategory({ name: 'SubCategory 2', description: 'second subcategory' });
-    subCategory3 = new SubCategory({ name: 'SubCategory 3', description: 'third subcategory' });
-    subCategory4 = new SubCategory({ name: 'SubCategory 4', description: 'fourth subcategory' });
+describe('Tests', () => {
+  let user, post, post2, post3, post4, thread, thread2, subCategory, subCategory2, subCategory3, subCategory4, subCategory5, category;
+
+  beforeEach(async (done) => {
+    category = await forumController.createCategory('Category 1');
+    subCategory = await forumController.createSubCategory('SubCategory 1', 'first subcategory', category);
+    subCategory2 = await forumController.createSubCategory('SubCategory 2', 'second subcategory', category);
+    subCategory3 = await forumController.createSubCategory('SubCategory 3', 'third subcategory', null, subCategory2);
+    subCategory4 = await forumController.createSubCategory('SubCategory 4', 'fourth subcategory', null, subCategory2);
+    subCategory5 = await forumController.createSubCategory('SubCategory 5', 'fifth subcategory', null, subCategory);
+    thread, post = await forumController.createThread('Thread 1', parentSubCategory, creator, createdOn, content);
     thread = new Thread({ name: 'Thread 1' });
     thread2 = new Thread({ name: 'Thread 2' });
-    post = new Post({createdOn: Date.now(), content: '1'});
+    thread3 = new Thread({ name: 'Thread 3' });
+    post = new Post({createdOn: Date.now(), content: '1' });
     post2 = new Post({createdOn: Date.now(), content: '2'});
     post3 = new Post({createdOn: Date.now(), content: '3'});
     post4 = new Post({createdOn: Date.now(), content: '4'});
+    post5 = new Post({createdOn: Date.now(), content: '5'});
     user = new User({name: 'user 1'});
+
+    const ratings = [
+        {
+            name: 'like'
+        },
+        {
+            name: 'dislike'
+        }
+    ];
+
+    
+
 
     post.creator = user;
     post2.creator = user;
     post3.creator = user;
     post4.creator = user;
+    post5.creator = user;
 
-    category.subCategories.push(subCategory);
-    category.subCategories.push(subCategory2);
+    post.ratings = ratings;
+    post2.ratings = ratings;
+    post3.ratings = ratings;
+    post4.ratings = ratings;
+    post5.ratings = ratings;
 
-    subCategory2.subCategories.push(subCategory3);
-    subCategory3.ancestors.push(subCategory2);
-    subCategory2.ancestors.forEach((el) => {
-        subCategory3.ancestors.push(el);
-    });
-
-    subCategory3.subCategories.push(subCategory4);
-    subCategory4.ancestors.push(subCategory3);
-    subCategory3.ancestors.forEach((el) => {
-        subCategory4.ancestors.push(el);
-    });
+    post.ratings[0].users.push(user);
+    post2.ratings[0].users.push(user);
+    post3.ratings[0].users.push(user);
+    post4.ratings[0].users.push(user);
+    post5.ratings[0].users.push(user);
+    post.ratings[1].users.push(user);
+    post2.ratings[1].users.push(user);
+    post3.ratings[1].users.push(user);
+    post4.ratings[1].users.push(user);
+    post5.ratings[1].users.push(user);
 
  
     subCategory.threads.push(thread);
@@ -51,6 +72,10 @@ describe('Tests', () => {
 
     subCategory.threads.push(thread2);
     thread2.parentSubCategory = subCategory;
+
+    subCategory5.threads.push(thread3);
+    thread3.parentSubCategory = subCategory5;
+
 
     thread.posts.push(post);
     thread.creator = post.creator;
@@ -78,7 +103,7 @@ describe('Tests', () => {
     thread2.creator = post3.creator;
     thread2.createdOn = post3.createdOn;
     thread2.lastPost = post3;
-    post3.parentThread = thread;
+    post3.parentThread = thread2;
     thread2.parentSubCategory.postCount += 1;
     thread2.parentSubCategory.lastPost = post3;
     thread2.parentSubCategory.ancestors.forEach((ancestor) => {
@@ -87,7 +112,7 @@ describe('Tests', () => {
     })
 
     thread2.posts.push(post4);
-    post4.parentThread = thread;
+    post4.parentThread = thread2;
     thread2.lastPost = post4;
     thread2.parentSubCategory.postCount += 1;
     thread2.parentSubCategory.lastPost = post4;
@@ -96,9 +121,31 @@ describe('Tests', () => {
         ancestor.lastPost = post4;
     })
 
+    thread3.posts.push(post5);
+    thread3.creator = post5.creator;
+    thread3.createdOn = post5.createdOn;
+    thread3.lastPost = post5;
+    post5.parentThread = thread3;
+    thread3.parentSubCategory.postCount += 1;
+    thread3.parentSubCategory.lastPost = post5;
+    thread3.parentSubCategory.ancestors.forEach((ancestor) => {
+        ancestor.postCount += 1;
+        ancestor.lastPost = post5;
+    })
+
     Promise.all([user.save(), category.save(), subCategory.save(), thread.save(), post.save()])
       .then(() => {
-        Promise.all([subCategory2.save(), subCategory3.save(), subCategory4.save(), thread2.save(), post2.save(), post3.save(), post4.save()])  
+        Promise.all([
+                        subCategory2.save(), 
+                        subCategory3.save(), 
+                        subCategory4.save(), 
+                        subCategory5.save(),
+                        thread2.save(),
+                        thread3.save(), 
+                        post2.save(), 
+                        post3.save(), 
+                        post4.save(), 
+                        post5.save()])  
           .then(() => done());
       });
   });
@@ -136,107 +183,7 @@ describe('Tests', () => {
   });
 
   it('just checking', (done) => {
-    SubCategory.findOne({subCategoryId: 1})
-        .populate({
-            path: 'subCategories',
-            select: 'name description lastPost postCount subCategoryId -_id',
-            populate: {
-                path: 'lastPost',
-                select: 'createdOn creator parentThread -_id',
-                populate: {
-                    path: 'parentThread creator',
-                    select: 'name -_id'
-                }
-            }
-        })
-        .populate({
-            path: 'threads',
-            select: 'name creator createdOn threadId totalViews lastPost posts -_id',
-            populate: {
-                path: 'creator lastPost',
-                select: 'createdOn creator parentThread name -_id',
-                populate: {
-                    path: 'parentThread creator',
-                    select: 'name -_id'
-                }
-            }
-        })
-        .lean()
-        .then((subCat) => {
-            const subCats = subCat.subCategories.map((subCategory) => {
-                const { subCategoryId, postCount, lastPost, ...rest} = subCategory;
-                const path = `/${subCategoryId}/${slugify(subCategory.name).toLowerCase()}`;
-
-                let lastUpdated = 'none';
-                let lastThreadName = 'none';
-                let lastUser = 'none';
-
-                if (subCategory.lastPost) {
-                    lastUpdated = timeago.ago(new Date(subCategory.lastPost.createdOn));
-                    lastThreadName = subCategory.lastPost.parentThread.name;
-                    lastUser = subCategory.lastPost.creator.name;
-                }
-                
-                const lastActiveThread = {
-                    name: lastThreadName,
-                    user: lastUser,
-                    lastUpdated
-                };
-
-                return {
-                    id: subCategory.subCategoryId,
-                    path,
-                    ...rest,
-                    totalPosts: subCategory.postCount,
-                    lastActiveThread
-                }
-            });
-
-            const threads = subCat.threads.map((thread) => {
-                const { name, creator, createdOn, threadId, totalViews, lastPost, ...rest} = thread;
-                const path = `/thread/${threadId}/${slugify(name).toLowerCase()}`;
-
-                let lastUpdated = 'none';
-                let lastThreadName = 'none';
-                let lastUser = 'none';
-
-                if (thread.lastPost) {
-                    lastUpdated = timeago.ago(new Date(thread.lastPost.createdOn));
-                    lastThreadName = thread.lastPost.parentThread.name;
-                    lastUser = thread.lastPost.creator.name;
-                }
-                
-                const last_post = {
-                    name: lastThreadName,
-                    user: lastUser,
-                    lastUpdated
-                };
-
-                const totalReplies = thread.posts.length;
-
-                return {
-                    id: thread.threadId,
-                    path,
-                    name,
-                    creator: creator.name,
-                    createdOn,
-                    totalReplies,
-                    totalViews,
-                    lastPost: last_post
-                }
-            });
-
-            const filledSubCategory = {
-                id: subCat.subCategoryId,
-                name: subCat.name,
-                subCategories: subCats,
-                threads
-            }
-            
-
-            console.log(JSON.stringify(filledSubCategory, null, 2));
-            done();
-        });
+    done();
             
   });
 });

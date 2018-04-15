@@ -12,6 +12,60 @@ const Category = require('../models/Category');
 
 module.exports = app => {
 
+    const example_thread = {
+        name: "jjj",
+        posts: [
+            {
+                id: 1,
+                content: "hiiiiiiiiiiiiiiiiiiiiiii",
+                ratings: [
+                    {
+                        ratingName: "Like",
+                        users: [
+                            {userName: "ssss"}
+                        ]
+                    },
+                    {
+                        ratingName: "Dislike",
+                        users: [
+                            {userName: "ssss"}
+                        ]
+                    }
+                ],
+                creator: {
+                    name: "ssssss",
+                    pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                    totalPosts: "235",
+                    signature: "asdfasdf"
+                }
+            },
+            {
+                id: 2,
+                content: "hiiiiiiiiiiiiiiiiiiiiiii",
+                ratings: [
+                    {
+                        ratingName: "Like",
+                        users: [
+                            {userName: "ssss"}
+                        ]
+                    },
+                    {
+                        ratingName: "Dislike",
+                        users: [
+                            {userName: "ssss"}
+                        ]
+                    }
+                ],
+                creator: {
+                    name: "ssssss",
+                    pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                    totalPosts: "235",
+                    signature: "asdfasdf"
+                }
+            }
+        ]
+    };
+
     const example_categories = [
         {
             id: 1,
@@ -26,7 +80,8 @@ module.exports = app => {
                     lastActiveThread: {
                         name: "LastThread1",
                         user: "username1",
-                        lastUpdated: "17 minutes ago"
+                        lastUpdated: "17 minutes ago",
+                        path: "/thread/1/lastthread1"
                     }
                 },
                 {
@@ -38,7 +93,8 @@ module.exports = app => {
                     lastActiveThread: {
                         name: "LastThread2",
                         user: "username2",
-                        lastUpdated: "23 minutes ago"
+                        lastUpdated: "23 minutes ago",
+                        path: "/thread/2/lastthread2"
                     }
                 },
                 {
@@ -50,7 +106,8 @@ module.exports = app => {
                     lastActiveThread: {
                         name: "LastThread3",
                         user: "username3",
-                        lastUpdated: "5 minutes ago"
+                        lastUpdated: "5 minutes ago",
+                        path: "/thread/2/lastthread2"
                     }
                 }
             ]
@@ -68,7 +125,8 @@ module.exports = app => {
                     lastActiveThread: {
                         name: "LastThread4",
                         user: "username4",
-                        lastUpdated: "17 minutes ago"
+                        lastUpdated: "17 minutes ago",
+                        path: "/thread/2/lastthread2"
                     }
                 },
                 {
@@ -80,7 +138,8 @@ module.exports = app => {
                     lastActiveThread: {
                         name: "LastThread5",
                         user: "username5",
-                        lastUpdated: "53 minutes ago"
+                        lastUpdated: "53 minutes ago",
+                        path: "/thread/2/lastthread2"
                     }
                 },
                 {
@@ -92,7 +151,8 @@ module.exports = app => {
                     lastActiveThread: {
                         name: "LastThread6",
                         user: "username6",
-                        lastUpdated: "5 minutes ago"
+                        lastUpdated: "5 minutes ago",
+                        path: "/thread/2/lastthread2"
                     }
                 }
             ]
@@ -111,7 +171,8 @@ module.exports = app => {
                 lastActiveThread: {
                     name: "LastThread1",
                     user: "username1",
-                    lastUpdated: "17 minutes ago"
+                    lastUpdated: "17 minutes ago",
+                    path: "/thread/2/lastthread2"
                 }
             },
             {
@@ -123,7 +184,8 @@ module.exports = app => {
                 lastActiveThread: {
                     name: "LastThread2",
                     user: "username2",
-                    lastUpdated: "23 minutes ago"
+                    lastUpdated: "23 minutes ago",
+                    path: "/thread/2/lastthread2"
                 }
             }
         ],
@@ -173,7 +235,7 @@ module.exports = app => {
                 select: 'createdOn creator parentThread -_id',
                 populate: {
                     path: 'parentThread creator',
-                    select: 'name -_id'
+                    select: 'name threadId -_id'
                 }
             }
         })
@@ -187,17 +249,20 @@ module.exports = app => {
                     let lastUpdated = 'none';
                     let lastThreadName = 'none';
                     let lastUser = 'none';
+                    let lastActiveThreadPath = 'none';
 
                     if (subCategory.lastPost) {
-                        lastUpdated = timeago.ago(new Date(subCategory.lastPost.createdOn));
+                        lastUpdated = subCategory.lastPost.createdOn;
                         lastThreadName = subCategory.lastPost.parentThread.name;
                         lastUser = subCategory.lastPost.creator.name;
+                        lastActiveThreadPath = `/thread/${subCategory.lastPost.parentThread.threadId}/${slugify(lastThreadName).toLowerCase()}`;
                     }
                     
                     const lastActiveThread = {
                         name: lastThreadName,
                         user: lastUser,
-                        lastUpdated
+                        lastUpdated,
+                        path: lastActiveThreadPath
                     };
 
                     return {
@@ -232,19 +297,19 @@ module.exports = app => {
                     select: 'createdOn creator parentThread -_id',
                     populate: {
                         path: 'parentThread creator',
-                        select: 'name -_id'
+                        select: 'name threadId -_id'
                     }
                 }
             })
             .populate({
                 path: 'threads',
-                select: 'name creator createdOn threadId totalViews lastPost posts -_id',
+                select: 'name creator createdOn threadId totalViews lastPost posts',
                 populate: {
                     path: 'creator lastPost',
-                    select: 'createdOn creator parentThread name -_id',
+                    select: 'createdOn creator parentThread name',
                     populate: {
                         path: 'parentThread creator',
-                        select: 'name -_id'
+                        select: 'name'
                     }
                 }
             })
@@ -257,17 +322,20 @@ module.exports = app => {
                     let lastUpdated = 'none';
                     let lastThreadName = 'none';
                     let lastUser = 'none';
+                    let lastActiveThreadPath = 'none';
 
                     if (subCategory.lastPost) {
-                        lastUpdated = timeago.ago(new Date(subCategory.lastPost.createdOn));
+                        lastUpdated = subCategory.lastPost.createdOn;
                         lastThreadName = subCategory.lastPost.parentThread.name;
                         lastUser = subCategory.lastPost.creator.name;
+                        lastActiveThreadPath = `/thread/${subCategory.lastPost.parentThread.threadId}/${slugify(lastThreadName).toLowerCase()}`;
                     }
                     
                     const lastActiveThread = {
                         name: lastThreadName,
                         user: lastUser,
-                        lastUpdated
+                        lastUpdated,
+                        path: lastActiveThreadPath
                     };
 
                     return {
@@ -288,7 +356,7 @@ module.exports = app => {
                     let lastUser = 'none';
 
                     if (thread.lastPost) {
-                        lastUpdated = timeago.ago(new Date(thread.lastPost.createdOn));
+                        lastUpdated = thread.lastPost.createdOn;
                         lastThreadName = thread.lastPost.parentThread.name;
                         lastUser = thread.lastPost.creator.name;
                     }
@@ -299,7 +367,7 @@ module.exports = app => {
                         lastUpdated
                     };
 
-                    const totalReplies = thread.posts.length;
+                    const totalReplies = thread.posts.length - 1;
 
                     return {
                         id: thread.threadId,
@@ -323,5 +391,63 @@ module.exports = app => {
 
                 res.send(filledSubCategory);
             });
+    })
+
+    app.get('/api/forums/thread/:id/:slug', (req, res) => {
+
+        const Thread = mongoose.model('Thread');
+        let threadPage;
+        Thread.findOne({threadId: req.params.id})
+            .populate({
+                path: 'posts',
+                select: 'postId content ratings creator -_id',
+                populate: {
+                    path: 'creator ratings.users',
+                    select: 'name -_id',
+                }
+            })
+            .lean()
+            .then((thread) => {
+                const filledPosts = thread.posts.map((post) => {
+                    const { content, postId, ratings, creator} = post;
+
+                    const filledRatings = ratings.map((rating) => {
+                        
+                        const filledUsers = rating.users.map((user) => {
+                            return {
+                                userName: user.name
+                            }
+                        });
+
+                        return {
+                            ratingName: rating.name,
+                            users: filledUsers
+                        }
+                    });
+
+                    const filledCreator = {
+                        name: creator.name,
+                        pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                        totalPosts: "not implemented yet",
+                        signature: "asdfasdf"
+                    }
+
+                    return {
+                        id: postId,
+                        content,
+                        ratings: filledRatings,
+                        creator: filledCreator
+                    }
+                });
+
+                const filledThread = {
+                    name: thread.name,
+                    posts: filledPosts
+                }
+                
+
+                res.send(filledThread);
+            });
+        
     })
 }

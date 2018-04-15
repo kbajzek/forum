@@ -38,3 +38,23 @@ export const initSubCategoryPageData = (path) => {
         path: path
     };
 };
+
+export const setThreadData = ( data ) => {
+    return {
+        type: actionTypes.SET_THREAD_DATA,
+        data: data
+    };
+};
+
+export const fetchThreadDataFailed = () => {
+    return {
+        type: actionTypes.FETCH_THREAD_DATA_FAILED
+    };
+};
+
+export const initThreadData = (path) => {
+    return {
+        type: actionTypes.INIT_THREAD_DATA,
+        path: path
+    };
+};

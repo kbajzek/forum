@@ -19,7 +19,7 @@ class Forums extends Component {
                         return <Categories />
                     }} />
                     <Route path="/forums/thread/:id/:slug" render={({match}) => {
-                        return <Thread id={match.params.id} slug={match.params.slug} />
+                        return <Thread key={match.params.id} id={match.params.id} slug={match.params.slug} />
                     }} />
                     <Route path="/forums/:id/:slug" render={({match}) => {
                         return <SubCategoryPage key={match.params.id} id={match.params.id} slug={match.params.slug} />

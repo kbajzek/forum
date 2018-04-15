@@ -1,87 +1,64 @@
 import React, {Component} from 'react';
+import {withRouter} from 'react-router-dom';
+import {connect} from 'react-redux';
+
+import * as actions from '../../../store/actions';
 
 import Post from './Post/Post';
+import Spinner from '../../UI/Spinner/Spinner';
 
 import classes from './Thread.module.css';
 
-
-const example_thread = {
-    name: "go fuck a tree branch bitch",
-    posts: [
-        {
-            id: 1,
-            content: "hiiiiiiiiiiiiiiiiiiiiiii",
-            ratings: [
-                {
-                    ratingName: "Like",
-                    users: [
-                        {userName: "ssss"}
-                    ]
-                },
-                {
-                    ratingName: "Dislike",
-                    users: [
-                        {userName: "ssss"}
-                    ]
-                }
-            ],
-            postCreator: {
-                name: "ssssss",
-                pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                totalPosts: "235",
-                signature: "asdfasdf"
-            }
-        },
-        {
-            id: 2,
-            content: "hiiiiiiiiiiiiiiiiiiiiiii",
-            ratings: [
-                {
-                    ratingName: "Like",
-                    users: [
-                        {userName: "ssss"}
-                    ]
-                },
-                {
-                    ratingName: "Dislike",
-                    users: [
-                        {userName: "ssss"}
-                    ]
-                }
-            ],
-            postCreator: {
-                name: "ssssss",
-                pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                totalPosts: "235",
-                signature: "asdfasdf"
-            }
-        }
-    ]
-};
-
 class Thread extends Component {
     
-    
+    componentDidMount() {
+        this.props.onInitThreadData("/thread/" + this.props.id + "/" + this.props.slug);
+    }
 
 
     render() {
+        let threadpage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
 
-        const postList = example_thread.posts.map(({id, content, ratings, postCreator}) => {
-            return (
-                <Post 
-                    key={id}
-                    content={content}
-                    ratings={ratings}
-                    user={postCreator} />
+        if (this.props.threadData) {
+            const postList = this.props.threadData.posts.map(({id, content, ratings, creator}) => {
+                return (
+                    <Post 
+                        key={id}
+                        content={content}
+                        ratings={ratings}
+                        user={creator} />
+                );
+            });
+
+            threadpage = (
+                <div>
+                    <div className={classes.Header}>{this.props.threadData.name}</div>
+                    <div className={classes.Thread}>
+                        {postList}
+                    </div>
+                </div>
             );
-        });
+        }
 
         return (
-            <div className={classes.Thread}>
-                {postList}
+            <div>
+                {threadpage}
             </div>
-        );
+        )
     }
 }
 
-export default Thread;
+const mapStateToProps = state => {
+    return {
+        threadData: state.forums.threadData,
+        error: state.forums.error
+    };
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onInitThreadData: (path) => dispatch(actions.initThreadData(path))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Thread));

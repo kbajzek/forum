@@ -9,6 +9,13 @@ const postSchema = new Schema({
     },
     createdOn: {type: Date},
     content: {type: String},
+    ratings: [{
+        name: {type: String},
+        users: [{
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        }]
+    }],
     parentThread: {
         type: Schema.Types.ObjectId,
         ref: 'Thread'

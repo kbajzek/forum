@@ -26,6 +26,16 @@ const subCategorySchema = new Schema(
     }
 );
 
+subCategorySchema.methods.addSubCategory = function(childSubCategory) {
+    let subcategory = this;
+    return new Promise(function(resolve, reject) {
+        subcategory.subCategories.push(childSubCategory);
+        subcategory.save()
+            .then(subcat => resolve(subcat))
+            .catch(err => reject(err));
+    })
+  };
+
 subCategorySchema.plugin(AutoIncrement, {id: 'subCategory_seq', inc_field: 'subCategoryId'});
 
 const subcategory = mongoose.model('SubCategory', subCategorySchema);

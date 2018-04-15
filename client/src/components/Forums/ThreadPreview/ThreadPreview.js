@@ -1,5 +1,6 @@
 import React from 'react';
 import {withRouter, Link} from 'react-router-dom';
+import timeago from 'time-ago';
 
 import classes from './ThreadPreview.module.css';
 
@@ -14,13 +15,13 @@ const ThreadPreview = (props) => {
                     className={classes.Name}>
                     {props.name}
                 </Link>
-                <div>{props.createdOn}</div>
+                <div>{timeago.ago(new Date(props.createdOn))}</div>
                 <div>{props.creator}</div>
             </div>
             
             <div className={classes.ReplyCount}>
                 <div>{props.totalReplies}</div>
-                <div>REPLIES</div>
+                <div>{props.totalReplies === 1 ? "REPLY": "REPLIES"}</div>
             </div>
 
             <div className={classes.ViewCount}>
@@ -32,7 +33,7 @@ const ThreadPreview = (props) => {
             <div className={classes.lastPost}>
                 <div>{props.lastPost.name}</div>
                 <div>{props.lastPost.user}</div>
-                <div>{props.lastPost.lastUpdated}</div>
+                <div>{timeago.ago(new Date(props.lastPost.lastUpdated))}</div>
             </div>
         </div>
     );

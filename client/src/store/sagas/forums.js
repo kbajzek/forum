@@ -27,3 +27,15 @@ export function* initSubCategoryPageDataSaga(action) {
   }
 }
 
+export function* initThreadDataSaga(action) {
+  try {
+    yield put(actions.setThreadData(null));
+    const response = yield axios.get(
+      "/api/forums" + action.path
+    );
+    yield put(actions.setThreadData(response.data));
+  } catch (error) {
+    yield put(actions.fetchThreadDataFailed());
+  }
+}
+
