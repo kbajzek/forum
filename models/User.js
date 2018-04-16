@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
-const AutoIncrement = require('mongoose-sequence')(mongoose);
-const {Schema} = mongoose;
+module.exports = (sequelize, DataTypes) => {
 
-const userSchema = new Schema({
-    name: {type: String}
-});
+    const User = sequelize.define('User', {
 
-userSchema.plugin(AutoIncrement, {id: 'user_seq', inc_field: 'userId'});
+        name: {
+            type: DataTypes.STRING
+        }
 
-const user = mongoose.model('User', userSchema);
-module.exports = user;
+    });
+
+    return User;
+};

@@ -1,32 +1,20 @@
-const mongoose = require('mongoose');
-const AutoIncrement = require('mongoose-sequence')(mongoose);
-const {Schema} = mongoose;
+module.exports = (sequelize, DataTypes) => {
 
-const threadSchema = new Schema({
-    name: {type: String},
-    totalViews: {type: Number, default: 0},
-    posts: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Post'
-    }],
-    parentSubCategory: {
-        type: Schema.Types.ObjectId,
-        ref: 'SubCategory'
-    },
-    creator: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    createdOn: {
-        type: Date
-    },
-    lastPost: {
-        type: Schema.Types.ObjectId,
-        ref: 'Post'
-    }
-});
+    const Thread = sequelize.define('Thread', {
 
-threadSchema.plugin(AutoIncrement, {id: 'thread_seq', inc_field: 'threadId'});
+        name: {
+            type: DataTypes.STRING
+        },
 
-const thread = mongoose.model('Thread', threadSchema);
-module.exports = thread;
+        total_views: {
+            type: DataTypes.INTEGER
+        }    
+
+    });
+
+    Thread.associate = function (models) {
+        models.Thread.belongsTo(models.SubCategory);
+    };
+
+    return Thread;
+};

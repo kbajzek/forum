@@ -1,28 +1,17 @@
-const mongoose = require('mongoose');
-const AutoIncrement = require('mongoose-sequence')(mongoose);
-const {Schema} = mongoose;
+module.exports = (sequelize, DataTypes) => {
 
-const postSchema = new Schema({
-    creator: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    createdOn: {type: Date},
-    content: {type: String},
-    ratings: [{
-        name: {type: String},
-        users: [{
-            type: Schema.Types.ObjectId,
-            ref: 'User'
-        }]
-    }],
-    parentThread: {
-        type: Schema.Types.ObjectId,
-        ref: 'Thread'
-    }
-});
+    const Post = sequelize.define('Post', {
+            
+        content: {
+            type: DataTypes.TEXT
+        },
+        
+    });
 
-postSchema.plugin(AutoIncrement, {id: 'post_seq', inc_field: 'postId'});
+    Post.associate = function (models) {
+        models.Post.belongsTo(models.Thread);
+        models.Post.belongsTo(models.User);
+    };
 
-const post = mongoose.model('Post', postSchema);
-module.exports = post;
+    return Post;
+};

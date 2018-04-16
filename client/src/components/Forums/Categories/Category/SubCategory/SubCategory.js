@@ -50,7 +50,7 @@ class SubCategory extends Component {
                 
                 <div className={classes.PostCount}>
                     <div>{this.props.totalPosts}</div>
-                    <div>POSTS</div>
+                    <div>{this.props.totalPosts === 1 ? "POST": "POSTS"}</div> 
                 </div>
     
                 {lastThread}

@@ -1,18 +1,28 @@
 const express = require('express');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const routes = require('./routes/forumRoutes');
+const models = require('./models');
+
+models.sequelize
+    .authenticate()
+    .then(() => {
+        console.log('Connection has been established successfully.');
+    })
+    .catch(err => {
+        console.error('Unable to connect to the database:', err);
+    });
 
 
 const app = express();
 
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise;
 app.use(bodyParser.json());
 
-let connection;
-if (process.env.NODE_ENV !== 'production') {
-    mongoose.connect('mongodb://localhost/forum_test');
-}
+// let connection;
+// if (process.env.NODE_ENV !== 'production') {
+//     mongoose.connect('mongodb://localhost/forum_test');
+// }
 
 routes(app);
 

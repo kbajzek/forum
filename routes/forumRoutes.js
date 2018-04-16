@@ -1,14 +1,8 @@
-const requireDir = require('require-dir');
-const models = requireDir('../models');
-const mongoose = require('mongoose');
 const assert = require('assert');
 const slugify = require('slugify');
-const timeago = require('time-ago');
-const User = require('../models/User');
-const Post = require('../models/Post');
-const Thread = require('../models/Thread');
-const SubCategory = require('../models/SubCategory');
-const Category = require('../models/Category');
+const models  = require('../models');
+const queries = require('../controllers/queries');
+const sqlstring = require('sqlstring');
 
 module.exports = app => {
 
@@ -224,230 +218,212 @@ module.exports = app => {
 
     app.get('/api/forums', (req, res) => {
 
-        const Category = mongoose.model('Category');
-        let category_ex;
-        Category.find({})
-        .populate({
-            path: 'subCategories',
-            select: 'name description lastPost postCount subCategoryId -_id',
-            populate: {
-                path: 'lastPost',
-                select: 'createdOn creator parentThread -_id',
-                populate: {
-                    path: 'parentThread creator',
-                    select: 'name threadId -_id'
-                }
-            }
-        })
-        .lean()
-        .then((categories) => {
-            const filledCategories = categories.map((category) => {
-                const filledSubCategories = category.subCategories.map((subCategory) => {
-                    const { subCategoryId, postCount, lastPost, ...rest} = subCategory;
-                    const path = `/${subCategoryId}/${slugify(subCategory.name).toLowerCase()}`;
+        models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT})
+            .then(result => {
 
-                    let lastUpdated = 'none';
-                    let lastThreadName = 'none';
-                    let lastUser = 'none';
-                    let lastActiveThreadPath = 'none';
+                let convertedResult = [];
+                let currentCatId = 0;
 
-                    if (subCategory.lastPost) {
-                        lastUpdated = subCategory.lastPost.createdOn;
-                        lastThreadName = subCategory.lastPost.parentThread.name;
-                        lastUser = subCategory.lastPost.creator.name;
-                        lastActiveThreadPath = `/thread/${subCategory.lastPost.parentThread.threadId}/${slugify(lastThreadName).toLowerCase()}`;
-                    }
-                    
-                    const lastActiveThread = {
-                        name: lastThreadName,
-                        user: lastUser,
-                        lastUpdated,
-                        path: lastActiveThreadPath
-                    };
+                result.forEach((row) => {
 
-                    return {
-                        id: subCategory.subCategoryId,
-                        path,
-                        ...rest,
-                        totalPosts: subCategory.postCount,
-                        lastActiveThread
+                    let lastUpdated = row.maxDate || 'none';
+                    let lastThreadName = row.ThreadName || 'none';
+                    let lastUser = row.UserName || 'none';
+                    let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}` : 'none';
+
+                    if (currentCatId !== row.categoryId) {
+                        currentCatId = row.categoryId;
+
+                        convertedResult.push(
+                            {
+                                id: row.categoryId, 
+                                name: row.categoryName, 
+                                subCategories: [
+                                    {
+                                        id: row.subCategoryId,
+                                        name: row.subCategoryName,
+                                        path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                                        description: row.description,
+                                        totalPosts: row.totalPosts || 0,
+                                        lastActiveThread: {
+                                            name: lastThreadName,
+                                            user: lastUser,
+                                            lastUpdated: lastUpdated,
+                                            path: lastActiveThreadPath
+                                        }
+
+                                    }
+                                ]
+                            }
+                        );
+                    } else {
+                        convertedResult[convertedResult.length - 1].subCategories.push(
+                            {
+                                id: row.subCategoryId,
+                                name: row.subCategoryName,
+                                path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                                description: row.description,
+                                totalPosts: row.totalPosts || 0,
+                                lastActiveThread: {
+                                    name: lastThreadName,
+                                    user: lastUser,
+                                    lastUpdated: lastUpdated,
+                                    path: lastActiveThreadPath
+                                }
+
+                            }
+                        )
                     }
                 });
-                const { _id, __v, categoryId, subCategories, ...rest} = category;
-                return {
-                    ...rest,
-                    id: category.categoryId,
-                    subCategories: filledSubCategories
-                }
+
+                res.send(convertedResult);
             });
-            res.send(filledCategories);
-        });
     })
 
-    app.get('/api/forums/:id/:slug', (req, res) => {
+    app.get('/api/forums/:id/:slug', async (req, res) => {
 
-        const SubCategory = mongoose.model('SubCategory');
-        let subcategorypage;
-        SubCategory.findOne({subCategoryId: req.params.id})
-            .populate({
-                path: 'subCategories',
-                select: 'name description lastPost postCount subCategoryId -_id',
-                populate: {
-                    path: 'lastPost',
-                    select: 'createdOn creator parentThread -_id',
-                    populate: {
-                        path: 'parentThread creator',
-                        select: 'name threadId -_id'
-                    }
-                }
-            })
-            .populate({
-                path: 'threads',
-                select: 'name creator createdOn threadId totalViews lastPost posts',
-                populate: {
-                    path: 'creator lastPost',
-                    select: 'createdOn creator parentThread name',
-                    populate: {
-                        path: 'parentThread creator',
-                        select: 'name'
-                    }
-                }
-            })
-            .lean()
-            .then((subCat) => {
-                const subCats = subCat.subCategories.map((subCategory) => {
-                    const { subCategoryId, postCount, lastPost, ...rest} = subCategory;
-                    const path = `/${subCategoryId}/${slugify(subCategory.name).toLowerCase()}`;
+        
+        try {
+            let subcatid = Number(req.params.id);
 
-                    let lastUpdated = 'none';
-                    let lastThreadName = 'none';
-                    let lastUser = 'none';
-                    let lastActiveThreadPath = 'none';
-
-                    if (subCategory.lastPost) {
-                        lastUpdated = subCategory.lastPost.createdOn;
-                        lastThreadName = subCategory.lastPost.parentThread.name;
-                        lastUser = subCategory.lastPost.creator.name;
-                        lastActiveThreadPath = `/thread/${subCategory.lastPost.parentThread.threadId}/${slugify(lastThreadName).toLowerCase()}`;
-                    }
-                    
-                    const lastActiveThread = {
-                        name: lastThreadName,
-                        user: lastUser,
-                        lastUpdated,
-                        path: lastActiveThreadPath
-                    };
-
-                    return {
-                        id: subCategory.subCategoryId,
-                        path,
-                        ...rest,
-                        totalPosts: subCategory.postCount,
-                        lastActiveThread
-                    }
-                });
-
-                const threads = subCat.threads.map((thread) => {
-                    const { name, creator, createdOn, threadId, totalViews, lastPost, ...rest} = thread;
-                    const path = `/thread/${threadId}/${slugify(name).toLowerCase()}`;
-
-                    let lastUpdated = 'none';
-                    let lastThreadName = 'none';
-                    let lastUser = 'none';
-
-                    if (thread.lastPost) {
-                        lastUpdated = thread.lastPost.createdOn;
-                        lastThreadName = thread.lastPost.parentThread.name;
-                        lastUser = thread.lastPost.creator.name;
-                    }
-                    
-                    const last_post = {
-                        name: lastThreadName,
-                        user: lastUser,
-                        lastUpdated
-                    };
-
-                    const totalReplies = thread.posts.length - 1;
-
-                    return {
-                        id: thread.threadId,
-                        path,
-                        name,
-                        creator: creator.name,
-                        createdOn,
-                        totalReplies,
-                        totalViews,
-                        lastPost: last_post
-                    }
-                });
-
-                const filledSubCategory = {
-                    id: subCat.subCategoryId,
-                    name: subCat.name,
-                    subCategories: subCats,
-                    threads
-                }
+            let result1 = await models.sequelize.query(queries.getSubCategoriesQuery(subcatid), { type: models.Sequelize.QueryTypes.SELECT});
+            let result2 = await models.sequelize.query(queries.getThreadsQuery(subcatid), { type: models.Sequelize.QueryTypes.SELECT});
+            let result3 = await models.sequelize.query(`SELECT name FROM forum_test.subcategories as s WHERE s.id =  ${subcatid}`, { type: models.Sequelize.QueryTypes.SELECT});
                 
+            let convertedResult = [];
+            let convertedResult2 = [];
 
-                res.send(filledSubCategory);
+            result1.forEach((row) => {
+
+                let lastUpdated = row.maxDate || 'none';
+                let lastThreadName = row.ThreadName || 'none';
+                let lastUser = row.UserName || 'none';
+                let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}` : 'none';
+
+                convertedResult.push(
+                    {
+                        id: row.subCategoryId,
+                        name: row.subCategoryName,
+                        path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                        description: row.description,
+                        totalPosts: row.totalPosts || 0,
+                        lastActiveThread: {
+                            name: lastThreadName,
+                            user: lastUser,
+                            lastUpdated: lastUpdated,
+                            path: lastActiveThreadPath
+                        }
+                    }
+                );
             });
+
+            result2.forEach((row) => {
+                convertedResult2.push(
+                    {
+                        id: row.ThreadId,
+                        path: `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}`,
+                        name: row.ThreadName,
+                        creator: "to be implemented",
+                        createdOn: "to be implemented",
+                        totalReplies: row.totalPosts - 1,
+                        totalViews: 0,
+                        lastPost: {
+                            name: row.ThreadName,
+                            user: row.UserName,
+                            lastUpdated: row.maxDate
+                        }
+                    }
+                );
+            });
+
+            const finalResult = {
+                id: subcatid,
+                name: result3[0].name,
+                subCategories: convertedResult,
+                threads: convertedResult2
+            }
+
+            res.send(finalResult);
+        } catch(err) {
+            res.status(404).send(err);
+        }
+
     })
 
     app.get('/api/forums/thread/:id/:slug', (req, res) => {
 
-        const Thread = mongoose.model('Thread');
-        let threadPage;
-        Thread.findOne({threadId: req.params.id})
-            .populate({
-                path: 'posts',
-                select: 'postId content ratings creator -_id',
-                populate: {
-                    path: 'creator ratings.users',
-                    select: 'name -_id',
-                }
-            })
-            .lean()
-            .then((thread) => {
-                const filledPosts = thread.posts.map((post) => {
-                    const { content, postId, ratings, creator} = post;
+        let threadId = Number(req.params.id);
+        models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
+            .then(result => {
 
-                    const filledRatings = ratings.map((rating) => {
-                        
-                        const filledUsers = rating.users.map((user) => {
-                            return {
-                                userName: user.name
-                            }
-                        });
+                let convertedPosts = [];
+                let currentPostId = 0;
+                let currentRatingId = 0;
 
-                        return {
-                            ratingName: rating.name,
-                            users: filledUsers
-                        }
-                    });
+                result.forEach((row) => {
 
-                    const filledCreator = {
-                        name: creator.name,
-                        pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                        totalPosts: "not implemented yet",
-                        signature: "asdfasdf"
+                    let rating;
+                    //if rating is not null, build it. If it exists, it will always have a user
+                    if (row.ratingName) {
+                        rating = {
+                            ratingName: row.ratingName,
+                            users: [
+                                {userName: row.ratingUserName}
+                            ]
+                        };
                     }
 
-                    return {
-                        id: postId,
-                        content,
-                        ratings: filledRatings,
-                        creator: filledCreator
+                    if(currentPostId !== row.postId) {
+                        // add another post, may or may not have a rating
+                        currentPostId = row.postId;
+                        convertedPosts.push(
+                            {
+                                id: row.postId,
+                                content: row.postContent,
+                                ratings: [],
+                                creator: {
+                                    name: row.creatorName,
+                                    pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                                    totalPosts: row.postCount,
+                                    signature: "to be implemented"
+                                }
+                            }
+                        );
+
+                        if (rating) {
+                            // add a new rating, reset current rating placeholder
+                            currentRatingId = row.ratingId;
+                            convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                        }
+                    } else {
+                        //there has to be at least 1 rating to get to here, and user has to exist
+                        if (currentRatingId !== row.ratingId) {
+                            currentRatingId = row.ratingId;
+                            // another rating type
+                            convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                        } else {
+                            // same rating type, different user
+                            const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
+                            convertedPosts[convertedPosts.length - 1].ratings[lastRating].push({userName: row.ratingUserName});
+                        }
                     }
                 });
 
-                const filledThread = {
-                    name: thread.name,
-                    posts: filledPosts
+                const finalResult = {
+                    name: result[0].threadName,
+                    posts: convertedPosts
                 }
-                
 
-                res.send(filledThread);
+                res.send(finalResult);
             });
         
+    })
+
+    app.post('/api/forums/category', (req, res) => {
+        const name = sqlstring.escape(req.body.name);
+        models.Category.create({name})
+            .then(() => {
+                res.send({});
+            });
     })
 }

@@ -1,12 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
-    
-    const Category = sequelize.define('Category', {
+
+    const RatingType = sequelize.define('RatingType', {
 
         name: {
             type: DataTypes.STRING
-        }  
-        
+        }
+
     });
 
-    return Category;
+    return RatingType;
 };
