@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
 
         ancestors: {
             type: DataTypes.STRING
+        },
+
+        position: {
+            type: DataTypes.INTEGER
         }
 
     });

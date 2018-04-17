@@ -7,5 +7,8 @@ export {
     fetchSubCategoryPageDataFailed,
     initThreadData,
     setThreadData,
-    fetchThreadDataFailed
+    fetchThreadDataFailed,
+    initCreateCategory,
+    createCategoryFailed,
+    createCategorySuccess
 } from './forums';

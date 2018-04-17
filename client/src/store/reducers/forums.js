@@ -57,6 +57,22 @@ const fetchThreadDataFailed = (state, action) => {
     return updatedState;
 };
 
+const createCategoryFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: false
+    }
+    return updatedState;
+};
+
+const createCategorySuccess = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: false
+    }
+    return updatedState;
+};
+
 const reducer = ( state = initialState, action ) => {
     switch ( action.type ) {
         case actionTypes.SET_CATEGORY_DATA: return setCategoryData(state, action);
@@ -65,6 +81,8 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.FETCH_SUB_CATEGORY_PAGE_DATA_FAILED: return fetchSubCategoryPageDataFailed(state, action);
         case actionTypes.SET_THREAD_DATA: return setThreadData(state, action);
         case actionTypes.FETCH_THREAD_DATA_FAILED: return fetchThreadDataFailed(state, action);
+        case actionTypes.CREATE_CATEGORY_SUCCESS: return createCategorySuccess(state, action);
+        case actionTypes.CREATE_CATEGORY_FAILED: return createCategoryFailed(state, action);
         default: return state;
     }
 };

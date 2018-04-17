@@ -58,3 +58,23 @@ export const initThreadData = (path) => {
         path: path
     };
 };
+
+export const initCreateCategory = ( name ) => {
+    return {
+        type: actionTypes.INIT_CREATE_CATEGORY,
+        name: name
+    };
+};
+
+export const createCategoryFailed = (error) => {
+    return {
+        type: actionTypes.CREATE_CATEGORY_FAILED,
+        error: error
+    };
+};
+
+export const createCategorySuccess = () => {
+    return {
+        type: actionTypes.CREATE_CATEGORY_SUCCESS
+    };
+};

@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => {
         content: {
             type: DataTypes.TEXT
         },
+
+        position: {
+            type: DataTypes.INTEGER
+        }
         
     });
 

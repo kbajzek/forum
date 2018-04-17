@@ -39,3 +39,16 @@ export function* initThreadDataSaga(action) {
   }
 }
 
+export function* initCreateCategorySaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/category/create", {
+        name: action.name
+      }
+    );
+    yield put(actions.initCategoryData());
+  } catch (error) {
+    yield put(actions.createCategoryFailed(error));
+  }
+}
+

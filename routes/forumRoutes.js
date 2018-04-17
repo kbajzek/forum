@@ -3,6 +3,7 @@ const slugify = require('slugify');
 const models  = require('../models');
 const queries = require('../controllers/queries');
 const sqlstring = require('sqlstring');
+const controllers = require('../controllers/controllers');
 
 module.exports = app => {
 
@@ -222,7 +223,7 @@ module.exports = app => {
             .then(result => {
 
                 let convertedResult = [];
-                let currentCatId = 0;
+                let currentCatPosition = 0;
 
                 result.forEach((row) => {
 
@@ -231,8 +232,8 @@ module.exports = app => {
                     let lastUser = row.UserName || 'none';
                     let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}` : 'none';
 
-                    if (currentCatId !== row.categoryId) {
-                        currentCatId = row.categoryId;
+                    if (currentCatPosition !== row.categoryPosition) {
+                        currentCatPosition = row.categoryPosition;
 
                         convertedResult.push(
                             {
@@ -323,13 +324,13 @@ module.exports = app => {
                         id: row.ThreadId,
                         path: `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}`,
                         name: row.ThreadName,
-                        creator: "to be implemented",
-                        createdOn: "to be implemented",
+                        creator: row.creatorName,
+                        createdOn: row.ThreadMade,
                         totalReplies: row.totalPosts - 1,
                         totalViews: 0,
                         lastPost: {
                             name: row.ThreadName,
-                            user: row.UserName,
+                            user: row.userName,
                             lastUpdated: row.maxDate
                         }
                     }
@@ -357,7 +358,7 @@ module.exports = app => {
             .then(result => {
 
                 let convertedPosts = [];
-                let currentPostId = 0;
+                let currentPostPosition = 0;
                 let currentRatingId = 0;
 
                 result.forEach((row) => {
@@ -373,9 +374,9 @@ module.exports = app => {
                         };
                     }
 
-                    if(currentPostId !== row.postId) {
+                    if(currentPostPosition !== row.postPosition) {
                         // add another post, may or may not have a rating
-                        currentPostId = row.postId;
+                        currentPostPosition = row.postPosition;
                         convertedPosts.push(
                             {
                                 id: row.postId,
@@ -419,9 +420,66 @@ module.exports = app => {
         
     })
 
-    app.post('/api/forums/category', (req, res) => {
+    app.post('/api/forums/category/create', (req, res) => {
         const name = sqlstring.escape(req.body.name);
-        models.Category.create({name})
+        controllers.createCategory(name)
+            .then(() => {
+                res.send({});
+            });
+    })
+
+    app.post('/api/forums/subcategory/create', (req, res) => {
+        const name = sqlstring.escape(req.body.name);
+        const description = sqlstring.escape(req.body.description);
+        const categoryId = sqlstring.escape(req.body.categoryId);
+        controllers.createSubCategory(name, description, categoryId)
+            .then(() => {
+                res.send({});
+            });
+    })
+
+    app.post('/api/forums/thread/create', (req, res) => {
+        const name = sqlstring.escape(req.body.name);
+        const content = sqlstring.escape(req.body.content);
+        const userId = sqlstring.escape(req.body.userId);
+        const subCategoryId = sqlstring.escape(req.body.subCategoryId);
+        controllers.createThread(name, content, userId, subCategoryId)
+            .then(() => {
+                res.send({});
+            });
+    })
+
+    app.post('/api/forums/post/create', (req, res) => {
+        const content = sqlstring.escape(req.body.content);
+        const userId = sqlstring.escape(req.body.userId);
+        const threadId = sqlstring.escape(req.body.threadId);
+        controllers.createPost(content, userId, threadId)
+            .then(() => {
+                res.send({});
+            });
+    })
+
+    app.post('/api/forums/user/create', (req, res) => {
+        const name = sqlstring.escape(req.body.name);
+        controllers.createUser(name)
+            .then(() => {
+                res.send({});
+            });
+    })
+
+    app.post('/api/forums/ratingtype/create', (req, res) => {
+        const name = sqlstring.escape(req.body.name);
+        controllers.createRatingType(name)
+            .then(() => {
+                res.send({});
+            });
+    })
+
+    app.post('/api/forums/rating/create', (req, res) => {
+        const ratingTypeId = sqlstring.escape(req.body.ratingTypeId);
+        const postId = sqlstring.escape(req.body.postId);
+        const userId = sqlstring.escape(req.body.userId);
+        controllers.createRating(UserId, PostId, RatingTypeId)
             .then(() => {
                 res.send({});
             });
