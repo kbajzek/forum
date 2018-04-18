@@ -156,7 +156,7 @@ module.exports = app => {
 
     const example_subcategorypage = {
         name: "asdfasdfasdf",
-        subcategories: [
+        subCategories: [
             {
                 id: 1,
                 path: "/1/subcategory-1",
@@ -235,29 +235,33 @@ module.exports = app => {
                     if (currentCatPosition !== row.categoryPosition) {
                         currentCatPosition = row.categoryPosition;
 
+                        let subCategories = [];
+
+                        if (row.subCategoryId) {
+                            subCategories = [{
+                                id: row.subCategoryId,
+                                name: row.subCategoryName,
+                                path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                                description: row.description,
+                                totalPosts: row.totalPosts || 0,
+                                lastActiveThread: {
+                                    name: lastThreadName,
+                                    user: lastUser,
+                                    lastUpdated: lastUpdated,
+                                    path: lastActiveThreadPath
+                                }
+                            }]
+                        }
+
                         convertedResult.push(
                             {
                                 id: row.categoryId, 
                                 name: row.categoryName, 
-                                subCategories: [
-                                    {
-                                        id: row.subCategoryId,
-                                        name: row.subCategoryName,
-                                        path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
-                                        description: row.description,
-                                        totalPosts: row.totalPosts || 0,
-                                        lastActiveThread: {
-                                            name: lastThreadName,
-                                            user: lastUser,
-                                            lastUpdated: lastUpdated,
-                                            path: lastActiveThreadPath
-                                        }
-
-                                    }
-                                ]
+                                subCategories
                             }
                         );
                     } else {
+                        //has to have at least 2 subcategories to get to here
                         convertedResult[convertedResult.length - 1].subCategories.push(
                             {
                                 id: row.subCategoryId,
@@ -412,6 +416,7 @@ module.exports = app => {
 
                 const finalResult = {
                     name: result[0].threadName,
+                    id: result[0].threadId,
                     posts: convertedPosts
                 }
 
@@ -421,67 +426,98 @@ module.exports = app => {
     })
 
     app.post('/api/forums/category/create', (req, res) => {
-        const name = sqlstring.escape(req.body.name);
-        controllers.createCategory(name)
-            .then(() => {
-                res.send({});
+        controllers.createCategory(req.body.name)
+            .then((newCategory) => {
+                res.send({
+                    id: newCategory.id
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 
     app.post('/api/forums/subcategory/create', (req, res) => {
-        const name = sqlstring.escape(req.body.name);
-        const description = sqlstring.escape(req.body.description);
-        const categoryId = sqlstring.escape(req.body.categoryId);
-        controllers.createSubCategory(name, description, categoryId)
-            .then(() => {
-                res.send({});
+        controllers.createSubCategory(req.body.name, req.body.description, req.body.categoryId, req.body.subCategoryId)
+            .then((newSubCategory) => {
+                res.send({
+                    id: newSubCategory.id,
+                    path: `/${newSubCategory.id}/${slugify(newSubCategory.name).toLowerCase()}`
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 
     app.post('/api/forums/thread/create', (req, res) => {
-        const name = sqlstring.escape(req.body.name);
-        const content = sqlstring.escape(req.body.content);
-        const userId = sqlstring.escape(req.body.userId);
-        const subCategoryId = sqlstring.escape(req.body.subCategoryId);
-        controllers.createThread(name, content, userId, subCategoryId)
-            .then(() => {
-                res.send({});
+        controllers.createThread(req.body.name, req.body.content, req.body.userId, req.body.subCategoryId)
+            .then((result) => {
+                res.send({
+                    threadId: result[0].id,
+                    postId: result[1].id,
+                    threadPath: `/thread/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
+                    name: result[2].name,
+                    createdOn: result[0].createdAt,
+                    lastUpdated: result[1].updatedAt
+                });
+            })
+            .catch((error) => {
+                console.log(error)
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 
     app.post('/api/forums/post/create', (req, res) => {
-        const content = sqlstring.escape(req.body.content);
-        const userId = sqlstring.escape(req.body.userId);
-        const threadId = sqlstring.escape(req.body.threadId);
-        controllers.createPost(content, userId, threadId)
-            .then(() => {
-                res.send({});
+        controllers.createPost(req.body.content, req.body.userId, req.body.threadId)
+            .then(({newPost, user}) => {
+                controllers.getUserTotalPosts(req.body.userId)
+                    .then(({user, count}) => {
+                        console.log(newPost)
+                        res.send({
+                            id: newPost.id, 
+                            content: newPost.content,
+                            userName: user.name, 
+                            userPicture: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg", 
+                            userTotalPosts: count, 
+                            userSignature: "to be implemented"
+                        });
+                    })
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 
     app.post('/api/forums/user/create', (req, res) => {
-        const name = sqlstring.escape(req.body.name);
-        controllers.createUser(name)
-            .then(() => {
-                res.send({});
+        controllers.createUser(req.body.name)
+            .then((newUser) => {
+                res.send({
+                    id: newUser.id
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 
     app.post('/api/forums/ratingtype/create', (req, res) => {
-        const name = sqlstring.escape(req.body.name);
-        controllers.createRatingType(name)
+        controllers.createRatingType(req.body.name)
             .then(() => {
                 res.send({});
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 
     app.post('/api/forums/rating/create', (req, res) => {
-        const ratingTypeId = sqlstring.escape(req.body.ratingTypeId);
-        const postId = sqlstring.escape(req.body.postId);
-        const userId = sqlstring.escape(req.body.userId);
-        controllers.createRating(UserId, PostId, RatingTypeId)
+        controllers.createRating(req.body.UserId, req.body.PostId, req.body.RatingTypeId)
             .then(() => {
                 res.send({});
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
             });
     })
 }

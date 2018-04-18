@@ -29,16 +29,17 @@ class Categories extends Component {
 
         let catForm;
 
-        if(this.state.showCatForm) {
-            catForm = <CategoryForm closeCatForm={this.toggleCategoryCreator} />
-        }
-
         if (this.props.categoryData) {
-            categories = this.props.categoryData.map(({id, name, subCategories}) => {
 
+            if(this.state.showCatForm) {
+                catForm = <CategoryForm closeForm={this.toggleCategoryCreator} />
+            }
+
+            categories = this.props.categoryData.map(({id, name, subCategories}) => {
                 return (
                     <Category 
                         key={id}
+                        categoryId={id}
                         name={name} 
                         subcategories={subCategories} />
                 );

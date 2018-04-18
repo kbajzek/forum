@@ -135,6 +135,7 @@ module.exports = {
     getThreadQuery(threadqueryid) {
         return (
             `SELECT t.name			as threadName,
+                    t.id            as threadId,
                     p.id			as postId,
                     p.content		as postContent,
                     r.ratingName	as ratingName,

@@ -5,10 +5,10 @@ import fields from './fields';
 import FieldComponent from '../FieldComponent/FieldComponent';
 import * as actions from '../../../store/actions';
 
-class CategoryForm extends Component {
+class SubCategoryForm extends Component {
 
-    onFormSubmit = ({name}) => {
-        this.props.onCreateCategory(name);
+    onFormSubmit = ({name, description}) => {
+        this.props.onCreateSubCategory(name, description, this.props.categoryId, this.props.subCategoryId, this.props.path);
         this.props.closeForm();
     }
 
@@ -35,7 +35,7 @@ class CategoryForm extends Component {
             </form>
         );
     }
-};
+}
 
 const validate = (values) => {
     const errors = {};
@@ -51,13 +51,13 @@ const validate = (values) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreateCategory: (name) => dispatch(actions.createCategory(name))
+        onCreateSubCategory: (name, description, categoryId, subCategoryId, path) => dispatch(actions.createSubCategory(name, description, categoryId, subCategoryId, path))
     }
 }
 
 export default connect(null, mapDispatchToProps)(
     reduxForm({
         validate,
-        form: 'categoryForm'
-    })(CategoryForm)
+        form: 'subCategoryForm'
+    })(SubCategoryForm)
 );

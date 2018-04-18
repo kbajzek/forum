@@ -5,10 +5,10 @@ import fields from './fields';
 import FieldComponent from '../FieldComponent/FieldComponent';
 import * as actions from '../../../store/actions';
 
-class CategoryForm extends Component {
+class PostForm extends Component {
 
-    onFormSubmit = ({name}) => {
-        this.props.onCreateCategory(name);
+    onFormSubmit = ({name, content}) => {
+        this.props.onCreatePost(content, 1, this.props.threadId, this.props.path); //fix userid eventually
         this.props.closeForm();
     }
 
@@ -51,13 +51,13 @@ const validate = (values) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreateCategory: (name) => dispatch(actions.createCategory(name))
+        onCreatePost: (content, userId, threadId, path) => dispatch(actions.createPost(content, userId, threadId, path))
     }
 }
 
 export default connect(null, mapDispatchToProps)(
     reduxForm({
         validate,
-        form: 'categoryForm'
-    })(CategoryForm)
+        form: 'postForm'
+    })(PostForm)
 );

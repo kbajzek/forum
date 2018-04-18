@@ -7,7 +7,7 @@ const Ratings = ({ratings}) => {
     const ratingList = ratings.map(({ratingName, users}) => {
 
         return (
-            <div className={classes.Rating}>
+            <div className={classes.Rating} key={ratingName}>
                 <div>{ratingName}</div>
                 <div className={classes.RatingCount}>{users.length}</div>
             </div>

@@ -66,8 +66,11 @@ module.exports = {
                             ThreadId: newThread.id,
                             UserId
                         }, {transaction: t})
-                            .then(function(newPost) {
-                                return [newThread, newPost];
+                            .then(function (newPost) {
+                                return models.User.findOne({where: {id: UserId}}, {transaction: t})
+                                    .then(function(user) {
+                                        return [newThread, newPost, user];
+                                    });
                             });
                     });
             });
@@ -75,15 +78,22 @@ module.exports = {
 
         createPost(content, UserId, ThreadId) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
-                return models.Post.findAndCountAll({where: {ThreadId}}, {transaction: t})
-                        .then(function ({count}) {
-                            return models.Post.create({
-                                content,
-                                position: count + 1,
-                                ThreadId,
-                                UserId
-                            }, {transaction: t});
-                        });
+                return models.User.findOne({where: {id: UserId}}, {transaction: t})
+                    .then(function(user) {
+                        return models.Post.findAndCountAll({where: {ThreadId}}, {transaction: t})
+                            .then(function ({count}) {
+                                return models.Post.create({
+                                    content,
+                                    position: count + 1,
+                                    ThreadId,
+                                    UserId
+                                }, {transaction: t})
+                                    .then(function(newPost) {
+                                        return {newPost, user};
+                                    });
+                            });
+                    });
+                
             });
         },
 
@@ -110,6 +120,18 @@ module.exports = {
                     PostId,
                     RatingTypeId
                 }, {transaction: t}); 
+            });
+        },
+
+        getUserTotalPosts(UserId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.Post.findAndCountAll({where: {UserId}}, {transaction: t})
+                    .then(function ({count}) {
+                        return models.User.findOne({where: {id: UserId}}, {transaction: t})
+                            .then(function (user) {
+                                return {user, count};
+                            });
+                    });
             });
         },
     

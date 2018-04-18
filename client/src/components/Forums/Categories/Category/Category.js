@@ -2,11 +2,24 @@ import React, {Component} from 'react';
 import SubCategory from './SubCategory/SubCategory';
 import classes from './Category.module.css';
 import Transition from 'react-transition-group/Transition';
+import SubCategoryForm from '../../../Forms/SubCategoryForm/SubCategoryForm';
 
 class Category extends Component {
     state = {
         categoryOpen: true,
-        contentHeight: 100000
+        contentHeight: 100000,
+        showSubCatForm: false
+    }
+
+    toggleSubCategoryCreator = (event) => {
+        event.stopPropagation();
+        this.setState((prevState) => {
+            return {showSubCatForm: !prevState.showSubCatForm}
+         });
+    }
+
+    closeSubCategoryCreator = () => {
+        this.setState({showSubCatForm: false});
     }
     
     categoryToggleHandler = () => {
@@ -25,6 +38,12 @@ class Category extends Component {
     }
 
     render() {
+
+        let subCatForm;
+
+        if(this.state.showSubCatForm) {
+            subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} categoryId={this.props.categoryId} />
+        }
 
         const subcat_markup = this.props.subcategories.map(({id, name, description, totalPosts, lastActiveThread, path}) => {
             return (
@@ -52,26 +71,28 @@ class Category extends Component {
         const transitionStyles = {
             entering:  
                 {
-                    'max-height': `${this.state.contentHeight}px`,
+                    'maxHeight': `${this.state.contentHeight}px`,
                     'visibility': 'hidden'
                 },
             entered:  
                 {
-                    'max-height': '0px',
+                    'maxHeight': '0px',
                     'visibility': 'hidden'
                 },
             exiting:  
                 {
-                    'max-height': `${this.state.contentHeight}px` 
+                    'maxHeight': `${this.state.contentHeight}px` 
                 }
         };
 
         return (
             <div className={classes.Category}>
+                {subCatForm}
                 <div 
                     onClick={this.categoryToggleHandler} 
                     className={classes.Header}>
                     {this.props.name}
+                    <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button>
                 </div>
                 <div className={classes.Wrap}>
                     <Transition
