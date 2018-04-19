@@ -27,6 +27,7 @@
     "mongoose-sequence": "^4.0.1",
     "mysql2": "^1.5.3",
     "nodemon": "^1.17.1",
+    "pegjs": "^0.10.0",
     "require-dir": "^1.0.0",
     "sequelize": "^4.37.6",
     "slugify": "^1.2.9",

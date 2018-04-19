@@ -3,6 +3,7 @@ const slugify = require('slugify');
 const models  = require('../models');
 const queries = require('../controllers/queries');
 const controllers = require('../controllers/controllers');
+const pegjs = require('pegjs');
 
 describe('Tests', () => {
 
@@ -64,7 +65,34 @@ describe('Tests', () => {
             });
     });
 
-    it('checking', (done) => {
+    it('pegjs stuff', (done) => {
+
+        const parser = pegjs.generate(
+        `start
+        = bs:boldStructure {console.log('hit2'); return bs;}
+        / is:italicizedStructure {console.log('hit3'); return is;}
+        / string:string {console.log('here5'); return [{'content': string.join("")}];}
+        
+        boldStructure
+        = left:(!'[b]' .)* '[b]' middle:boldContent '[/b]' right:start { console.log('here2'); return [{'content': left.map((el) => el.join("")).join("")} , {'bold': middle.map((el) => el.join("")).join("")}].concat(right); }
+        
+        italicizedStructure
+        = left:(!'[i]' .)* '[i]' middle:italicizedContent '[/i]' right:start { console.log('here3'); return [{'content': left.map((el) => el.join("")).join("")} , {'italicized': middle.map((el) => el.join("")).join("")}].concat(right); }
+        
+        italicizedContent
+        = (!'[/b]' !'[/i]' .)*
+        / (!'[/i]' boldStructure)*
+        
+        boldContent
+        = (!'[/b]' !'[/i]' .)*
+        / (!'[/b]' italicizedStructure)*
+        
+        string
+        = .*`
+        );
+
+        console.log(JSON.stringify(parser.parse("d[b]ffff[i]hh[/i]rrr[/b][i]rrr[/i]d"), null, 2))
+
         
         // let threadId = Number(1);
         // models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
