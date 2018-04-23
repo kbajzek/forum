@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
-import {reduxForm, Field} from 'redux-form';
+import {reduxForm, Field, formValueSelector} from 'redux-form';
 import {connect} from 'react-redux';
 import fields from './fields';
 import FieldComponent from '../FieldComponent/FieldComponent';
+import Textarea from '../FieldComponent/Textarea';
 import * as actions from '../../../store/actions';
+import PostContent from '../../Forums/Thread/Post/PostContent/PostContent';
 
 class PostForm extends Component {
 
@@ -13,11 +15,11 @@ class PostForm extends Component {
     }
 
     renderFields = () => {
-        return fields.map( ({label, name})  => {
+        return fields.map( ({label, name, type})  => {
             return (
                 <Field
                     key={name}
-                    component={FieldComponent}
+                    component={type === 'textarea' ? Textarea : FieldComponent}
                     type="text"
                     label={label}
                     name={name}
@@ -29,7 +31,13 @@ class PostForm extends Component {
     render() {
         return(
             <form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
-                {this.renderFields()}
+                <Field
+                    key='content'
+                    component={Textarea}
+                    type='text'
+                    name='content'
+                />
+                <PostContent content={this.props.contentValue} />
                 <button type="submit">SUBMIT</button>
                 <button onClick={this.props.closeForm}>CANCEL</button>
             </form>
@@ -49,13 +57,22 @@ const validate = (values) => {
     return errors;
 }
 
+const selector = formValueSelector('postForm');
+
+const mapStateToProps = state => {
+    const contentValue = selector(state, 'content');
+    return {
+        contentValue
+    }
+}
+
 const mapDispatchToProps = dispatch => {
     return {
         onCreatePost: (content, userId, threadId, path) => dispatch(actions.createPost(content, userId, threadId, path))
     }
 }
 
-export default connect(null, mapDispatchToProps)(
+export default connect(mapStateToProps, mapDispatchToProps)(
     reduxForm({
         validate,
         form: 'postForm'

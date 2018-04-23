@@ -3,7 +3,9 @@ const slugify = require('slugify');
 const models  = require('../models');
 const queries = require('../controllers/queries');
 const controllers = require('../controllers/controllers');
-const pegjs = require('pegjs');
+const parser = require('./parsetest');
+const htmlParser = require('htmlparser2');
+const util = require('util');
 
 describe('Tests', () => {
 
@@ -65,40 +67,36 @@ describe('Tests', () => {
             });
     });
 
-    it('pegjs stuff', (done) => {
+    it('parser stuff', (done) => {
 
-        const parser = pegjs.generate(
-        `start
-        = bs:boldStructure {console.log('hit2'); return bs;}
-        / is:italicizedStructure {console.log('hit3'); return is;}
-        / string:string {console.log('here5'); return [{'content': string.join("")}];}
-        
-        boldStructure
-        = left:(!'[b]' .)* '[b]' middle:boldContent '[/b]' right:start { console.log('here2'); return [{'content': left.map((el) => el.join("")).join("")} , {'bold': middle.map((el) => el.join("")).join("")}].concat(right); }
-        
-        italicizedStructure
-        = left:(!'[i]' .)* '[i]' middle:italicizedContent '[/i]' right:start { console.log('here3'); return [{'content': left.map((el) => el.join("")).join("")} , {'italicized': middle.map((el) => el.join("")).join("")}].concat(right); }
-        
-        italicizedContent
-        = (!'[/b]' !'[/i]' .)*
-        / (!'[/i]' boldStructure)*
-        
-        boldContent
-        = (!'[/b]' !'[/i]' .)*
-        / (!'[/b]' italicizedStructure)*
-        
-        string
-        = .*`
-        );
 
-        console.log(JSON.stringify(parser.parse("d[b]ffff[i]hh[/i]rrr[/b][i]rrr[/i]d"), null, 2))
+        const result = parser.process({
+            text: "afbdd[b]dsd[b]adsfadsf[/b]fbsdfbd[/b]dddddddddd[b]adsfadsf[/b]ddddd",
+            removeMisalignedTags: false,
+            addInLineBreaks: false
+        });
+
+        console.log(result);
+
+        const handler = new htmlParser.DomHandler(function (error, dom) {
+            if (error) {
+                console.log(error);
+            } else {
+                
+                
+                
+                console.log(dom[0]);
+                
+
+                // console.log(JSON.stringify(util.inspect(dom), null, 2));
+                done();
+            }
+        });
+        const htmlParserInstance = new htmlParser.Parser(handler);
+        htmlParserInstance.write(result.html);
+        htmlParserInstance.end();
 
         
-        // let threadId = Number(1);
-        // models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
-        // console.log(result2);
-        
-        done();
 
     });
 });
