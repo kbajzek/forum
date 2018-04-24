@@ -4,8 +4,6 @@ const models  = require('../models');
 const queries = require('../controllers/queries');
 const controllers = require('../controllers/controllers');
 const parser = require('./parsetest');
-const htmlParser = require('htmlparser2');
-const util = require('util');
 
 describe('Tests', () => {
 
@@ -69,32 +67,105 @@ describe('Tests', () => {
 
     it('parser stuff', (done) => {
 
+        const tagStack = [];
+        const tagNameStack = [];
+        const positionStack = [];
 
-        const result = parser.process({
-            text: "afbdd[b]dsd[b]adsfadsf[/b]fbsdfbd[/b]dddddddddd[b]adsfadsf[/b]ddddd",
-            removeMisalignedTags: false,
-            addInLineBreaks: false
-        });
+        let tempTagStack = [];
+        let tempTagNameStack = [];
+        let tempPositionStack = [];
 
-        console.log(result);
+        let finalStructure = {};
 
-        const handler = new htmlParser.DomHandler(function (error, dom) {
-            if (error) {
-                console.log(error);
+        const tags = ['b','i'];
+        
+        let d = "afbdd[b]dsd[b]ad[i]sfadsf[/b]fbsdfbd[/b]dddddddddd[b]ad[i]sfadsf[/b]ddddd";
+
+        let text = "af[b]bdd[b]dsd[b]ad[i]sfadsf[/b]fbsdfbd[/b]dddddddddd[b]ad[i]sfadsf[/b]ddddd";
+
+        const tag = new RegExp("\\[([/])?(" + tags.join("|") + ")([=][^\\]]*?)?\\]", "gi");
+
+        let match = tag.exec(text);
+
+        while(match !== null) {
+            console.log(text)
+            const [matched, isClosing, tagName, tagParams] = match;
+            console.log(matched, isClosing, tagName, tagParams)
+            console.log(tagStack)
+
+            const params = tagParams || ''; // So we don't append 'undefined' to the replacement
+
+            const findTag = (tag) => {
+            
+                const lastTag = tempTagStack.pop();
+                const lastTagName = tempTagNameStack.pop();
+                const lastPosition = tempPositionStack.pop();
+    
+                if (tag === lastTagName) {
+                    tempTagStack.push(lastTag);
+                    tempTagNameStack.push(lastTagName);
+                    tempPositionStack.push(lastPosition);
+                    return tempTagStack.length;
+                } else if (tempTagStack.length === 0) {
+                    return null;
+                } else {
+                    return findTag(tag);
+                }
+            };
+
+            if (isClosing) {
+                tempTagStack = [...tagStack];
+                tempTagNameStack = [...tagNameStack];
+                tempPositionStack = [...positionStack];
+                
+                let pos = findTag(tagName);
+
+                console.log(pos)
+
+                if (!pos) { // cant find closing tag in stack, eat it
+                    const newString = "&bad1;" + tagName + params + "&bad2;";
+                    text = text.substr(0, tag.lastIndex - newString.length + 10) + newString + text.substr(tag.lastIndex);
+                } else {
+                    const newString = "</" + tagName + params + ">";
+                    text = text.substr(0, tag.lastIndex - newString.length) + newString + text.substr(tag.lastIndex);
+                    let i = tagStack.length - pos;
+                    while(i !== 0) { // if not at end of stack, remove the wrong ones
+                        const lastTag = tagStack.pop();
+                        const lastTagName = tagNameStack.pop();
+                        const lastPosition = positionStack.pop();
+                        const newString = "&bad1;" + lastTag.substr(1, lastTag.length - 2) + "&bad2;";
+                        text = text.substr(0, lastPosition - lastTag.length) + newString + text.substr(lastPosition);
+                        i--;
+                    }
+                    const lastTag = tagStack.pop();
+                    const lastTagName = tagNameStack.pop();
+                    const lastPosition = positionStack.pop();
+                }
+
             } else {
-                
-                
-                
-                console.log(dom[0]);
-                
-
-                // console.log(JSON.stringify(util.inspect(dom), null, 2));
-                done();
+                tagStack.push("<" + tagName + params + ">");
+                tagNameStack.push(tagName);
+                const newString = "<" + tagName + params + ">";
+                text = text.substr(0, tag.lastIndex-newString.length) + newString + text.substr(tag.lastIndex );
+                positionStack.push(tag.lastIndex);
             }
-        });
-        const htmlParserInstance = new htmlParser.Parser(handler);
-        htmlParserInstance.write(result.html);
-        htmlParserInstance.end();
+
+            tag.lastIndex = 0;
+            match = tag.exec(text);
+        }  
+
+        let i = tagStack.length;
+        while(i !== 0) { // if not at end of stack, remove the wrong ones
+            const lastTag = tagStack.pop();
+            const lastTagName = tagNameStack.pop();
+            const lastPosition = positionStack.pop();
+            const newString = "&bad1;" + lastTag.substr(1, lastTag.length - 2) + "&bad2;";
+            text = text.substr(0, lastPosition - lastTag.length) + newString + text.substr(lastPosition);
+            i--;
+        }
+
+        done();
+        console.log(text)    
 
         
 
