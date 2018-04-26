@@ -6,6 +6,7 @@
 
 .RightSide {
     display: flex;
+    overflow: hidden;
     flex-flow: column;
     padding: 1rem;
 }

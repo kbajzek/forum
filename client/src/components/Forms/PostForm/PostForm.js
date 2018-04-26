@@ -31,6 +31,7 @@ class PostForm extends Component {
     render() {
         return(
             <form onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{width: '80%'}}>
+                
                 <Field
                     key='content'
                     component={Textarea}
@@ -38,7 +39,7 @@ class PostForm extends Component {
                     name='content'
                     change={this.props.change}
                 />
-                <PostContent content={this.props.contentValue} style={{fontSize: '16px', minHeight: '10rem', backgroundColor: 'yellow', marginBottom: '2rem'}} />
+                <PostContent content={this.props.contentValue} style={{fontSize: '16px', minHeight: '10rem', backgroundColor: '#EEEEEE', marginBottom: '2rem'}} />
                 <button type="submit">SUBMIT</button>
                 <button onClick={this.props.closeForm}>CANCEL</button>
             </form>

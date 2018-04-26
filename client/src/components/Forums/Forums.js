@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Route, Switch} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 
 
@@ -25,6 +26,7 @@ class Forums extends Component {
                         return <SubCategoryPage key={match.params.id} id={match.params.id} slug={match.params.slug} />
                     }} />
                 </Switch>
+
     
                 
             </div>
@@ -32,6 +34,11 @@ class Forums extends Component {
     }
 }
 
+const mapStateToProps = state => {
+    return {
+        PostData: state.forums.postEditorData
+    };
+}
 
 
-export default Forums;
+export default connect(mapStateToProps, null)(Forums);

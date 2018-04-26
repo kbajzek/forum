@@ -4,6 +4,7 @@ const initialState = {
     categoryData: null,
     subCategoryPageData: null,
     threadData: null,
+    postEditorData: null,
     request_notifications: [],
     error: false
 };

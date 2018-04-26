@@ -30,6 +30,13 @@ class Thread extends Component {
         this.setState({showPostForm: false});
     }
 
+    handlePostEditInit = (id) => {
+        
+    }
+
+    handlePostEditInit = (id) => {
+        
+    }
 
     render() {
 
@@ -49,7 +56,10 @@ class Thread extends Component {
                         key={id}
                         content={content}
                         ratings={ratings}
-                        user={creator} />
+                        user={creator}
+                        id={id}
+                        handleEdit={this.handlePostEdit}
+                        handleDelete={this.handlePostDelete} />
                 );
             });
 
