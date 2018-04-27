@@ -5,6 +5,7 @@ const initialState = {
     subCategoryPageData: null,
     threadData: null,
     postEditorData: null,
+    postCreated: null,
     request_notifications: [],
     error: false
 };

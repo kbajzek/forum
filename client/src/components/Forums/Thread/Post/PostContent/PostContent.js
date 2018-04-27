@@ -492,21 +492,13 @@ class PostContent extends Component {
             }else if(content.tag === 'code') {
 
                 return (
-                        <div style={{'margin': '2rem 3rem', 'display':'block', 'overflowX': 'auto'}} key={key} >
-                            <div style={{'display':'flex'}} >
-                                <Highlight className={content.attribute || ''}>
-                                    {content.content[0]}
-                                </Highlight>
-                            </div>
+                    <div style={{'margin': '2rem 3rem', 'display':'block', 'overflowX': 'auto'}} key={key} >
+                        <div style={{'display':'flex'}} >
+                            <Highlight className={content.attribute || ''}>
+                                {content.content[0]}
+                            </Highlight>
                         </div>
-                        
-                    // <div key={key} style={{
-                    //                         'whiteSpace': 'pre-wrap',
-                    //                         'display': 'block', 
-                    //                         'fontFamily': 'monospace', 
-                    //                         'backgroundColor': '#DDDDDD',
-                    //                         'padding': '10px',
-                    //                         'wordWrap':'break-word'}} >{content.content}</div>
+                    </div>
                 );
             }else {
                 return (

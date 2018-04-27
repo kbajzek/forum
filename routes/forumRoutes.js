@@ -475,9 +475,10 @@ module.exports = app => {
                     .then(({user, count}) => {
                         console.log(newPost)
                         res.send({
-                            id: newPost.id, 
+                            postId: newPost.id, 
                             content: newPost.content,
-                            userName: user.name, 
+                            threadId: req.body.threadId,
+                            userName: user.name,
                             userPicture: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg", 
                             userTotalPosts: count, 
                             userSignature: "to be implemented"

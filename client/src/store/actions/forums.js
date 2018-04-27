@@ -170,13 +170,14 @@ export const createThreadFailed = (error) => {
 
 // POST
 
-export const createPost = ( content, userId, threadId, path ) => {
+export const createPost = ( content, userId, threadId, path, history ) => {
     return {
         type: actionTypes.CREATE_POST,
         content: content,
         userId: userId,
         threadId: threadId,
-        path: path
+        path: path,
+        history: history
     };
 };
 

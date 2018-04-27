@@ -458,7 +458,7 @@ class FieldComponent extends Component {
     render() {
         const { input, label, meta: { error, touched } } = this.props;
         return (
-            <div>
+            <div style={{ height: '100%'}}>
                 <button onClick={this.handleBold}>B</button>
                 <button onClick={this.handleItalicize}>I</button>
                 <button onClick={this.handleUnderline}>U</button>
@@ -477,8 +477,8 @@ class FieldComponent extends Component {
                 <button onClick={this.handleOrderedList}>Ordered List</button>
                 <button onClick={this.handleUnorderedList}>Unordered List</button>
                 <label>{label}</label>
-                <textarea ref={this.textarea} onKeyDown={this.handleKeyDown} {...input} style={{ marginBottom: '5px', width: '100%', height: '10rem', boxSizing: 'border-box' }} />
-                <div style={{ marginBottom: '20px', color: 'red' }}>
+                <textarea ref={this.textarea} onKeyDown={this.handleKeyDown} {...input} style={{ height: '125px', marginBottom: '5px', width: '100%'}} />
+                <div style={{ marginBottom: '5px', color: 'red' }}>
                     {touched && error}
                 </div>
             </div>

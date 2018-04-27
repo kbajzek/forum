@@ -132,6 +132,7 @@ export function* createPostSaga(action) {
       }
     );
     yield put(actions.refreshThreadData(action.path));
+    yield action.history.push("/forums" + action.path + "#" + response.data.postId);
   } catch (error) {
     yield put(actions.createPostFailed(error));
   }

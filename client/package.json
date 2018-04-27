@@ -16,6 +16,7 @@
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.2.2",
     "react-scripts-cssmodules": "1.0.171",
+    "react-scrollable-anchor": "^0.6.1",
     "react-transition-group": "^2.2.1",
     "redux": "^3.7.2",
     "redux-form": "^7.3.0",
