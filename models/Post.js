@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Post.associate = function (models) {
-        models.Post.belongsTo(models.Thread);
+        models.Post.belongsTo(models.Thread, { onDelete: 'cascade' });
         models.Post.belongsTo(models.User);
     };
 

@@ -11,7 +11,10 @@ import {
   createCategorySaga,
   createSubCategorySaga,
   createThreadSaga,
-  createPostSaga
+  createPostSaga,
+  editPostSaga,
+  deletePostSaga,
+  createRatingSaga
 } from "./forums";
 
 export function* watchForums() {
@@ -25,4 +28,7 @@ export function* watchForums() {
   yield takeEvery(actionTypes.CREATE_SUB_CATEGORY, createSubCategorySaga);
   yield takeEvery(actionTypes.CREATE_THREAD, createThreadSaga);
   yield takeEvery(actionTypes.CREATE_POST, createPostSaga);
+  yield takeEvery(actionTypes.EDIT_POST, editPostSaga);
+  yield takeEvery(actionTypes.DELETE_POST, deletePostSaga);
+  yield takeEvery(actionTypes.CREATE_RATING, createRatingSaga);
 }

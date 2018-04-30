@@ -150,14 +150,15 @@ export const createSubCategoryFailed = (error) => {
 
 // THREAD
 
-export const createThread = ( name, content, userId, subCategoryId, path ) => {
+export const createThread = ( name, content, userId, subCategoryId, path, history ) => {
     return {
         type: actionTypes.CREATE_THREAD,
         name: name,
         content: content,
         userId: userId,
         subCategoryId: subCategoryId,
-        path: path
+        path: path,
+        history: history
     };
 };
 
@@ -184,6 +185,58 @@ export const createPost = ( content, userId, threadId, path, history ) => {
 export const createPostFailed = (error) => {
     return {
         type: actionTypes.CREATE_POST_FAILED,
+        error: error
+    };
+};
+
+export const editPost = ( content, postId, path, history ) => {
+    return {
+        type: actionTypes.EDIT_POST,
+        content: content,
+        postId: postId,
+        path: path,
+        history: history
+    };
+};
+
+export const editPostFailed = (error) => {
+    return {
+        type: actionTypes.EDIT_POST_FAILED,
+        error: error
+    };
+};
+
+export const deletePost = (postId, path, history) => {
+    return {
+        type: actionTypes.DELETE_POST,
+        postId: postId,
+        path: path,
+        history: history
+    };
+};
+
+export const deletePostFailed = (error) => {
+    return {
+        type: actionTypes.DELETE_POST_FAILED,
+        error: error
+    };
+};
+
+// POST
+
+export const createRating = ( userId, ratingTypeId, postId, path ) => {
+    return {
+        type: actionTypes.CREATE_RATING,
+        userId: userId,
+        ratingTypeId: ratingTypeId,
+        postId: postId,
+        path: path
+    };
+};
+
+export const createRatingFailed = (error) => {
+    return {
+        type: actionTypes.CREATE_RATING_FAILED,
         error: error
     };
 };

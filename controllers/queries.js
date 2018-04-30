@@ -139,7 +139,8 @@ module.exports = {
                     p.id			as postId,
                     p.content		as postContent,
                     r.ratingName	as ratingName,
-                    r.ratingId		as ratingId,
+                    r.ratingTypeId	as ratingTypeId,
+                    r.ratingId      as ratingId,
                     r.userName		as ratingUserName,
                     r.userId		as ratingUserId,
                     u.id			as creatorId,
@@ -162,7 +163,8 @@ module.exports = {
                         GROUP BY p.UserId) as qc on qc.userId = u.id
                     left join (
                                 SELECT rt.name		as ratingName,
-                                    rt.id		as ratingId,
+                                    rt.id		as ratingTypeId,
+                                    r.id        as ratingId,
                                     u.name		as userName,
                                     u.id			as userId,
                                     r.PostId		as postId
@@ -171,7 +173,7 @@ module.exports = {
                                             join forum_test.users as u on u.id = r.UserId
                                 
                                 ) as r on r.postId = p.id
-            ORDER BY postPosition, ratingId;`
+            ORDER BY postPosition, ratingTypeId;`
         );
     }
 }

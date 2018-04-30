@@ -230,7 +230,7 @@ module.exports = app => {
                     let lastUpdated = row.maxDate || 'none';
                     let lastThreadName = row.ThreadName || 'none';
                     let lastUser = row.UserName || 'none';
-                    let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}` : 'none';
+                    let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
 
                     if (currentCatPosition !== row.categoryPosition) {
                         currentCatPosition = row.categoryPosition;
@@ -303,7 +303,7 @@ module.exports = app => {
                 let lastUpdated = row.maxDate || 'none';
                 let lastThreadName = row.ThreadName || 'none';
                 let lastUser = row.UserName || 'none';
-                let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}` : 'none';
+                let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
 
                 convertedResult.push(
                     {
@@ -358,70 +358,83 @@ module.exports = app => {
     app.get('/api/forums/thread/:id/:slug', (req, res) => {
 
         let threadId = Number(req.params.id);
-        models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
-            .then(result => {
+        models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})
+            .then(ratingTypes => {
+                models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
+                    .then(result => {
 
-                let convertedPosts = [];
-                let currentPostPosition = 0;
-                let currentRatingId = 0;
+                        let convertedPosts = [];
+                        let currentPostPosition = 0;
+                        let currentRatingTypeId = 0;
 
-                result.forEach((row) => {
+                        result.forEach((row) => {
 
-                    let rating;
-                    //if rating is not null, build it. If it exists, it will always have a user
-                    if (row.ratingName) {
-                        rating = {
-                            ratingName: row.ratingName,
-                            users: [
-                                {userName: row.ratingUserName}
-                            ]
-                        };
-                    }
+                            let rating;
+                            //if rating is not null, build it. If it exists, it will always have a user
+                            if (row.ratingName) {
+                                rating = {
+                                    ratingName: row.ratingName,
+                                    users: [
+                                        {userName: row.ratingUserName, ratingId: row.ratingId}
+                                    ]
+                                };
+                            }
 
-                    if(currentPostPosition !== row.postPosition) {
-                        // add another post, may or may not have a rating
-                        currentPostPosition = row.postPosition;
-                        convertedPosts.push(
-                            {
-                                id: row.postId,
-                                content: row.postContent,
-                                ratings: [],
-                                creator: {
-                                    name: row.creatorName,
-                                    pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                                    totalPosts: row.postCount,
-                                    signature: "to be implemented"
+                            if(currentPostPosition !== row.postPosition) {
+                                // add another post, may or may not have a rating
+                                currentPostPosition = row.postPosition;
+                                convertedPosts.push(
+                                    {
+                                        id: row.postId,
+                                        content: row.postContent,
+                                        ratings: [],
+                                        creator: {
+                                            name: row.creatorName,
+                                            pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                                            totalPosts: row.postCount,
+                                            signature: "to be implemented"
+                                        }
+                                    }
+                                );
+
+                                if (rating) {
+                                    // add a new rating, reset current rating placeholder
+                                    currentRatingTypeId = row.ratingTypeId;
+                                    convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                                }
+                            } else {
+                                //there has to be at least 1 rating to get to here, and user has to exist
+                                if (currentRatingTypeId !== row.ratingTypeId) {
+                                    currentRatingTypeId = row.ratingTypeId;
+                                    // another rating type
+                                    convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                                } else {
+                                    // same rating type, different user
+                                    const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
+                                    convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({userName: row.ratingUserName, ratingId: row.ratingId});
                                 }
                             }
-                        );
+                        });
 
-                        if (rating) {
-                            // add a new rating, reset current rating placeholder
-                            currentRatingId = row.ratingId;
-                            convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                        const ratings = ratingTypes.map((ratingType) => {
+                            return {
+                                id: ratingType.id,
+                                name: ratingType.name
+                            };
+                        })
+
+                        const finalResult = {
+                            name: result[0].threadName,
+                            id: result[0].threadId,
+                            slug: slugify(result[0].threadName).toLowerCase(),
+                            posts: convertedPosts,
+                            ratingTypes: ratings
                         }
-                    } else {
-                        //there has to be at least 1 rating to get to here, and user has to exist
-                        if (currentRatingId !== row.ratingId) {
-                            currentRatingId = row.ratingId;
-                            // another rating type
-                            convertedPosts[convertedPosts.length - 1].ratings.push(rating);
-                        } else {
-                            // same rating type, different user
-                            const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
-                            convertedPosts[convertedPosts.length - 1].ratings[lastRating].push({userName: row.ratingUserName});
-                        }
-                    }
-                });
 
-                const finalResult = {
-                    name: result[0].threadName,
-                    id: result[0].threadId,
-                    posts: convertedPosts
-                }
-
-                res.send(finalResult);
+                        res.send(finalResult);
+                    });
             });
+        
         
     })
 
@@ -463,7 +476,6 @@ module.exports = app => {
                 });
             })
             .catch((error) => {
-                console.log(error)
                 res.status(500).send({ error: 'Something failed!' })
             });
     })
@@ -473,7 +485,6 @@ module.exports = app => {
             .then(({newPost, user}) => {
                 controllers.getUserTotalPosts(req.body.userId)
                     .then(({user, count}) => {
-                        console.log(newPost)
                         res.send({
                             postId: newPost.id, 
                             content: newPost.content,
@@ -484,6 +495,31 @@ module.exports = app => {
                             userSignature: "to be implemented"
                         });
                     })
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/post/edit', (req, res) => {
+        controllers.editPost(req.body.content, req.body.postId)
+            .then((updatedPost) => {
+                res.send({
+                    postId: updatedPost.id
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/post/delete', (req, res) => {
+        controllers.deletePost(req.body.postId)
+            .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
+                console.log(response);
+                res.send({
+                    response: response
+                });
             })
             .catch((error) => {
                 res.status(500).send({ error: 'Something failed!' })
@@ -513,9 +549,11 @@ module.exports = app => {
     })
 
     app.post('/api/forums/rating/create', (req, res) => {
-        controllers.createRating(req.body.UserId, req.body.PostId, req.body.RatingTypeId)
-            .then(() => {
-                res.send({});
+        controllers.createRating(req.body.userId, req.body.postId, req.body.ratingTypeId)
+            .then((newRating) => {
+                res.send({
+                    ratingId: newRating
+                });
             })
             .catch((error) => {
                 res.status(500).send({ error: 'Something failed!' })

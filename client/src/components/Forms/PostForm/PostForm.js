@@ -2,70 +2,88 @@ import React, {Component} from 'react';
 import {reduxForm, Field, formValueSelector} from 'redux-form';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
-import fields from './fields';
-import FieldComponent from '../FieldComponent/FieldComponent';
-import Textarea from '../FieldComponent/Textarea';
+import PostEditor from '../FieldComponent/PostEditor';
 import * as actions from '../../../store/actions';
-import PostContent from '../../Forums/Thread/Post/PostContent/PostContent';
+import FieldComponent from '../FieldComponent/FieldComponent';
+
 
 class PostForm extends Component {
 
+    validate = (value) => {
+        let errors = null;
+    
+        if (!value) {
+            errors = 'You must provide a value';
+        }
+        
+        return errors;
+    }
+
     onFormSubmit = ({name, content}) => {
-        this.props.onCreatePost(content, 1, this.props.threadId, this.props.path, this.props.history); //fix userid eventually
+        if(this.props.postId){
+            this.props.onEditPost(content, this.props.postId, this.props.path, this.props.history);
+        }else if(this.props.subCategoryId){
+            this.props.onCreateThread(name, content, 1, this.props.subCategoryId, this.props.path, this.props.history); //fix userid eventually
+        }else{
+            this.props.onCreatePost(content, 1, this.props.threadId, this.props.path, this.props.history); //fix userid eventually
+        }
+        this.props.destroy();
         this.props.closeForm();
     }
 
-    renderFields = () => {
-        return fields.map( ({label, name, type})  => {
-            return (
-                <Field
-                    key={name}
-                    component={type === 'textarea' ? Textarea : FieldComponent}
-                    type="text"
-                    label={label}
-                    name={name}
-                />
-            );
-        });
+    onFormCancel = () => {
+        this.props.destroy();
+        this.props.closeForm();
     }
 
     render() {
+
+        let editorDescription = 'Replying to thread \'' + this.props.threadName + '\'';
+        let subCategoryDescription = null;
+        if(this.props.postId) {
+            editorDescription = 'Editing post #' + this.props.postId + ' in thread \'' + this.props.threadName + '\'';
+        }
+        if(this.props.subCategoryId) {
+            editorDescription = (
+                <Field
+                    key='name'
+                    component={FieldComponent}
+                    type='text'
+                    name='name'
+                    validate={this.validate}/>
+            );
+            subCategoryDescription = (
+                <div>
+                    {"Creating new thread in: '" + this.props.subCategoryName + "'"}
+                </div>
+            );
+        }
+
         return(
-            <div style={{position: 'fixed', bottom: '10px', left: '10px', right: '10px'}}>
-                <form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
-                    <div style={{display: 'flex', height: '20rem'}}>
-                        <div style={{flex: '0 0 50%'}}>
-                            <Field
-                                key='content'
-                                component={Textarea}
-                                type='text'
-                                name='content'
-                                change={this.props.change}
-                            />
-                        </div>
-                        <div style={{flex: '0 0 50%'}}>
-                            <PostContent content={this.props.contentValue} style={{fontSize: '16px', height: '100%', backgroundColor: '#EEEEEE', marginBottom: '2rem'}} />
-                        </div>
+                <form onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+                    <div style={{display: 'flex', flexShrink: '0', padding: '1rem', fontSize: '2rem', justifyContent: 'space-between'}}>
+                        <div>{editorDescription}</div>
+                        {subCategoryDescription}
                     </div>
-                    <button type="submit">SUBMIT</button>
-                    <button onClick={this.props.closeForm}>CANCEL</button>
+                    <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1'}}>
+                        <Field
+                            key='content'
+                            component={PostEditor}
+                            type='text'
+                            name='content'
+                            change={this.props.change}
+                            contentValue={this.props.contentValue}
+                            validate={this.validate}/>
+                        
+                    </div>
+                    <div>
+                        <button type="submit">SUBMIT</button>
+                        <button onClick={this.onFormCancel}>CANCEL</button>
+                    </div>
                 </form>
-            </div>
         );
     }
 };
-
-const validate = (values) => {
-    const errors = {};
-    
-    fields.forEach(({ name }) => {
-        if (!values[name]) {
-        errors[name] = 'You must provide a value';
-        }
-    });
-    
-    return errors;
-}
 
 const selector = formValueSelector('postForm');
 
@@ -78,13 +96,15 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreatePost: (content, userId, threadId, path, history) => dispatch(actions.createPost(content, userId, threadId, path, history))
+        onCreatePost: (content, userId, threadId, path, history) => dispatch(actions.createPost(content, userId, threadId, path, history)),
+        onEditPost: (content, postId, path, history) => dispatch(actions.editPost(content, postId, path, history)),
+        onCreateThread: (name, content, userId, subCategoryId, path, history) => dispatch(actions.createThread(name, content, userId, subCategoryId, path, history))
     }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(
     reduxForm({
-        validate,
+        destroyOnUnmount: false,
         form: 'postForm'
     })(withRouter(PostForm))
 );

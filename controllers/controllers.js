@@ -5,7 +5,7 @@ module.exports = {
 
         createCategory(name) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
-                return models.Category.findAndCountAll({}, {transaction: t})
+                return models.Category.findAndCountAll({transaction: t})
                     .then(function ({count}) {
                         return models.Category.create({
                             name,
@@ -18,7 +18,7 @@ module.exports = {
         createSubCategory(name, description, CategoryId, SubCategoryId) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 if (CategoryId) {
-                    return models.SubCategory.findAndCountAll({where: {CategoryId}}, {transaction: t})
+                    return models.SubCategory.findAndCountAll({where: {CategoryId}, transaction: t})
                         .then(function ({count}) {
                             return models.SubCategory.create({
                                 name,
@@ -28,9 +28,9 @@ module.exports = {
                             }, {transaction: t}); 
                         });
                 } else {
-                    return models.SubCategory.findAndCountAll({where: {SubCategoryId}}, {transaction: t})
+                    return models.SubCategory.findAndCountAll({where: {SubCategoryId}, transaction: t})
                         .then(function ({count}) {
-                            return models.SubCategory.findOne({where: {id: SubCategoryId}}, {transaction: t})
+                            return models.SubCategory.findOne({where: {id: SubCategoryId}, transaction: t})
                                 .then(function (result) {
                                     let ancestors;
                                     if (result.ancestors) {
@@ -67,7 +67,7 @@ module.exports = {
                             UserId
                         }, {transaction: t})
                             .then(function (newPost) {
-                                return models.User.findOne({where: {id: UserId}}, {transaction: t})
+                                return models.User.findOne({where: {id: UserId}, transaction: t})
                                     .then(function(user) {
                                         return [newThread, newPost, user];
                                     });
@@ -78,9 +78,9 @@ module.exports = {
 
         createPost(content, UserId, ThreadId) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
-                return models.User.findOne({where: {id: UserId}}, {transaction: t})
+                return models.User.findOne({where: {id: UserId}, transaction: t})
                     .then(function(user) {
-                        return models.Post.findAndCountAll({where: {ThreadId}}, {transaction: t})
+                        return models.Post.findAndCountAll({where: {ThreadId}, transaction: t})
                             .then(function ({count}) {
                                 return models.Post.create({
                                     content,
@@ -94,6 +94,39 @@ module.exports = {
                             });
                     });
                 
+            });
+        },
+
+        editPost(updatedContent, postId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.Post.findOne({where: {id: postId}, transaction: t})
+                    .then(function(post) {
+                        return post.updateAttributes({content: updatedContent}, {transaction: t});
+                    });
+                
+            });
+        },
+
+        deletePost(postId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.Post.findOne({where: {id: postId}, transaction: t})
+                    .then(function(post) {
+                        
+                        if(post.position === 1){
+                            return models.Thread.destroy({where: {id: post.ThreadId}, transaction: t})
+                                .then((result) => {
+                                    return 1;
+                                });
+                        } else {
+                            return models.sequelize.query("UPDATE Posts SET position = position - 1 WHERE position > ? AND ThreadId = ?;" , { replacements: [post.position, post.ThreadId], type: models.Sequelize.QueryTypes.UPDATE, transaction: t})
+                                .then(() => {
+                                    return models.Post.destroy({where: {id: postId}, transaction: t})
+                                        .then((result) => {
+                                            return 2;
+                                        });
+                                })
+                        }
+                    });
             });
         },
 
@@ -125,9 +158,9 @@ module.exports = {
 
         getUserTotalPosts(UserId) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
-                return models.Post.findAndCountAll({where: {UserId}}, {transaction: t})
+                return models.Post.findAndCountAll({where: {UserId}, transaction: t})
                     .then(function ({count}) {
-                        return models.User.findOne({where: {id: UserId}}, {transaction: t})
+                        return models.User.findOne({where: {id: UserId}, transaction: t})
                             .then(function (user) {
                                 return {user, count};
                             });

@@ -22,9 +22,13 @@ const Post = (props) => {
                     <div className={classes.Content}>
                         <PostContent content={props.content} />
                     </div>
-                    <Ratings ratings={props.ratings} />
-                    <button onClick={() => {props.handleEdit(props.id)}}>EDIT</button>
-                    <button onClick={() => {props.handleDelete(props.id)}}>DELETE</button>
+                    <Ratings ratings={props.ratings} ratingTypes={props.ratingTypes} postId={props.id} path={"/thread/" + props.threadData.id + "/" + props.threadData.slug}/>
+                    <div style={{display: 'flex'}}>
+                        <button onClick={() => {props.handleEdit(props.id, props.content, props.threadData.id, props.threadData.slug, props.threadData.name)}}>EDIT</button>
+                        <button onClick={() => {props.handleDelete(props.id, props.threadData.id, props.threadData.slug)}}>DELETE</button>
+                        <button onClick={() => {props.handleQuote(props.user.name, props.id, props.threadData.id, props.threadData.slug, props.threadData.name, props.content)}}>QUOTE</button>
+                        <button onClick={() => {props.handleReply(props.user.name, props.id, props.threadData.id, props.threadData.slug, props.threadData.name, props.content)}}>REPLY</button>
+                    </div>
                 </div>
         </div>
     );

@@ -241,6 +241,30 @@ const createPostFailed = (state, action) => {
 //     return updatedState;
 // };
 
+const editPostFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const deletePostFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const createRatingFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
 const reducer = ( state = initialState, action ) => {
     switch ( action.type ) {
 
@@ -259,6 +283,10 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.CREATE_SUB_CATEGORY_FAILED: return createSubCategoryFailed(state, action);
         case actionTypes.CREATE_THREAD_FAILED: return createThreadFailed(state, action);
         case actionTypes.CREATE_POST_FAILED: return createPostFailed(state, action);
+        case actionTypes.EDIT_POST_FAILED: return editPostFailed(state, action);
+        case actionTypes.DELETE_POST_FAILED: return deletePostFailed(state, action);
+
+        case actionTypes.CREATE_RATING_FAILED: return createRatingFailed(state, action);
 
         default: return state;
     }

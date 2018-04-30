@@ -32,5 +32,12 @@ export {
 
     createPost,
     createPostFailed,
+    editPost,
+    editPostFailed,
+    deletePost,
+    deletePostFailed,
+
+    createRating,
+    createRatingFailed,
     
 } from './forums';

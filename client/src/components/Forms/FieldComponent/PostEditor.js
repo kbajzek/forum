@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 
+import PostContent from '../../Forums/Thread/Post/PostContent/PostContent';
+
 class FieldComponent extends Component {
 
     constructor(props) {
         super(props);
         // create a ref to store the textInput DOM element
         this.textarea = React.createRef();
+        this.postPreview = React.createRef();
     }
 
     // handleKeyDown = (e) => {
@@ -31,6 +34,10 @@ class FieldComponent extends Component {
     
     //     }
     // };
+
+    handleScroll = (e) => {
+        this.postPreview.current.scrollTop = (this.postPreview.current.scrollHeight-this.postPreview.current.clientHeight) * (e.target.scrollTop/(e.target.scrollHeight-e.target.clientHeight));
+    }
 
     handleBold = (e) => {
         e.preventDefault();
@@ -456,31 +463,47 @@ class FieldComponent extends Component {
     };
 
     render() {
-        const { input, label, meta: { error, touched } } = this.props;
+        //const { input, label, meta: { error, touched } } = this.props;
+        const { input } = this.props;
         return (
-            <div style={{ height: '100%'}}>
-                <button onClick={this.handleBold}>B</button>
-                <button onClick={this.handleItalicize}>I</button>
-                <button onClick={this.handleUnderline}>U</button>
-                <button onClick={this.handleStrikethrough}>S</button>
-                <button onClick={this.handleLeft}>Left</button>
-                <button onClick={this.handleRight}>Right</button>
-                <button onClick={this.handleCenter}>Center</button>
-                <button onClick={this.handleJustify}>Justify</button>
-                <button onClick={this.handleIndent}>Indent</button>
-                <button onClick={this.handleColor}>Color</button>
-                <button onClick={this.handleSize}>Size</button>
-                <button onClick={this.handleUrl}>Link</button>
-                <button onClick={this.handleImage}>Image</button>
-                <button onClick={this.handleYoutube}>Youtube</button>
-                <button onClick={this.handleCode}>Code</button>
-                <button onClick={this.handleOrderedList}>Ordered List</button>
-                <button onClick={this.handleUnorderedList}>Unordered List</button>
-                <label>{label}</label>
-                <textarea ref={this.textarea} onKeyDown={this.handleKeyDown} {...input} style={{ height: '125px', marginBottom: '5px', width: '100%'}} />
-                <div style={{ marginBottom: '5px', color: 'red' }}>
-                    {touched && error}
+            <div style={{ flexGrow: '1', display: 'flex', flexDirection: 'column'}}>
+                <div>
+                    <button onClick={this.handleBold}>B</button>
+                    <button onClick={this.handleItalicize}>I</button>
+                    <button onClick={this.handleUnderline}>U</button>
+                    <button onClick={this.handleStrikethrough}>S</button>
+                    <button onClick={this.handleLeft}>Left</button>
+                    <button onClick={this.handleRight}>Right</button>
+                    <button onClick={this.handleCenter}>Center</button>
+                    <button onClick={this.handleJustify}>Justify</button>
+                    <button onClick={this.handleIndent}>Indent</button>
+                    <button onClick={this.handleColor}>Color</button>
+                    <button onClick={this.handleSize}>Size</button>
+                    <button onClick={this.handleUrl}>Link</button>
+                    <button onClick={this.handleImage}>Image</button>
+                    <button onClick={this.handleYoutube}>Youtube</button>
+                    <button onClick={this.handleCode}>Code</button>
+                    <button onClick={this.handleOrderedList}>Ordered List</button>
+                    <button onClick={this.handleUnorderedList}>Unordered List</button>
                 </div>
+                <div style={{'display': 'flex', flexGrow: '1'}}>
+                    <div style={{flex: '0 0 50%', padding: '.5rem', 'boxSizing': 'border-box'}}>
+                        <textarea ref={this.textarea} onScroll={this.handleScroll} {...input} 
+                            style={{ fontFamily:'sans-serif', height: '100%', width: '100%', margin: '0', padding: '.5rem', resize: 'none', 'boxSizing': 'border-box', fontSize: '16px', backgroundColor: '#aaaaaa'}} />
+                    </div>
+                    <div style={{flex: '0 0 50%', padding: '.5rem', 'boxSizing': 'border-box', minWidth: '0'}}>
+                        <div ref={this.postPreview} style={{fontSize: '16px', height: '100%', width: '100%', backgroundColor: '#aaaaaa', overflow: 'auto'}}>
+                            <PostContent content={this.props.contentValue}/>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <div style={{ flexShrink: '0', color: 'red', fontSize: '16px' }}>
+                    {this.props.meta.touched && this.props.meta.error}
+                </div>
+
+                
             </div>
         );
     }

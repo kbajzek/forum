@@ -74,7 +74,7 @@ export function* refreshThreadDataSaga(action) {
 
 export function* createCategorySaga(action) {
   try {
-    const response = yield axios.post(
+    yield axios.post(
       "/api/forums/category/create", {
         name: action.name
       }
@@ -87,7 +87,7 @@ export function* createCategorySaga(action) {
 
 export function* createSubCategorySaga(action) {
   try {
-    const response = yield axios.post(
+    yield axios.post(
       "/api/forums/subcategory/create", {
         name: action.name,
         description: action.description,
@@ -116,6 +116,7 @@ export function* createThreadSaga(action) {
       }
     );
     yield put(actions.refreshSubCategoryPageData(action.path));
+    yield action.history.push("/forums" + response.data.threadPath);
   } catch (error) {
     yield put(actions.createThreadFailed(error));
   }
@@ -138,3 +139,52 @@ export function* createPostSaga(action) {
   }
 }
 
+export function* editPostSaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/post/edit", {
+        content: action.content,
+        postId: action.postId,
+        path: action.path
+      }
+    );
+    yield put(actions.refreshThreadData(action.path));
+    yield action.history.push("/forums" + action.path + "#" + response.data.postId);
+  } catch (error) {
+    yield put(actions.editPostFailed(error));
+  }
+}
+
+export function* deletePostSaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/post/delete", {
+        postId: action.postId
+      }
+    );
+    if (response.data.response === 1) {
+      yield action.history.push("/forums");
+      yield put(actions.setThreadData(null));
+    } else {
+      yield put(actions.refreshThreadData(action.path));
+    }
+  } catch (error) {
+    yield put(actions.deletePostFailed(error));
+  }
+}
+
+export function* createRatingSaga(action) {
+  try {
+    yield axios.post(
+      "/api/forums/rating/create", {
+        userId: action.userId,
+        postId: action.postId,
+        ratingTypeId: action.ratingTypeId,
+        path: action.path
+      }
+    );
+    yield put(actions.refreshThreadData(action.path));
+  } catch (error) {
+    yield put(actions.createRatingFailed(error));
+  }
+}

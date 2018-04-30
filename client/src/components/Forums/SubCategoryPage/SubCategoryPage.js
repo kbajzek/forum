@@ -8,15 +8,13 @@ import SubCategory from './../Categories/Category/SubCategory/SubCategory';
 import ThreadPreview from '../ThreadPreview/ThreadPreview';
 import Spinner from '../../UI/Spinner/Spinner';
 import SubCategoryForm from '../../Forms/SubCategoryForm/SubCategoryForm';
-import ThreadForm from '../../Forms/ThreadForm/ThreadForm';
 
 import classes from './SubCategoryPage.module.css';
 
 class SubCategoryPage extends Component {
 
     state = {
-        showSubCatForm: false,
-        showThreadForm: false
+        showSubCatForm: false
     }
 
     toggleSubCategoryCreator = () => {
@@ -29,14 +27,8 @@ class SubCategoryPage extends Component {
         this.setState({showSubCatForm: false});
     }
 
-    toggleThreadCreator = () => {
-        this.setState((prevState) => {
-            return {showThreadForm: !prevState.showThreadForm}
-         });
-    }
-
-    closeThreadCreator = () => {
-        this.setState({showThreadForm: false});
+    handleThreadCreator = () => {
+        this.props.handleThreadCreate(this.props.slug, this.props.id, this.props.subCategoryPageData.name);
     }
 
     componentDidMount() {
@@ -46,7 +38,6 @@ class SubCategoryPage extends Component {
     render() {
 
         let subCatForm;
-        let threadForm;
         
         let subcategorypage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
 
@@ -54,11 +45,6 @@ class SubCategoryPage extends Component {
 
             if(this.state.showSubCatForm) {
                 subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} subCategoryId={this.props.subCategoryPageData.id} path={"/" + this.props.id + "/" + this.props.slug} />
-            }
-    
-            
-            if(this.state.showThreadForm) {
-                threadForm = <ThreadForm closeForm={this.closeThreadCreator} subCategoryId={this.props.subCategoryPageData.id} path={"/" + this.props.id + "/" + this.props.slug} />
             }
 
             const subcat_markup = this.props.subCategoryPageData.subCategories.map(({id, name, description, totalPosts, lastActiveThread, path}) => {
@@ -91,8 +77,7 @@ class SubCategoryPage extends Component {
                 <div>
                     <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button>
                     {subCatForm}
-                    <button onClick={this.toggleThreadCreator}>CREATE THREAD</button>
-                    {threadForm}
+                    <button onClick={this.handleThreadCreator}>CREATE THREAD</button>
                     <div className={classes.Header}>{this.props.subCategoryPageData.name}</div>
                     <div className={classes.SubCat}>{subcat_markup}</div>
                     <div>{thread_markup}</div>

@@ -5,7 +5,7 @@ const FieldComponent = ({ input, label, meta: { error, touched } }) => {
         <div>
             <label>{label}</label>
             <input {...input} style={{ marginBottom: '5px' }} />
-            <div style={{ marginBottom: '20px', color: 'red' }}>
+            <div style={{ color: 'red', fontSize: '16px' }}>
                 {touched && error}
             </div>
         </div>

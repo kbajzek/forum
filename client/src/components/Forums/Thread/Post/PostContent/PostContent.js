@@ -11,10 +11,8 @@ const parse = (text) => {
     let tempTagNameStack = [];
     let tempPositionStack = [];
 
-    let finalStructure = {};
-
     // reply, spoiler
-    const tags = ['b','i','u','s','left','right','center','justify', 'indent', 'size', 'color', 'url', 'image', 'youtube', 'code', 'list', 'li'];
+    const tags = ['b','i','u','s','left','right','center','justify', 'indent', 'quote', 'size', 'color', 'url', 'image', 'youtube', 'code', 'list', 'li'];
     const dontParse = ['url', 'image', 'youtube', 'code'];
 
     const tag = new RegExp("\\[([/])?(" + tags.join("|") + ")([=][^\\]]*?)?\\]", "gi");
@@ -45,14 +43,14 @@ const parse = (text) => {
 
     // if arranging lists with just \n in between the tags, remove it
     //have to do it twice because: (regex.lastIndex = *) before: *[/list]/n[list]/n[li] after: [/list][list]*/n[li], so won't get all of them first time round
-    text = text.replace(/\[([\/])?(li|list)([=][^\]]*?)?\]\n\[([\/])?(li|list)([=][^\]]*?)?\]/g, function(match, tagClose1, tagName1, tagParams1, tagClose2, tagName2, tagParams2){
+    text = text.replace(/\[([/])?(li|list)([=][^\]]*?)?\]\n\[([/])?(li|list)([=][^\]]*?)?\]/g, function(match, tagClose1, tagName1, tagParams1, tagClose2, tagName2, tagParams2){
         const close1 = tagClose1 || '';
         const close2 = tagClose2 || '';
         const params1 = tagParams1 || '';
         const params2 = tagParams2 || '';
         return "[" + close1 + tagName1 + params1 + "][" + close2 + tagName2 + params2 + "]";
     });
-    text = text.replace(/\[([\/])?(li|list)([=][^\]]*?)?\]\n\[([\/])?(li|list)([=][^\]]*?)?\]/g, function(match, tagClose1, tagName1, tagParams1, tagClose2, tagName2, tagParams2){
+    text = text.replace(/\[([/])?(li|list)([=][^\]]*?)?\]\n\[([/])?(li|list)([=][^\]]*?)?\]/g, function(match, tagClose1, tagName1, tagParams1, tagClose2, tagName2, tagParams2){
         const close1 = tagClose1 || '';
         const close2 = tagClose2 || '';
         const params1 = tagParams1 || '';
@@ -61,6 +59,9 @@ const parse = (text) => {
     });
     text = text.replace(/\[\/list\]\n/g, function(match){
         return '[/list]';
+    });
+    text = text.replace(/\[\/quote\]\n/g, function(match){
+        return '[/quote]';
     });
 
     const findTag = (tag) => {
@@ -111,15 +112,15 @@ const parse = (text) => {
                 let i = tagStack.length - pos;
                 while(i !== 0) { // if not at end of stack, remove the wrong ones
                     const lastTag = tagStack.pop();
-                    const lastTagName = tagNameStack.pop();
+                    tagNameStack.pop();
                     const lastPosition = positionStack.pop();
                     const newString = "&bad1;" + lastTag.substr(1, lastTag.length - 2) + "&bad2;";
                     text = text.substr(0, lastPosition - lastTag.length) + newString + text.substr(lastPosition);
                     i--;
                 }
-                const lastTag = tagStack.pop();
-                const lastTagName = tagNameStack.pop();
-                const lastPosition = positionStack.pop();
+                tagStack.pop();
+                tagNameStack.pop();
+                positionStack.pop();
             }
 
         } else { // is an opening tag
@@ -145,7 +146,7 @@ const parse = (text) => {
     let i = tagStack.length;
     while(i !== 0) { // if not at end of stack, remove the wrong ones
         const lastTag = tagStack.pop();
-        const lastTagName = tagNameStack.pop();
+        tagNameStack.pop();
         const lastPosition = positionStack.pop();
         const newString = "&bad1;" + lastTag.substr(1, lastTag.length - 2) + "&bad2;";
         text = text.substr(0, lastPosition - lastTag.length) + newString + text.substr(lastPosition);
@@ -264,6 +265,15 @@ class PostContent extends Component {
             }else if(content.tag === 'indent') {
                 return (
                     <div key={key} style={{'display': 'block', 'paddingLeft': '4rem'}}>{content.content.map(child => {return this.addNestedContent(child, i++);})}</div>
+                );
+            }else if(content.tag === 'quote') {
+                return (
+                    <span key={key} style={{'display': 'flex', padding: '1rem'}}>
+                        <div style={{borderLeft: '4px solid blue'}}></div>
+                        <div style={{padding: '1rem'}}>
+                            {content.content.map(child => {return this.addNestedContent(child, i++);})}
+                        </div>
+                    </span>
                 );
             }else if(content.tag === 'list') {
                 let type = 1;
@@ -431,7 +441,7 @@ class PostContent extends Component {
 
                 let size = 16;
                 if(content.attribute && content.attribute.match(/^[0-9]+$/)) {
-                    size = Math.min(72, Math.max(8, parseInt(content.attribute)));
+                    size = Math.min(72, Math.max(8, parseInt(content.attribute, 10)));
                 }
 
                 return (
@@ -454,7 +464,11 @@ class PostContent extends Component {
                     url = content.content[0] || '';
                 }
                 if(!url.match(/^http[s]?:\/\//i)){
-                    url = '//' + (url || '');
+                    if(!url.match(/^\/forums/i)){
+                        url = '//' + (url || '');
+                    } else {
+                        url = url || '';
+                    }
                 }
 
                 return (
@@ -475,19 +489,21 @@ class PostContent extends Component {
                 let source = content.content[0] || '';
                 let regex = new RegExp("youtu(be\\.com/watch\\?v=|\\.be/)([a-zA-Z0-9\\-_]+)", "gi");
                 let regex2 = new RegExp("[a-zA-Z0-9\\-_]+", "gi");
-                let match;
+                let match1 = regex.exec(source);
+                let match2 = regex2.exec(source);
                 let tag = '';
-                if(match = regex.exec(source)){
-                    tag = match[2];
-                }else if(match = regex2.exec(source)){
-                    tag = match[0];
+                if(match1){
+                    tag = match1[2];
+                }else if(match2){
+                    tag = match2[0];
                 }
                 // if(!content.attribute || !content.attribute.match(/^http[s]?:\/\//i)) {
                 //     url = '//' + (content.attribute || '');
                 // }
 
                 return (
-                    <iframe key={key} width={'560'} height={'315'} frameBorder={'0'} src={`//www.youtube.com/embed/${tag}/wmode=opaque`} allowFullScreen style={{display: 'flex'}}></iframe>
+                    // eslint-disable-next-line
+                    <iframe key={key} width={'560'} height={'315'} frameBorder={'0'} src={`//www.youtube.com/embed/${tag}/wmode=opaque`} allowFullScreen style={{display: 'flex'}}></iframe> 
                 );
             }else if(content.tag === 'code') {
 
@@ -514,20 +530,9 @@ class PostContent extends Component {
 
     render() {
 
-        let customStyle = {fontSize: '16px'};
-        if(this.props.style) {
-            customStyle = this.props.style;
-        }
-
-        const content = this.props.content || '';
-        // console.log(content)
-        //console.log(parse(this.props.content || ''))
-
         return (
-            <div style={customStyle}>
-                <div style={{'padding': '10px', 'whiteSpace': 'pre-wrap'}}>
-                    {this.addNestedContent(parse(this.props.content || ''))}
-                </div>
+            <div style={{'padding': '.5rem', 'whiteSpace': 'pre-wrap', fontSize: '16px'}}>
+                {this.addNestedContent(parse(this.props.content || ''))}
             </div>
         );
 
