@@ -129,7 +129,7 @@ module.exports = {
                     join forum_test.posts			as p2	on p2.ThreadId = t.id and p2.position = 1
                     join forum_test.users			as u2	on p2.UserId = u.id
             GROUP BY threadId
-            ORDER BY threadId;`
+            ORDER BY maxDate DESC;`
         );
     },
     getThreadQuery(threadqueryid) {
