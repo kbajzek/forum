@@ -1,8 +1,11 @@
 const express = require('express');
 const session = require('express-session');
+const redis = require("redis").createClient();
+const RedisStore = require('connect-redis')(session);
 const passport = require('passport');
 const util = require('util');
 const SteamStrategy = require('passport-steam').Strategy;
+
 const bodyParser = require('body-parser');
 const routes = require('./routes/forumRoutes');
 const models = require('./models');
@@ -50,8 +53,14 @@ const app = express();
 
 app.use(session({
     secret: 'your secret',
-    resave: true,
-    saveUninitialized: true}));
+    resave: false,
+    saveUninitialized: false,
+    store:new RedisStore({
+        host: 'localhost',
+        port: 6379,
+        client: redis
+    })
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -73,19 +82,24 @@ app.get('/logout', function(req, res){
 app.get('/auth/steam',
     passport.authenticate('steam', { failureRedirect: '/' }),
     function(req, res) {
-    res.redirect('/');
-});
+        // The request will be redirected to Steam for authentication, so
+        // this function will not be called.
+        res.redirect('/');
+    }
+);
 
 app.get('/auth/steam/return',
-  passport.authenticate('steam', { failureRedirect: '/' }),
-  function(req, res) {
-    console.log("In steam returning function");
-    res.redirect('/');
-  });
+    passport.authenticate('steam', { failureRedirect: '/' }),
+    function(req, res) {
+        console.log("Authentication was successful");
+        console.log("In steam returning function");
+        res.redirect('/');
+    }
+);
 
-  app.get('/account', ensureAuthenticated, function(req, res){
-    res.send({ user: req.user });
-  });
+app.get('/account', ensureAuthenticated, function(req, res){
+        res.send({ user: req.user });
+});
 
 if (process.env.NODE_ENV === 'production') {
     // Express will serve up production assets
