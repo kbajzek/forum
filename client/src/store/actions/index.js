@@ -41,3 +41,9 @@ export {
     createRatingFailed,
     
 } from './forums';
+export {
+
+    fetchUserInit,
+    fetchUserSuccess
+    
+} from './auth';

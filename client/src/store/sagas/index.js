@@ -14,8 +14,11 @@ import {
   createPostSaga,
   editPostSaga,
   deletePostSaga,
-  createRatingSaga
+  createRatingSaga,
 } from "./forums";
+import {
+  fetchUserSaga,
+} from "./auth";
 
 export function* watchForums() {
   yield takeEvery(actionTypes.INIT_CATEGORY_DATA, initCategoryDataSaga);
@@ -31,4 +34,8 @@ export function* watchForums() {
   yield takeEvery(actionTypes.EDIT_POST, editPostSaga);
   yield takeEvery(actionTypes.DELETE_POST, deletePostSaga);
   yield takeEvery(actionTypes.CREATE_RATING, createRatingSaga);
+}
+
+export function* watchAuth() {
+  yield takeEvery(actionTypes.FETCH_USER_INIT, fetchUserSaga);
 }

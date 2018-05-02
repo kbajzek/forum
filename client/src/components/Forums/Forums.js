@@ -25,6 +25,10 @@ class Forums extends Component {
         postEditorSubCategoryName: ''
     }
 
+    componentDidMount() {
+        this.props.fetchUser();
+    }
+
     handlePostEdit = (postId, postContent, threadId, slug, threadName) => {
         //this.setState({showPostEditor: true, postEditorThread: threadId, postEditorSlug: slug, postEditorActive: true, postEditorThreadName: threadName});
         this.props.changePostEditor(postContent);
@@ -240,7 +244,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = (dispatch) => {
 	return {
         changePostEditor : (value) => dispatch(change('postForm', 'content', value)),
-        onDeletePost: (postId, path, history) => dispatch(actions.deletePost(postId, path, history))
+        onDeletePost: (postId, path, history) => dispatch(actions.deletePost(postId, path, history)),
+        fetchUser: () => dispatch(actions.fetchUserInit())
 	}
 }
 

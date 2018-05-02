@@ -7,7 +7,8 @@ const util = require('util');
 const SteamStrategy = require('passport-steam').Strategy;
 
 const bodyParser = require('body-parser');
-const routes = require('./routes/forumRoutes');
+const forumRoutes = require('./routes/forumRoutes');
+const authRoutes = require('./routes/authRoutes');
 const models = require('./models');
 
 passport.serializeUser(function(user, done) {
@@ -65,41 +66,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 app.use(bodyParser.json());
 
-routes(app);
 
-app.get('/', function(req, res){
-    res.send({message: 'hi'});
-  });
 
-app.get('/logout', function(req, res){
-    req.logout();
-    res.redirect('/');
-  });
-
-app.get('/auth/steam',
-    passport.authenticate('steam', { failureRedirect: '/' }),
-    function(req, res) {
-        // The request will be redirected to Steam for authentication, so
-        // this function will not be called.
-        res.redirect('/');
-    }
-);
-
-app.get('/auth/steam/return',
-    passport.authenticate('steam', { failureRedirect: '/' }),
-    function(req, res) {
-        console.log("Authentication was successful");
-        console.log("In steam returning function");
-        res.redirect('/');
-    }
-);
-
-app.get('/account', ensureAuthenticated, function(req, res){
-        res.send({ user: req.user });
-});
+authRoutes(app);
+forumRoutes(app);
 
 if (process.env.NODE_ENV === 'production') {
     // Express will serve up production assets
@@ -117,7 +89,9 @@ if (process.env.NODE_ENV === 'production') {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT);
 
-
+// app.get('/account', ensureAuthenticated, function(req, res){
+//     res.send({ user: req.user });
+// });
 
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) { return next(); }

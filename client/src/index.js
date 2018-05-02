@@ -8,9 +8,10 @@ import createSagaMiddleware from "redux-saga";
 import "./index.css";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
+import authReducer from "./store/reducers/auth";
 import forumReducer from "./store/reducers/forums";
-import { watchForums } from "./store/sagas";
-import { reducer as formReducer } from 'redux-form'
+import { watchForums, watchAuth } from "./store/sagas";
+import { reducer as formReducer } from 'redux-form';
 
 const composeEnhancers =
 (process.env.NODE_ENV === "development"
@@ -21,7 +22,8 @@ const composeEnhancers =
 
 const rootReducer = combineReducers({
   forums: forumReducer,
-  form: formReducer
+  form: formReducer,
+  auth: authReducer
 });
 
 const sagaMiddleware = createSagaMiddleware();
@@ -31,6 +33,7 @@ const store = createStore(
   composeEnhancers(applyMiddleware(sagaMiddleware))
 );
 
+sagaMiddleware.run(watchAuth);
 sagaMiddleware.run(watchForums);
 
 const app = (

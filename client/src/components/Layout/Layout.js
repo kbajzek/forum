@@ -28,6 +28,10 @@ class Layout extends Component {
         } );
     }
 
+    handleLogin = () => {
+
+    }
+
     render () {
     
         const navItems = (
@@ -53,6 +57,7 @@ class Layout extends Component {
         return (
             <Auxiliary>
                 <Navbar
+                    auth={this.props.auth}
                     drawerToggleClicked={this.sideDrawerToggleHandler}>
                     {navItems}
                 </Navbar>
@@ -69,10 +74,16 @@ class Layout extends Component {
     }
 }
 
+const mapStateToProps = state => {
+    return { 
+        auth: state.auth
+    };
+}
+
 const mapDispatchToProps = dispatch => {
     return {
         onInitCategoryData: () => dispatch(actions.initCategoryData())
     }
 }
 
-export default connect(null, mapDispatchToProps)(Layout);
+export default connect(mapStateToProps, mapDispatchToProps)(Layout);
