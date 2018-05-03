@@ -18,6 +18,7 @@ import {
 } from "./forums";
 import {
   fetchUserSaga,
+  logoutUserSaga,
 } from "./auth";
 
 export function* watchForums() {
@@ -38,4 +39,5 @@ export function* watchForums() {
 
 export function* watchAuth() {
   yield takeEvery(actionTypes.FETCH_USER_INIT, fetchUserSaga);
+  yield takeEvery(actionTypes.LOGOUT_USER_INIT, logoutUserSaga);
 }

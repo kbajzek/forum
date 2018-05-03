@@ -18,12 +18,12 @@ module.exports = app => {
     );
 
     app.get('/api/fetch_user', (req, res) => {
-        res.send(req.session.passport.user);
+        res.send(req.session && req.session.passport && req.session.passport.user);
     });
 
     app.get('/api/logout', (req, res) => {
         req.logout();
-        res.redirect('/');
+        res.send({logout: 1});
     })
 
 }

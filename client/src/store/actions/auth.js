@@ -12,3 +12,15 @@ export const fetchUserSuccess = (data) => {
         data: data
     };
 };
+
+export const logoutUserInit = () => {
+    return {
+        type: actionTypes.LOGOUT_USER_INIT
+    };
+};
+
+export const logoutUserSuccess = () => {
+    return {
+        type: actionTypes.LOGOUT_USER_SUCCESS
+    };
+};

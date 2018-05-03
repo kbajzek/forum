@@ -12,3 +12,15 @@ export function* fetchUserSaga(action) {
   } catch (error) {
   }
 }
+
+export function* logoutUserSaga(action) {
+  try {
+    const response = yield axios.get(
+      "/api/logout"
+    );
+    if(response.data.logout === 1) {
+      yield put(actions.logoutUserSuccess());
+    }
+  } catch (error) {
+  }
+}

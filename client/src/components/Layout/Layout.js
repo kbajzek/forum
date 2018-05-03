@@ -28,8 +28,8 @@ class Layout extends Component {
         } );
     }
 
-    handleLogin = () => {
-
+    handleLogout = () => {
+        this.props.onLogout();
     }
 
     render () {
@@ -58,6 +58,7 @@ class Layout extends Component {
             <Auxiliary>
                 <Navbar
                     auth={this.props.auth}
+                    logout={this.handleLogout}
                     drawerToggleClicked={this.sideDrawerToggleHandler}>
                     {navItems}
                 </Navbar>
@@ -82,7 +83,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onInitCategoryData: () => dispatch(actions.initCategoryData())
+        onInitCategoryData: () => dispatch(actions.initCategoryData()),
+        onLogout: () => dispatch(actions.logoutUserInit())
     }
 }
 

@@ -10,7 +10,7 @@ const navbar = ( props ) => {
     let authButton = <a href={'/auth/steam'}>LOGIN</a>;
 
     if (props.auth) {
-        authButton = <a href={'/api/logout'}>LOGOUT</a>
+        authButton = <button onClick={props.logout}>LOGOUT</button>
     }
 
     return (

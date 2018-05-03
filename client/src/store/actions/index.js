@@ -44,6 +44,8 @@ export {
 export {
 
     fetchUserInit,
-    fetchUserSuccess
+    fetchUserSuccess,
+    logoutUserInit,
+    logoutUserSuccess,
     
 } from './auth';
