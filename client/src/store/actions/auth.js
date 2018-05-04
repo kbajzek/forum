@@ -6,10 +6,11 @@ export const fetchUserInit = () => {
     };
 };
 
-export const fetchUserSuccess = (data) => {
+export const fetchUserSuccess = (user, csrf) => {
     return {
         type: actionTypes.FETCH_USER_SUCCESS,
-        data: data
+        user: user,
+        csrf: csrf
     };
 };
 

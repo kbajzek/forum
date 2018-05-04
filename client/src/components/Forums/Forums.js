@@ -9,6 +9,7 @@ import PostForm from '../Forms/PostForm/PostForm';
 import Categories from './Categories/Categories';
 import SubCategoryPage from './SubCategoryPage/SubCategoryPage';
 import Thread from './Thread/Thread';
+import UserPage from './UserPage/UserPage';
 
 import classes from './Forums.module.css';
 
@@ -201,6 +202,28 @@ class Forums extends Component {
                                     handlePostDelete={this.handlePostDelete}
                                     handlePostQuote={this.handlePostQuote}
                                     handlePostReply={this.handlePostReply}/>
+                                {editorButton}
+                            </div>
+                        );
+                        
+                    }} />
+                    <Route path="/forums/user/:id/:slug" render={({match}) => {
+                        let editorButton;
+                        if (this.state.postEditorActive) {
+                            editorButton = (
+                                <button 
+                                    onClick={this.togglePostEditor} 
+                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
+                                    EDITOR
+                                </button>
+                            );
+                        }
+                        return (
+                            <div>
+                                <UserPage 
+                                    key={match.params.id} 
+                                    id={match.params.id} 
+                                    slug={match.params.slug}/>
                                 {editorButton}
                             </div>
                         );

@@ -5,6 +5,16 @@ const queries = require('../controllers/queries');
 const sqlstring = require('sqlstring');
 const controllers = require('../controllers/controllers');
 
+const ensureAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) { return next(); }
+    res.status(401).send({ error: 'Not Authenticated!' })
+}
+
+const ensureCSRF = (req, res, next) => {
+    if (req.get('X-XSRF-TOKEN') === req.session.csrf) { return next(); }
+    res.status(401).send({ error: 'CSRF Token Not Matched!' })
+}
+
 module.exports = app => {
 
     const example_thread = {
@@ -355,7 +365,7 @@ module.exports = app => {
 
     })
 
-    app.get('/api/forums/thread/:id/:slug', (req, res) => {
+    app.get('/api/forums/thread/:id/:slug', ensureAuthenticated, (req, res) => {
 
         let threadId = Number(req.params.id);
         models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})

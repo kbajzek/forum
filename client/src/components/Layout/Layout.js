@@ -57,7 +57,7 @@ class Layout extends Component {
         return (
             <Auxiliary>
                 <Navbar
-                    auth={this.props.auth}
+                    auth={this.props.user}
                     logout={this.handleLogout}
                     drawerToggleClicked={this.sideDrawerToggleHandler}>
                     {navItems}
@@ -77,7 +77,7 @@ class Layout extends Component {
 
 const mapStateToProps = state => {
     return { 
-        auth: state.auth
+        user: state.auth.user
     };
 }
 

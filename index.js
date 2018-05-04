@@ -32,10 +32,27 @@ passport.use(new SteamStrategy({
       // represent the logged-in user.  In a typical application, you would want
       // to associate the Steam account with a user record in your database,
       // and return that user instead.
-      console.log("In validate function");
-      console.log(identifier);
-      console.log(profile);
-      return done(null, identifier);
+    //   console.log("In validate function");
+    //   console.log(identifier);
+    //   console.log(profile);
+
+      const beginningString = 'https://steamcommunity.com/openid/id/';
+      const steamId = identifier.substring(beginningString.length);
+
+      models.User.findOne({where: {steam: steamId}})
+        .then((result) => {
+            if(!result){
+                models.User.create({steam: steamId, name: 'to be implemented'})
+                    .then((newUser) => {
+                        return done(null, newUser.id);
+                    })
+            } else {
+                return done(null, result.id);
+            }
+            
+        })
+      
+      
     });
   }
 ));
@@ -71,6 +88,7 @@ app.use(bodyParser.json());
 
 
 authRoutes(app);
+
 forumRoutes(app);
 
 if (process.env.NODE_ENV === 'production') {
@@ -93,7 +111,3 @@ app.listen(PORT);
 //     res.send({ user: req.user });
 // });
 
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) { return next(); }
-    res.status(401).send({ error: 'Not Authenticated!' })
-}

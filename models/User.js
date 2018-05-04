@@ -4,6 +4,10 @@ module.exports = (sequelize, DataTypes) => {
 
         name: {
             type: DataTypes.STRING
+        },
+        
+        steam: {
+            type: DataTypes.STRING
         }
 
     });

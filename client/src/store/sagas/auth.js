@@ -8,7 +8,8 @@ export function* fetchUserSaga(action) {
     const response = yield axios.get(
       "/api/fetch_user"
     );
-    yield put(actions.fetchUserSuccess(response.data));
+    yield axios.defaults.headers.common['X-XSRF-TOKEN'] = response.data.csrf;
+    yield put(actions.fetchUserSuccess(response.data.user, response.data.csrf));
   } catch (error) {
   }
 }
@@ -19,6 +20,7 @@ export function* logoutUserSaga(action) {
       "/api/logout"
     );
     if(response.data.logout === 1) {
+      yield axios.defaults.headers.common['X-XSRF-TOKEN'] = null;
       yield put(actions.logoutUserSuccess());
     }
   } catch (error) {
