@@ -8,12 +8,27 @@
 
 }
 
-.ProfilePicture {
+.ProfileLinkContainer {
     display: inline-block;
     width: 5rem;
     height: 5rem;
     border-radius: 50%;
     padding: 1rem;
+    overflow: hidden;
+}
+
+.ProfileLink {
+    display: inline-block;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+}
+
+.ProfilePicture {
+    display: inline-block;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
 }
 
 .TotalPosts {

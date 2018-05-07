@@ -400,6 +400,7 @@ module.exports = app => {
                                         ratings: [],
                                         creator: {
                                             name: row.creatorName,
+                                            path: `/user/${row.creatorId}/${slugify(row.creatorName).toLowerCase()}`,
                                             pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
                                             totalPosts: row.postCount,
                                             signature: "to be implemented"

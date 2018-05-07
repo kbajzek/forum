@@ -17,7 +17,8 @@ const Post = (props) => {
                 <PostUser 
                     name={props.user.name}
                     pictureURL={props.user.pictureURL}
-                    totalPosts={props.user.totalPosts} />
+                    totalPosts={props.user.totalPosts}
+                    path={props.user.path} />
                 <div className={classes.RightSide}>
                     <div className={classes.Content}>
                         <PostContent content={props.content} />
