@@ -11,8 +11,8 @@ const forumRoutes = require('./routes/forumRoutes');
 const authRoutes = require('./routes/authRoutes');
 const models = require('./models');
 
-passport.serializeUser(function(user, done) {
-    done(null, user);
+passport.serializeUser(function(id, done) {
+    done(null, id);
 });
   
 passport.deserializeUser(function(obj, done) {
@@ -22,19 +22,10 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SteamStrategy({
     returnURL: 'http://localhost:5000/auth/steam/return',
     realm: 'http://localhost:5000/',
-    profile: false
+    apiKey: 'CF1AE94B18F1E3282342ED1886995157'
   },
   function(identifier, profile, done) {
-    // asynchronous verification, for effect...
-    process.nextTick(function () {
-
-      // To keep the example simple, the user's Steam profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
-      // to associate the Steam account with a user record in your database,
-      // and return that user instead.
-    //   console.log("In validate function");
-    //   console.log(identifier);
-    //   console.log(profile);
+    console.log(profile);
 
       const beginningString = 'https://steamcommunity.com/openid/id/';
       const steamId = identifier.substring(beginningString.length);
@@ -42,7 +33,7 @@ passport.use(new SteamStrategy({
       models.User.findOne({where: {steam: steamId}})
         .then((result) => {
             if(!result){
-                models.User.create({steam: steamId, name: 'to be implemented'})
+                models.User.create({steam: steamId, name: profile.displayName})
                     .then((newUser) => {
                         return done(null, newUser.id);
                     })
@@ -51,9 +42,6 @@ passport.use(new SteamStrategy({
             }
             
         })
-      
-      
-    });
   }
 ));
 
