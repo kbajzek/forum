@@ -29,6 +29,8 @@ class Categories extends Component {
 
         let catForm;
 
+        let catButton = this.props.auth ? <button onClick={this.toggleCategoryCreator}>CREATE CATEGORY</button> : null;
+
         if (this.props.categoryData) {
 
             if(this.state.showCatForm) {
@@ -41,7 +43,8 @@ class Categories extends Component {
                         key={id}
                         categoryId={id}
                         name={name} 
-                        subcategories={subCategories} />
+                        subcategories={subCategories}
+                        auth={this.props.auth} />
                 );
             });
         }
@@ -50,7 +53,7 @@ class Categories extends Component {
     
         return (
             <div>
-                <button onClick={this.toggleCategoryCreator}>CREATE CATEGORY</button>
+                {catButton}
                 {catForm}
                 {categories}
             </div>
@@ -61,7 +64,8 @@ class Categories extends Component {
 const mapStateToProps = state => {
     return {
         categoryData: state.forums.categoryData,
-        error: state.forums.error
+        error: state.forums.error,
+        auth: state.auth.user
     };
 }
 

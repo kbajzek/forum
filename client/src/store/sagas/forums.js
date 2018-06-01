@@ -57,7 +57,7 @@ export function* initThreadDataSaga(action) {
     );
     yield put(actions.setThreadData(response.data));
   } catch (error) {
-    yield put(actions.initThreadDataFailed());
+    yield put(actions.initThreadDataFailed(error.response.data));
   }
 }
 
@@ -186,5 +186,20 @@ export function* createRatingSaga(action) {
     yield put(actions.refreshThreadData(action.path));
   } catch (error) {
     yield put(actions.createRatingFailed(error));
+  }
+}
+
+export function* deleteRatingSaga(action) {
+  try {
+    yield axios.post(
+      "/api/forums/rating/delete", {
+        userId: action.userId,
+        postId: action.postId,
+        path: action.path
+      }
+    );
+    yield put(actions.refreshThreadData(action.path));
+  } catch (error) {
+    yield put(actions.deleteRatingFailed(error));
   }
 }

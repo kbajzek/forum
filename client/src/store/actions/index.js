@@ -39,6 +39,9 @@ export {
 
     createRating,
     createRatingFailed,
+
+    deleteRating,
+    deleteRatingFailed,
     
 } from './forums';
 export {

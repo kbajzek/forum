@@ -167,5 +167,14 @@ module.exports = {
                     });
             });
         },
+
+        deleteRating(UserId, PostId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.Rating.destroy({where: {postId: PostId, userId: UserId}, transaction: t})
+                    .then(function(result) {
+                        return 1;
+                    });
+            });
+        },
     
 }

@@ -127,7 +127,7 @@ module.exports = {
                                 join forum_test.posts as p on p.ThreadId = t.id
                         GROUP BY mainSubCategoryId, threadId) as q1 on c.id = q1.mainSubCategoryId and t.id = q1.threadId and p.updatedAt = q1.maxDate
                     join forum_test.posts			as p2	on p2.ThreadId = t.id and p2.position = 1
-                    join forum_test.users			as u2	on p2.UserId = u.id
+                    join forum_test.users			as u2	on p2.UserId = u2.id
             GROUP BY threadId
             ORDER BY maxDate DESC;`
         );

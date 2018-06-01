@@ -222,7 +222,7 @@ export const deletePostFailed = (error) => {
     };
 };
 
-// POST
+// RATING
 
 export const createRating = ( userId, ratingTypeId, postId, path ) => {
     return {
@@ -237,6 +237,22 @@ export const createRating = ( userId, ratingTypeId, postId, path ) => {
 export const createRatingFailed = (error) => {
     return {
         type: actionTypes.CREATE_RATING_FAILED,
+        error: error
+    };
+};
+
+export const deleteRating = ( userId, postId, path ) => {
+    return {
+        type: actionTypes.DELETE_RATING,
+        userId: userId,
+        postId: postId,
+        path: path
+    };
+};
+
+export const deleteRatingFailed = (error) => {
+    return {
+        type: actionTypes.DELETE_RATING_FAILED,
         error: error
     };
 };

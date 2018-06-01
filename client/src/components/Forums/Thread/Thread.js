@@ -6,6 +6,7 @@ import * as actions from '../../../store/actions';
 
 import Post from './Post/Post';
 import Spinner from '../../UI/Spinner/Spinner';
+import ErrorPage from '../ErrorPage/ErrorPage';
 
 import classes from './Thread.module.css';
 
@@ -21,7 +22,9 @@ class Thread extends Component {
 
     render() {
 
-        let threadpage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
+        let threadpage = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
+
+        let threadButton = this.props.auth ? <button onClick={this.handlePostCreator}>CREATE POST</button> : null;
 
         if (this.props.threadData) {
 
@@ -38,13 +41,14 @@ class Thread extends Component {
                         handleEdit={this.props.handlePostEdit}
                         handleDelete={this.props.handlePostDelete}
                         handleQuote={this.props.handlePostQuote}
-                        handleReply={this.props.handlePostReply} />
+                        handleReply={this.props.handlePostReply}
+                        auth={this.props.auth} />
                 );
             });
 
             threadpage = (
                 <div>
-                    <button onClick={this.handlePostCreator}>CREATE POST</button>
+                    {threadButton}
                     <div className={classes.Header}>{this.props.threadData.name}</div>
                     <div className={classes.Thread}>
                         {postList}
@@ -64,7 +68,8 @@ class Thread extends Component {
 const mapStateToProps = state => {
     return {
         threadData: state.forums.threadData,
-        error: state.forums.error
+        error: state.forums.error,
+        auth: state.auth.user
     };
 }
 

@@ -41,6 +41,10 @@ class SubCategoryPage extends Component {
         
         let subcategorypage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
 
+        let subCatButton = this.props.auth ? <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
+
+        let threadButton = this.props.auth ? <button onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
+
         if (this.props.subCategoryPageData) {
 
             if(this.state.showSubCatForm) {
@@ -75,9 +79,9 @@ class SubCategoryPage extends Component {
 
             subcategorypage = (
                 <div>
-                    <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button>
+                    {subCatButton}
                     {subCatForm}
-                    <button onClick={this.handleThreadCreator}>CREATE THREAD</button>
+                    {threadButton}
                     <div className={classes.Header}>{this.props.subCategoryPageData.name}</div>
                     <div className={classes.SubCat}>{subcat_markup}</div>
                     <div>{thread_markup}</div>
@@ -104,7 +108,8 @@ class SubCategoryPage extends Component {
 const mapStateToProps = state => {
     return {
         subCategoryPageData: state.forums.subCategoryPageData,
-        error: state.forums.error
+        error: state.forums.error,
+        auth: state.auth.user
     };
 }
 

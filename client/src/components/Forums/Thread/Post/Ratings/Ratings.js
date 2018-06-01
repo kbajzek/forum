@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import {Link} from 'react-router-dom';
 
 import * as actions from '../../../../../store/actions';
 //import classes from './Ratings.module.css';
@@ -19,8 +20,14 @@ class Ratings extends Component {
     handleRate = (ratingTypeId) => {
         this.props.onCreateRating(1, ratingTypeId, this.props.postId, this.props.path); // fix userid eventually
     }
+
+    handleUndoRating = () => {
+        this.props.onDeleteRating(1, this.props.postId, this.props.path); // fix userid eventually
+    }
     
     render() {
+
+        let hasNotRated = true;
 
         const ratingButtonList = this.props.ratingTypes.map(({id, name}) => {
             return (
@@ -34,12 +41,23 @@ class Ratings extends Component {
 
             let ratingInfo = users.length;
 
+            hasNotRated = hasNotRated && !users.find((user) => {
+                return user.userId === this.props.auth;
+            });
+            
+
             if (this.state.expanded) {
 
                 const userList = users.map((user) => {
                     return (
                         <div key={user.ratingId}>
-                            {user.userName}
+                            <Link
+                                to={{
+                                    pathname: "/forums" + user.path
+                                }}>
+                                {user.userName}
+                            </Link>
+                            
                         </div>
                     );
                 })
@@ -65,10 +83,13 @@ class Ratings extends Component {
             <div style={{display: 'flex', padding: '.5rem 0', alignItems: 'flexStart'}}>
                 {ratingList}
                 <div>
-                    <button onClick={this.toggleExpand}>TOGGLE EXPAND</button>
+                    {this.props.ratings.length > 0 && <button onClick={this.toggleExpand}>TOGGLE EXPAND</button>}
+                </div>
+                <div>
+                    {this.props.auth && !hasNotRated && <button onClick={this.handleUndoRating}>UNDO RATING</button>}
                 </div>
                 <div style={{marginLeft: 'auto'}}>
-                    {ratingButtonList}
+                    {this.props.auth && hasNotRated && this.props.userId !== this.props.auth && ratingButtonList}
                 </div>
             </div>
         );
@@ -77,7 +98,8 @@ class Ratings extends Component {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreateRating: (userId, ratingTypeId, postId, path) => dispatch(actions.createRating(userId, ratingTypeId, postId, path))
+        onCreateRating: (userId, ratingTypeId, postId, path) => dispatch(actions.createRating(userId, ratingTypeId, postId, path)),
+        onDeleteRating: (userId, postId, path) => dispatch(actions.deleteRating(userId, postId, path))
     }
 }
 

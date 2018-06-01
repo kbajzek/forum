@@ -4,16 +4,10 @@ const models  = require('../models');
 const queries = require('../controllers/queries');
 const sqlstring = require('sqlstring');
 const controllers = require('../controllers/controllers');
-
-const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) { return next(); }
-    res.status(401).send({ error: 'Not Authenticated!' })
-}
-
-const ensureCSRF = (req, res, next) => {
-    if (req.get('X-XSRF-TOKEN') === req.session.csrf) { return next(); }
-    res.status(401).send({ error: 'CSRF Token Not Matched!' })
-}
+const requireCSRF = require('../middlewares/requireCSRF');
+const requireLogin = require('../middlewares/requireLogin');
+const checkCanRate = require('../middlewares/checkCanRate');
+const checkCanUnrate = require('../middlewares/checkCanUnrate');
 
 module.exports = app => {
 
@@ -365,7 +359,7 @@ module.exports = app => {
 
     })
 
-    app.get('/api/forums/thread/:id/:slug', ensureAuthenticated, (req, res) => {
+    app.get('/api/forums/thread/:id/:slug', (req, res) => {
 
         let threadId = Number(req.params.id);
         models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})
@@ -385,7 +379,12 @@ module.exports = app => {
                                 rating = {
                                     ratingName: row.ratingName,
                                     users: [
-                                        {userName: row.ratingUserName, ratingId: row.ratingId}
+                                        {
+                                            userName: row.ratingUserName, 
+                                            ratingId: row.ratingId, 
+                                            userId: row.ratingUserId, 
+                                            path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
+                                        }
                                     ]
                                 };
                             }
@@ -400,6 +399,7 @@ module.exports = app => {
                                         ratings: [],
                                         creator: {
                                             name: row.creatorName,
+                                            userId: row.creatorId,
                                             path: `/user/${row.creatorId}/${slugify(row.creatorName).toLowerCase()}`,
                                             pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
                                             totalPosts: row.postCount,
@@ -422,7 +422,12 @@ module.exports = app => {
                                 } else {
                                     // same rating type, different user
                                     const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
-                                    convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({userName: row.ratingUserName, ratingId: row.ratingId});
+                                    convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({
+                                        userName: row.ratingUserName, 
+                                        ratingId: row.ratingId, 
+                                        userId: row.ratingUserId, 
+                                        path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
+                                    });
                                 }
                             }
                         });
@@ -449,7 +454,7 @@ module.exports = app => {
         
     })
 
-    app.post('/api/forums/category/create', (req, res) => {
+    app.post('/api/forums/category/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createCategory(req.body.name)
             .then((newCategory) => {
                 res.send({
@@ -461,7 +466,7 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/subcategory/create', (req, res) => {
+    app.post('/api/forums/subcategory/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createSubCategory(req.body.name, req.body.description, req.body.categoryId, req.body.subCategoryId)
             .then((newSubCategory) => {
                 res.send({
@@ -474,8 +479,9 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/thread/create', (req, res) => {
-        controllers.createThread(req.body.name, req.body.content, req.body.userId, req.body.subCategoryId)
+    app.post('/api/forums/thread/create', requireCSRF, requireLogin, (req, res) => {
+        console.log(req.session)
+        controllers.createThread(req.body.name, req.body.content, req.session.passport.user, req.body.subCategoryId)
             .then((result) => {
                 res.send({
                     threadId: result[0].id,
@@ -491,17 +497,16 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/post/create', (req, res) => {
-        controllers.createPost(req.body.content, req.body.userId, req.body.threadId)
+    app.post('/api/forums/post/create', requireCSRF, requireLogin, (req, res) => {
+        controllers.createPost(req.body.content, req.session.passport.user, req.body.threadId)
             .then(({newPost, user}) => {
-                controllers.getUserTotalPosts(req.body.userId)
+                controllers.getUserTotalPosts(req.session.passport.user)
                     .then(({user, count}) => {
                         res.send({
                             postId: newPost.id, 
                             content: newPost.content,
                             threadId: req.body.threadId,
-                            userName: user.name,
-                            userPicture: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg", 
+                            userName: user.name, 
                             userTotalPosts: count, 
                             userSignature: "to be implemented"
                         });
@@ -512,7 +517,7 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/post/edit', (req, res) => {
+    app.post('/api/forums/post/edit', requireCSRF, requireLogin, (req, res) => {
         controllers.editPost(req.body.content, req.body.postId)
             .then((updatedPost) => {
                 res.send({
@@ -524,10 +529,9 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/post/delete', (req, res) => {
+    app.post('/api/forums/post/delete', requireCSRF, requireLogin, (req, res) => {
         controllers.deletePost(req.body.postId)
             .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
-                console.log(response);
                 res.send({
                     response: response
                 });
@@ -537,7 +541,7 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/user/create', (req, res) => {
+    app.post('/api/forums/user/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createUser(req.body.name)
             .then((newUser) => {
                 res.send({
@@ -549,7 +553,7 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/ratingtype/create', (req, res) => {
+    app.post('/api/forums/ratingtype/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createRatingType(req.body.name)
             .then(() => {
                 res.send({});
@@ -559,11 +563,23 @@ module.exports = app => {
             });
     })
 
-    app.post('/api/forums/rating/create', (req, res) => {
-        controllers.createRating(req.body.userId, req.body.postId, req.body.ratingTypeId)
+    app.post('/api/forums/rating/create', requireCSRF, requireLogin, checkCanRate, (req, res) => {
+        controllers.createRating(req.session.passport.user, req.body.postId, req.body.ratingTypeId)
             .then((newRating) => {
                 res.send({
                     ratingId: newRating
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/rating/delete', requireCSRF, requireLogin, checkCanUnrate, (req, res) => {
+        controllers.deleteRating(req.session.passport.user, req.body.postId)
+            .then((response) => {
+                res.send({
+                    response: response
                 });
             })
             .catch((error) => {
