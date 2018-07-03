@@ -112,6 +112,80 @@ export const refreshThreadDataFailed = (error) => {
     };
 };
 
+// USER PAGE
+
+export const setUserData = ( data ) => {
+    return {
+        type: actionTypes.SET_USER_DATA,
+        data: data
+    };
+};
+
+export const initUserData = (path) => {
+    return {
+        type: actionTypes.INIT_USER_DATA,
+        path: path
+    };
+};
+
+export const initUserDataFailed = (error) => {
+    return {
+        type: actionTypes.INIT_USER_DATA_FAILED,
+        error: error
+    };
+};
+
+export const refreshUserData = (path) => {
+    return {
+        type: actionTypes.REFRESH_USER_DATA,
+        path: path
+    };
+};
+
+export const refreshUserDataFailed = (error) => {
+    return {
+        type: actionTypes.REFRESH_USER_DATA_FAILED,
+        error: error
+    };
+};
+
+// MESSAGE PAGE
+
+export const setMessageData = ( data ) => {
+    return {
+        type: actionTypes.SET_MESSAGE_DATA,
+        data: data
+    };
+};
+
+export const initMessageData = (path) => {
+    return {
+        type: actionTypes.INIT_MESSAGE_DATA,
+        path: path
+    };
+};
+
+export const initMessageDataFailed = (error) => {
+    return {
+        type: actionTypes.INIT_MESSAGE_DATA_FAILED,
+        error: error
+    };
+};
+
+export const refreshMessageData = (path) => {
+    return {
+        type: actionTypes.REFRESH_MESSAGE_DATA,
+        path: path
+    };
+};
+
+export const refreshMessageDataFailed = (error) => {
+    return {
+        type: actionTypes.REFRESH_MESSAGE_DATA_FAILED,
+        error: error
+    };
+};
+
 // CATEGORY
 
 export const createCategory = ( name ) => {
@@ -127,6 +201,8 @@ export const createCategoryFailed = (error) => {
         error: error
     };
 };
+
+
 
 // SUBCATEGORY
 
@@ -218,6 +294,78 @@ export const deletePost = (postId, path, history) => {
 export const deletePostFailed = (error) => {
     return {
         type: actionTypes.DELETE_POST_FAILED,
+        error: error
+    };
+};
+
+// MESSAGE
+
+export const createMessage = ( name, content, members, path, history ) => {
+    return {
+        type: actionTypes.CREATE_MESSAGE,
+        name: name,
+        content: content,
+        members: members,
+        path: path,
+        history: history
+    };
+};
+
+export const createMessageFailed = (error) => {
+    return {
+        type: actionTypes.CREATE_MESSAGE_FAILED,
+        error: error
+    };
+};
+
+// MESSAGE POST
+
+export const createMessagePost = ( content, messageId, path, history ) => {
+    return {
+        type: actionTypes.CREATE_MESSAGE_POST,
+        content: content,
+        messageId: messageId,
+        path: path,
+        history: history
+    };
+};
+
+export const createMessagePostFailed = (error) => {
+    return {
+        type: actionTypes.CREATE_MESSAGE_POST_FAILED,
+        error: error
+    };
+};
+
+export const editMessagePost = ( content, messagePostId, path, history ) => {
+    return {
+        type: actionTypes.EDIT_MESSAGE_POST,
+        content: content,
+        messagePostId: messagePostId,
+        path: path,
+        history: history
+    };
+};
+
+export const editMessagePostFailed = (error) => {
+    return {
+        type: actionTypes.EDIT_MESSAGE_POST_FAILED,
+        error: error
+    };
+};
+
+export const deleteMessagePost = (messagePostId, path, history) => {
+    return {
+        type: actionTypes.DELETE_MESSAGE_POST,
+        messagePostId: messagePostId,
+        path: path,
+        history: history
+    };
+};
+
+export const deleteMessagePostFailed = (error) => {
+    return {
+        type: actionTypes.DELETE_MESSAGE_POST_FAILED,
         error: error
     };
 };

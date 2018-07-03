@@ -454,6 +454,109 @@ module.exports = app => {
         
     })
 
+    app.get('/api/forums/user/:id/:slug', (req, res) => {
+
+        let userId = Number(req.params.id);
+        
+        models.sequelize.query(queries.getUserQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
+            .then(result => {
+                let convertedPosts = [];
+
+                result.forEach((row) => {
+
+                    convertedPosts.push(
+                        {
+                            id: row.postId,
+                            content: row.postContent,
+                            createdAt: row.postCreatedAt,
+                            threadName: row.threadName,
+                            path: `/thread/${row.postThreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
+                        }
+                    );
+                    
+                });
+
+                let userData = {
+                    userName: result[0].userName,
+                    posts: convertedPosts
+                }
+
+                res.send(userData);
+            })
+    });
+
+    app.get('/api/forums/message', requireLogin, (req, res) => {
+        
+        models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
+            .then(result => {
+                let convertedMessageHeaders = [];
+                let convertedMessagePosts = [];
+
+                result.forEach((row) => {
+
+                    convertedMessageHeaders.push(
+                        {
+                            id: row.messageId,
+                            name: row.messageName,
+                            path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
+                        }
+                    );
+                    
+                });
+
+                let messageData = {
+                    headers: convertedMessageHeaders,
+                    posts: convertedMessagePosts
+                }
+
+                res.send(messageData);
+            })
+    });
+
+    app.get('/api/forums/message/:id/:slug', requireLogin, (req, res) => {
+
+        let messageId = Number(req.params.id);
+        
+        models.sequelize.query(queries.getUserMessageListQuery(userId), { type: models.Sequelize.QueryTypes.SELECT})
+            .then(result => {
+                models.sequelize.query(queries.getMessageQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT})
+                    .then(result2 => {
+                        let convertedMessageHeaders = [];
+                        let convertedMessagePosts = [];
+
+                        result.forEach((row) => {
+
+                            convertedMessageHeaders.push(
+                                {
+                                    id: row.messageId,
+                                    name: row.messageName,
+                                    path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
+                                }
+                            );
+                            
+                        });
+
+                        result2.forEach((row) => {
+
+                            convertedMessagePosts.push(
+                                {
+                                    id: row.messagePostId,
+                                    content: row.messagePostContent
+                                }
+                            );
+                            
+                        });
+
+                        let messageData = {
+                            headers: convertedMessageHeaders,
+                            posts: convertedMessagePosts
+                        }
+
+                        res.send(messageData);
+                    })
+            })
+    });
+
     app.post('/api/forums/category/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createCategory(req.body.name)
             .then((newCategory) => {
@@ -531,6 +634,62 @@ module.exports = app => {
 
     app.post('/api/forums/post/delete', requireCSRF, requireLogin, (req, res) => {
         controllers.deletePost(req.body.postId)
+            .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
+                res.send({
+                    response: response
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/message/create', requireCSRF, requireLogin, (req, res) => {
+        console.log(req.session)
+        controllers.createMessage(req.body.name, req.body.content, req.body.members, req.session.passport.user)
+            .then((result) => {
+                res.send({
+                    message: result[0].id,
+                    messagePostId: result[1].id,
+                    messagePath: `/message/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
+                    createdOn: result[0].createdAt,
+                    lastUpdated: result[1].updatedAt
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/messagepost/create', requireCSRF, requireLogin, (req, res) => {
+        controllers.createMessagePost(req.body.content, req.session.passport.user, req.body.messageId)
+            .then(({newPost, user}) => {
+                res.send({
+                    postId: newPost.id, 
+                    content: newPost.content,
+                    messageId: req.body.messageId,
+                    userName: user.name
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/messagepost/edit', requireCSRF, requireLogin, (req, res) => {
+        controllers.editMessagePost(req.body.content, req.body.messagePostId)
+            .then((updatedPost) => {
+                res.send({
+                    messagePostId: updatedPost.id
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/messagepost/delete', requireCSRF, requireLogin, (req, res) => {
+        controllers.deleteMessagePost(req.body.messagePostId)
             .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
                 res.send({
                     response: response

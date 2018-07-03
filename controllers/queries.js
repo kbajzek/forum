@@ -175,5 +175,43 @@ module.exports = {
                                 ) as r on r.postId = p.id
             ORDER BY postPosition, ratingTypeId;`
         );
+    },
+    getUserQuery(userqueryid) {
+        return (
+            `SELECT p.id		as postId,
+                p.content		as postContent,
+                p.createdAt		as postCreatedAt,
+                p.ThreadId		as postThreadId,
+                p.position		as postPosition,
+                t.name			as threadName,
+                u.name          as userName
+            FROM forum_test.posts as p
+                join forum_test.threads as t on t.id = p.ThreadId
+                join forum_test.users as u on u.id = ${userqueryid}
+            WHERE p.userId = ${userqueryid}
+            ORDER BY postCreatedAt desc;`
+        );
+    },
+    getUserMessageListQuery(userid) {
+        return (
+            `SELECT m.id		as messageId,
+                m.name  		as messageName,
+                m.createdAt		as messageCreatedAt
+            FROM forum_test.messages as m
+                join forum_test.messagemembers as mm on mm.MessageId = m.id
+            WHERE mm.UserId = ${userid}
+            ORDER BY messageCreatedAt desc;`
+        );
+    },
+    getMessageQuery(messageid) {
+        return (
+            `SELECT mp.id		as messagePostId,
+                mp.content 		as messagePostContent,
+                mp.createdAt    as messagePostCreatedAt
+            FROM forum_test.messages as m
+                join forum_test.messageposts as mp on mp.MessageId = m.id
+            WHERE m.id = ${messageid}
+            ORDER BY messagePostCreatedAt;`
+        );
     }
 }

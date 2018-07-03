@@ -72,6 +72,52 @@ export function* refreshThreadDataSaga(action) {
   }
 }
 
+export function* initUserDataSaga(action) {
+  try {
+    yield put(actions.setUserData(null));
+    const response = yield axios.get(
+      "/api/forums" + action.path
+    );
+    yield put(actions.setUserData(response.data));
+  } catch (error) {
+    yield put(actions.initUserDataFailed(error.response.data));
+  }
+}
+
+export function* refreshUserDataSaga(action) {
+  try {
+    const response = yield axios.get(
+      "/api/forums" + action.path
+    );
+    yield put(actions.setUserData(response.data));
+  } catch (error) {
+    yield put(actions.refreshUserDataFailed());
+  }
+}
+
+export function* initMessageDataSaga(action) {
+  try {
+    yield put(actions.setMessageData(null));
+    const response = yield axios.get(
+      "/api/forums" + action.path
+    );
+    yield put(actions.setMessageData(response.data));
+  } catch (error) {
+    yield put(actions.initMessageDataFailed(error.response.data));
+  }
+}
+
+export function* refreshMessageDataSaga(action) {
+  try {
+    const response = yield axios.get(
+      "/api/forums" + action.path
+    );
+    yield put(actions.setMessageData(response.data));
+  } catch (error) {
+    yield put(actions.refreshMessageDataFailed());
+  }
+}
+
 export function* createCategorySaga(action) {
   try {
     yield axios.post(
@@ -170,6 +216,70 @@ export function* deletePostSaga(action) {
     }
   } catch (error) {
     yield put(actions.deletePostFailed(error));
+  }
+}
+
+export function* createMessageSaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/message/create", {
+        name: action.name,
+        content: action.content,
+        members: action.members
+      }
+    );
+    yield put(actions.refreshMessageData(action.path));
+    yield action.history.push("/forums" + response.data.messagePath);
+  } catch (error) {
+    yield put(actions.createMessageFailed(error));
+  }
+}
+
+export function* createMessagePostSaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/messagepost/create", {
+        content: action.content,
+        messageId: action.messageId,
+        path: action.path
+      }
+    );
+    yield put(actions.refreshMessageData(action.path));
+    yield action.history.push("/forums" + response.data.messagePath);
+  } catch (error) {
+    yield put(actions.createMessagePostFailed(error));
+  }
+}
+
+export function* editMessagePostSaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/messagepost/edit", {
+        content: action.content,
+        messagePostId: action.messagePostId,
+        path: action.path
+      }
+    );
+    yield put(actions.refreshMessageData(action.path));
+    yield action.history.push("/forums" + response.data.messagePath);
+  } catch (error) {
+    yield put(actions.editMessagePostFailed(error));
+  }
+}
+
+export function* deleteMessagePostSaga(action) {
+  try {
+    const response = yield axios.post(
+      "/api/forums/messagepost/delete", {
+        content: action.content,
+        messagePostId: action.messagePostId,
+        path: action.path
+      }
+    );
+    yield put(actions.refreshMessageData(action.path));
+    yield action.history.push("/forums" + response.data.messagePath);
+  } catch (error) {
+    yield put(actions.deleteMessagePostFailed(error));
   }
 }
 

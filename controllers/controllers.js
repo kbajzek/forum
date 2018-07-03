@@ -130,6 +130,93 @@ module.exports = {
             });
         },
 
+        createMessage(name, content, members, UserId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.Message.create({
+                    name
+                }, {transaction: t})
+                    .then(function(newMessage) {
+                        const perm = 2;
+                        return models.MessageMember.create({
+                            perm,
+                            UserId
+                        }, {transaction: t})
+                            .then(function(user) {
+                                const perm = 1;
+                                return models.sequelize.Promise.map(members, function(member){
+                                    return models.MessageMember.create({
+                                        perm,
+                                        member
+                                    }, {transaction: t})
+                                })
+                                    .then(function(newMembers) {
+                                        return models.MessagePost.create({
+                                            content,
+                                            UserId,
+                                            MessageId: newMessage.id
+                                        }, {transaction: t})
+                                            .then(function(messagepost) {
+                                                return [newMessage, messagepost, user];
+                                            });
+                                    });
+                            });
+                    });
+            });
+        },
+
+        createMessagePost(content, UserId, MessageId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.User.findOne({where: {id: UserId}, transaction: t})
+                    .then(function(user) {
+                        return models.MessagePost.findAndCountAll({where: {MessageId}, transaction: t})
+                            .then(function ({count}) {
+                                return models.MessagePost.create({
+                                    content,
+                                    MessageId,
+                                    UserId
+                                }, {transaction: t})
+                                    .then(function(newPost) {
+                                        return {newPost, user};
+                                    });
+                            });
+                    });
+                
+            });
+        },
+
+        editMessagePost(updatedContent, messagePostId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.MessagePost.findOne({where: {id: messagePostId}, transaction: t})
+                    .then(function(post) {
+                        return post.updateAttributes({content: updatedContent}, {transaction: t});
+                    });
+                
+            });
+        },
+
+        deleteMessagePost(messagePostId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.MessagePost.findOne({where: {id: messagePostId}, transaction: t})
+                    .then(function(post) {
+                        return models.MessagePost.findAndCountAll({where: {MessageId}, transaction: t})
+                            .then(function({count}) {
+                                
+                                if(count === 1){
+                                    return models.Message.destroy({where: {id: post.MessageId}, transaction: t})
+                                        .then((result) => {
+                                            return 1;
+                                        });
+                                } else {
+                                    return models.MessagePost.destroy({where: {id: messagePostId}, transaction: t})
+                                        .then((result) => {
+                                            return 2;
+                                        });
+                                }
+                            });
+                        });
+            });
+        },
+
         createUser(name) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.User.create({

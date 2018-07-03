@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FieldComponent = ({ input, label, meta: { error, touched } }) => {
+const FieldComponentUser = ({ input, label, meta: { error, touched } }) => {
     return (
         <div>
             <label>{label}</label>
@@ -12,4 +12,4 @@ const FieldComponent = ({ input, label, meta: { error, touched } }) => {
     );
 }
 
-export default FieldComponent;
+export default FieldComponentUser;

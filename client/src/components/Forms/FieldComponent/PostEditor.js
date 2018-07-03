@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import PostContent from '../../Forums/Thread/Post/PostContent/PostContent';
 
-class FieldComponent extends Component {
+class PostEditor extends Component {
 
     constructor(props) {
         super(props);
@@ -509,4 +509,4 @@ class FieldComponent extends Component {
     }
 }
 
-export default FieldComponent;
+export default PostEditor;

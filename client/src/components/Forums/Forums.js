@@ -10,20 +10,23 @@ import Categories from './Categories/Categories';
 import SubCategoryPage from './SubCategoryPage/SubCategoryPage';
 import Thread from './Thread/Thread';
 import UserPage from './UserPage/UserPage';
+import MessagePage from './MessagePage/MessagePage';
 
 import classes from './Forums.module.css';
 
 class Forums extends Component {
 
     state={
+        postEditorMessageMode: false,
         postEditorActive: false,
         showPostEditor: false,
-        postEditorThread: null,
-        postEditorPost: null,
+        postEditorThread: null, //thread or message
+        postEditorPost: null, //post or messagepost
         postEditorSlug: '',
-        postEditorThreadName: '',
+        postEditorThreadName: '', //thread or message
         postEditorSubCategory: null,
-        postEditorSubCategoryName: ''
+        postEditorSubCategoryName: '',
+        postEditorMembers: []
     }
 
     componentDidMount() {
@@ -41,7 +44,8 @@ class Forums extends Component {
             postEditorThreadName: threadName, 
             postEditorPost: postId,
             postEditorSubCategory: null,
-            postEditorSubCategoryName: ''
+            postEditorSubCategoryName: '',
+            postEditorMessageMode: false
         });
     }
 
@@ -93,7 +97,23 @@ class Forums extends Component {
             postEditorActive: true, 
             postEditorThreadName: '', 
             postEditorSubCategory: subCategoryId,
-            postEditorSubCategoryName: subCategoryName
+            postEditorSubCategoryName: subCategoryName,
+            postEditorMessageMode: false
+        });
+    }
+
+    handleMessageCreate = (slug, members) => {
+        this.props.changePostEditor('');
+        this.setState({
+            showPostEditor: true, 
+            postEditorThread: null, 
+            postEditorSlug: slug, 
+            postEditorActive: true, 
+            postEditorThreadName: '', 
+            postEditorSubCategory: '',
+            postEditorSubCategoryName: '',
+            postEditorMembers: members,
+            postEditorMessageMode: true
         });
     }
 
@@ -154,7 +174,8 @@ class Forums extends Component {
                         threadName={this.state.postEditorThreadName || ''}
                         postId={this.state.postEditorPost}
                         subCategoryId={this.state.postEditorSubCategory}
-                        subCategoryName={this.state.postEditorSubCategoryName} />
+                        subCategoryName={this.state.postEditorSubCategoryName}
+                        message={this.state.postEditorMessageMode} />
                 </div>
             );
         }
@@ -224,6 +245,47 @@ class Forums extends Component {
                                     key={match.params.id} 
                                     id={match.params.id} 
                                     slug={match.params.slug}/>
+                                {editorButton}
+                            </div>
+                        );
+                        
+                    }} />
+                    <Route path="/forums/message/:id/:slug" render={({match}) => {
+                        let editorButton;
+                        if (this.state.postEditorActive) {
+                            editorButton = (
+                                <button 
+                                    onClick={this.togglePostEditor} 
+                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
+                                    EDITOR
+                                </button>
+                            );
+                        }
+                        return (
+                            <div>
+                                <MessagePage 
+                                    key={match.params.id} 
+                                    id={match.params.id} 
+                                    slug={match.params.slug} handleMessageCreate={this.handleMessageCreate}/>
+                                {editorButton}
+                            </div>
+                        );
+                        
+                    }} />
+                    <Route path="/forums/message" render={({match}) => {
+                        let editorButton;
+                        if (this.state.postEditorActive) {
+                            editorButton = (
+                                <button 
+                                    onClick={this.togglePostEditor} 
+                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
+                                    EDITOR
+                                </button>
+                            );
+                        }
+                        return (
+                            <div>
+                                <MessagePage handleMessageCreate={this.handleMessageCreate} />
                                 {editorButton}
                             </div>
                         );

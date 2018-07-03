@@ -4,6 +4,8 @@ const initialState = {
     categoryData: null,
     subCategoryPageData: null,
     threadData: null,
+    userData: null,
+    messageData: null,
     postEditorData: null,
     postCreated: null,
     request_notifications: [],
@@ -20,6 +22,14 @@ const setCategoryData = (state, action) => {
 };
 
 const initCategoryDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const refreshCategoryDataFailed = (state, action) => {
     const updatedState = {
         ...state,
         error: action.error
@@ -44,6 +54,14 @@ const initSubCategoryPageDataFailed = (state, action) => {
     return updatedState;
 };
 
+const refreshSubCategoryPageDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
 const setThreadData = (state, action) => {
     const updatedState = {
         ...state,
@@ -61,23 +79,57 @@ const initThreadDataFailed = (state, action) => {
     return updatedState;
 };
 
-const refreshCategoryDataFailed = (state, action) => {
-    const updatedState = {
-        ...state,
-        error: action.error
-    }
-    return updatedState;
-};
-
-const refreshSubCategoryPageDataFailed = (state, action) => {
-    const updatedState = {
-        ...state,
-        error: action.error
-    }
-    return updatedState;
-};
-
 const refreshThreadDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const setUserData = (state, action) => {
+    const updatedState = {
+        ...state,
+        userData: action.data,
+        error: false
+    }
+    return updatedState;
+};
+
+const initUserDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const refreshUserDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const setMessageData = (state, action) => {
+    const updatedState = {
+        ...state,
+        messageData: action.data,
+        error: false
+    }
+    return updatedState;
+};
+
+const initMessageDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const refreshMessageDataFailed = (state, action) => {
     const updatedState = {
         ...state,
         error: action.error
@@ -101,71 +153,6 @@ const createSubCategoryFailed = (state, action) => {
     return updatedState;
 };
 
-// const createSubCategorySuccessPartial = (state, action) => {
-
-//     let updatedCategoryData = state.categoryData;
-//     let updatedSubCategoryPageData = state.subCategoryPageData;
-
-//     if (action.categoryId) {
-//         updatedCategoryData = state.categoryData.map((category) => {
-//             if (category.id === action.categoryId) {
-//                 const updatedSubCategories = category.subCategories.concat(
-//                     {
-//                         id: action.id,
-//                         path: action.path,
-//                         name: action.name,
-//                         description: action.description,
-//                         totalPosts: 0,
-//                         lastActiveThread: {
-//                             name: 'none',
-//                             user: 'none',
-//                             lastUpdated: 'none',
-//                             path: 'none'
-//                         }
-//                     }
-//                 );
-//                 return {
-//                     ...category,
-//                     subCategories: updatedSubCategories
-//                 };
-//             }
-//             return category;
-//         });
-
-//     } else {
-
-//         const updatedSubCategories = state.subCategoryPageData.subCategories.concat(
-//             {
-//                 id: action.id,
-//                 path: action.path,
-//                 name: action.name,
-//                 description: action.description,
-//                 totalPosts: 0,
-//                 lastActiveThread: {
-//                     name: 'none',
-//                     user: 'none',
-//                     lastUpdated: 'none',
-//                     path: 'none'
-//                 }
-//             }
-//         );
-
-//         updatedSubCategoryPageData = {
-//             ...state.subCategoryPageData,
-//             subCategories: updatedSubCategories
-//         }
-
-//     }
-
-//     const updatedState = {
-//         ...state,
-//         categoryData: updatedCategoryData,
-//         subCategoryPageData: updatedSubCategoryPageData,
-//         error: false
-//     }
-//     return updatedState;
-// };
-
 const createThreadFailed = (state, action) => {
     const updatedState = {
         ...state,
@@ -174,36 +161,6 @@ const createThreadFailed = (state, action) => {
     return updatedState;
 };
 
-// const createThreadSuccess = (state, action) => {
-
-//     const updatedThreads = state.subCategoryPageData.threads.concat(
-//         {
-//             id: action.id,
-//             path: action.path,
-//             name: action.name,
-//             creator: action.userName,
-//             createdOn: action.createdOn,
-//             totalReplies: 0,
-//             totalViews: 0,
-//             lastPost: {
-//                 user: action.userName,
-//                 lastUpdated: action.lastUpdated
-//             }
-//         }
-//     );
-
-//     const updatedSubCategoryPageData = {
-//         ...state.subCategoryPageData,
-//         threads: updatedThreads
-//     }
-
-//     const updatedState = {
-//         ...state,
-//         subCategoryPageData: updatedSubCategoryPageData,
-//         error: false
-//     }
-//     return updatedState;
-// };
 
 const createPostFailed = (state, action) => {
     const updatedState = {
@@ -212,34 +169,6 @@ const createPostFailed = (state, action) => {
     }
     return updatedState;
 };
-
-// const createPostSuccessPartial = (state, action) => {
-//     const updatedPosts = state.threadData.posts.concat(
-//         {
-//             id: action.id,
-//             content: action.content,
-//             ratings: [],
-//             creator: {
-//                 name: action.userName,
-//                 pictureURL: action.userPicture,
-//                 totalPosts: action.userTotalPosts,
-//                 signature: action.userSignature
-//             }
-//         }
-//     );
-
-//     const updatedThreadData = {
-//         ...state.threadData,
-//         posts: updatedPosts
-//     }
-
-//     const updatedState = {
-//         ...state,
-//         threadData: updatedThreadData,
-//         error: false
-//     }
-//     return updatedState;
-// };
 
 const editPostFailed = (state, action) => {
     const updatedState = {
@@ -250,6 +179,39 @@ const editPostFailed = (state, action) => {
 };
 
 const deletePostFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const createMessageFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+
+const createMessagePostFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const editMessagePostFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const deleteMessagePostFailed = (state, action) => {
     const updatedState = {
         ...state,
         error: action.error
@@ -270,14 +232,23 @@ const reducer = ( state = initialState, action ) => {
 
         case actionTypes.SET_CATEGORY_DATA: return setCategoryData(state, action);
         case actionTypes.INIT_CATEGORY_DATA_FAILED: return initCategoryDataFailed(state, action);
+        case actionTypes.REFRESH_CATEGORY_DATA_FAILED: return refreshCategoryDataFailed(state, action);
+
         case actionTypes.SET_SUB_CATEGORY_PAGE_DATA: return setSubCategoryPageData(state, action);
         case actionTypes.INIT_SUB_CATEGORY_PAGE_DATA_FAILED: return initSubCategoryPageDataFailed(state, action);
+        case actionTypes.REFRESH_SUB_CATEGORY_PAGE_DATA_FAILED: return refreshSubCategoryPageDataFailed(state, action);
+
         case actionTypes.SET_THREAD_DATA: return setThreadData(state, action);
         case actionTypes.INIT_THREAD_DATA_FAILED: return initThreadDataFailed(state, action);
-        
-        case actionTypes.REFRESH_CATEGORY_DATA_FAILED: return refreshCategoryDataFailed(state, action);
-        case actionTypes.REFRESH_SUB_CATEGORY_PAGE_DATA_FAILED: return refreshSubCategoryPageDataFailed(state, action);
         case actionTypes.REFRESH_THREAD_DATA_FAILED: return refreshThreadDataFailed(state, action);
+
+        case actionTypes.SET_USER_DATA: return setUserData(state, action);
+        case actionTypes.INIT_USER_DATA_FAILED: return initUserDataFailed(state, action);
+        case actionTypes.REFRESH_USER_DATA_FAILED: return refreshUserDataFailed(state, action);
+
+        case actionTypes.SET_MESSAGE_DATA: return setMessageData(state, action);
+        case actionTypes.INIT_MESSAGE_DATA_FAILED: return initMessageDataFailed(state, action);
+        case actionTypes.REFRESH_MESSAGE_DATA_FAILED: return refreshMessageDataFailed(state, action);
 
         case actionTypes.CREATE_CATEGORY_FAILED: return createCategoryFailed(state, action);
         case actionTypes.CREATE_SUB_CATEGORY_FAILED: return createSubCategoryFailed(state, action);
@@ -285,6 +256,10 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.CREATE_POST_FAILED: return createPostFailed(state, action);
         case actionTypes.EDIT_POST_FAILED: return editPostFailed(state, action);
         case actionTypes.DELETE_POST_FAILED: return deletePostFailed(state, action);
+        case actionTypes.CREATE_MESSAGE_FAILED: return createMessageFailed(state, action);
+        case actionTypes.CREATE_MESSAGE_POST_FAILED: return createMessagePostFailed(state, action);
+        case actionTypes.EDIT_MESSAGE_POST_FAILED: return editMessagePostFailed(state, action);
+        case actionTypes.DELETE_MESSAGE_POST_FAILED: return deleteMessagePostFailed(state, action);
 
         case actionTypes.CREATE_RATING_FAILED: return createRatingFailed(state, action);
 
