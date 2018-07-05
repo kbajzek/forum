@@ -5,9 +5,13 @@ import {connect} from 'react-redux';
 import PostEditor from '../FieldComponent/PostEditor';
 import * as actions from '../../../store/actions';
 import FieldComponent from '../FieldComponent/FieldComponent';
-
+import MultiSelect from '../FieldComponent/MultiSelect';
 
 class PostForm extends Component {
+
+    state = {
+        users: []
+    }
 
     validate = (value) => {
         let errors = null;
@@ -17,6 +21,19 @@ class PostForm extends Component {
         }
         
         return errors;
+    }
+
+    refreshUsers = (input, callback) => {
+        this.setState((prevState) => {
+            const newUserArray = prevState.users.concat({value: input, label: input});
+            
+            return {users: newUserArray};
+        });
+        const userList = [{value: 'd', label: 'd'}, ...this.state.users];
+        console.log(userList);
+        callback(null, {
+            options: userList
+        })
     }
 
     onFormSubmit = ({name, content}) => {
@@ -55,10 +72,12 @@ class PostForm extends Component {
             if(!this.props.messageId) {
                 editorDescription = (
                     <Field
+                        async
                         key='name'
-                        component={FieldComponent}
+                        component={MultiSelect}
                         type='text'
                         name='name'
+                        loadOptions={this.refreshUsers}
                         validate={this.validate}/>
                 );
                 subCategoryDescription = (
