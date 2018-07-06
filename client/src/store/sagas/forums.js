@@ -118,6 +118,21 @@ export function* refreshMessageDataSaga(action) {
   }
 }
 
+export function* fetchUserlistSaga(action) {
+  try {
+    const response = yield axios.get(
+      "/api/forums/userlist", {
+        params: {
+          search: action.search
+        }
+      }
+    );
+    yield put(actions.fetchUserlistSuccess(response.data.users));
+  } catch (error) {
+    yield put(actions.fetchUserlistFailed());
+  }
+}
+
 export function* createCategorySaga(action) {
   try {
     yield axios.post(
@@ -161,8 +176,7 @@ export function* createThreadSaga(action) {
         subCategoryId: action.subCategoryId
       }
     );
-    yield put(actions.refreshSubCategoryPageData(action.path));
-    yield action.history.push("/forums" + response.data.threadPath);
+    yield action.history.push("/forums" + response.data.path);
   } catch (error) {
     yield put(actions.createThreadFailed(error));
   }
@@ -174,12 +188,11 @@ export function* createPostSaga(action) {
       "/api/forums/post/create", {
         content: action.content,
         userId: action.userId,
-        threadId: action.threadId,
-        path: action.path
+        threadId: action.threadId
       }
     );
-    yield put(actions.refreshThreadData(action.path));
-    yield action.history.push("/forums" + action.path + "#" + response.data.postId);
+    yield put(actions.refreshThreadData(response.data.path));
+    yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
   } catch (error) {
     yield put(actions.createPostFailed(error));
   }
@@ -190,12 +203,11 @@ export function* editPostSaga(action) {
     const response = yield axios.post(
       "/api/forums/post/edit", {
         content: action.content,
-        postId: action.postId,
-        path: action.path
+        postId: action.postId
       }
     );
-    yield put(actions.refreshThreadData(action.path));
-    yield action.history.push("/forums" + action.path + "#" + response.data.postId);
+    yield put(actions.refreshThreadData(response.data.path));
+    yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
   } catch (error) {
     yield put(actions.editPostFailed(error));
   }
@@ -212,7 +224,7 @@ export function* deletePostSaga(action) {
       yield action.history.push("/forums");
       yield put(actions.setThreadData(null));
     } else {
-      yield put(actions.refreshThreadData(action.path));
+      yield put(actions.refreshThreadData(response.data.path));
     }
   } catch (error) {
     yield put(actions.deletePostFailed(error));

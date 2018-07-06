@@ -24,6 +24,7 @@
     "connect-redis": "^3.3.3",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
+    "lodash": "^4.17.10",
     "mocha": "^5.1.1",
     "mysql2": "^1.5.3",
     "nodemon": "^1.17.3",

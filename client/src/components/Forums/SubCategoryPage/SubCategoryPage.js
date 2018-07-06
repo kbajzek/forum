@@ -28,7 +28,7 @@ class SubCategoryPage extends Component {
     }
 
     handleThreadCreator = () => {
-        this.props.handleThreadCreate(this.props.slug, this.props.id, this.props.subCategoryPageData.name);
+        this.props.handleThreadCreate(this.props.id);
     }
 
     componentDidMount() {

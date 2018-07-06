@@ -7,6 +7,13 @@ import * as actions from '../../../store/actions';
 import FieldComponent from '../FieldComponent/FieldComponent';
 import MultiSelect from '../FieldComponent/MultiSelect';
 
+const CREATE_THREAD = 1;
+const CREATE_POST = 2;
+const EDIT_POST = 3;
+const CREATE_MESSAGE = 4;
+const CREATE_MESSAGE_POST = 5;
+const EDIT_MESSAGE_POST = 6;
+
 class PostForm extends Component {
 
     state = {
@@ -15,46 +22,35 @@ class PostForm extends Component {
 
     validate = (value) => {
         let errors = null;
-    
         if (!value) {
             errors = 'You must provide a value';
         }
-        
         return errors;
     }
 
-    refreshUsers = (input, callback) => {
-        this.setState((prevState) => {
-            const newUserArray = prevState.users.concat({value: input, label: input});
-            
-            return {users: newUserArray};
-        });
-        const userList = [{value: 'd', label: 'd'}, ...this.state.users];
-        console.log(userList);
-        callback(null, {
-            options: userList
-        })
-    }
+    onFormSubmit = () => {
 
-    onFormSubmit = ({name, content}) => {
-        if(this.props.message){
-            if(this.props.messagePostId){
-                this.props.onEditMessagePost(content, this.props.messagePostId, this.props.path, this.props.history);
-            }else if(this.props.messageId){
-                this.props.onCreateMessagePost(content, this.props.messageId, this.props.path, this.props.history);
-            }else{
-                this.props.onCreateMessage(name, content, this.props.members, this.props.path, this.props.history);
-            }
-        }else{
-            if(this.props.postId){
-                this.props.onEditPost(content, this.props.postId, this.props.path, this.props.history);
-            }else if(this.props.subCategoryId){
-                this.props.onCreateThread(name, content, 1, this.props.subCategoryId, this.props.path, this.props.history); //fix userid eventually
-            }else{
-                this.props.onCreatePost(content, 1, this.props.threadId, this.props.path, this.props.history); //fix userid eventually
-            }
+        switch(this.props.modeValue) {
+            case CREATE_THREAD:
+                this.props.onCreateThread(this.props.titleValue, this.props.contentValue, 1, this.props.subCategoryIdValue, null, this.props.history); //fix userid eventually
+                break;
+            case CREATE_POST:
+                this.props.onCreatePost(this.props.contentValue, 1, this.props.threadIdValue, null, this.props.history); //fix userid eventually
+                break;
+            case EDIT_POST:
+                this.props.onEditPost(this.props.contentValue, this.props.postIdValue, null, this.props.history);
+                break;
+            case CREATE_MESSAGE:
+                this.props.onCreateMessage(this.props.titleValue, this.props.contentValue, this.props.membersValue, null, this.props.history);
+                break;
+            case CREATE_MESSAGE_POST:
+                this.props.onCreateMessagePost(this.props.contentValue, this.props.messageIdValue, null, this.props.history);
+                break;
+            case EDIT_MESSAGE_POST:
+                this.props.onEditMessagePost(this.props.contentValue, this.props.messagePostIdValue, null, this.props.history);
+                break;
+            default:
         }
-        
         this.props.destroy();
         this.props.closeForm();
     }
@@ -65,71 +61,86 @@ class PostForm extends Component {
     }
 
     render() {
-        let subCategoryDescription = null;
-        let editorDescription = null;
-        if (this.props.message){
-            editorDescription = 'Replying to message \'' + this.props.messageName + '\'';
-            if(!this.props.messageId) {
-                editorDescription = (
+        let description = null;
+
+        let threadField = null;
+
+        let membersField = null;
+        let titleField = null;
+
+        let contentField = (
+            <Field
+                key='content'
+                name='content'
+                component={PostEditor}
+                type='text'
+                change={this.props.change}
+                contentValue={this.props.contentValue}
+                validate={this.validate}/>
+        );
+
+        switch(this.props.modeValue) {
+            case CREATE_THREAD:
+                description = 'Creating new thread';
+                titleField = (
                     <Field
-                        async
-                        key='name'
-                        component={MultiSelect}
-                        type='text'
-                        name='name'
-                        loadOptions={this.refreshUsers}
-                        validate={this.validate}/>
-                );
-                subCategoryDescription = (
-                    <div>
-                        {"Creating new message"}
-                    </div>
-                );
-            }
-        }else{
-            editorDescription = 'Replying to thread \'' + this.props.threadName + '\'';
-            if(this.props.subCategoryId) {
-                editorDescription = (
-                    <Field
-                        key='name'
+                        key='title'
+                        name='title'
                         component={FieldComponent}
                         type='text'
-                        name='name'
                         validate={this.validate}/>
                 );
-                subCategoryDescription = (
-                    <div>
-                        {"Creating new thread in: '" + this.props.subCategoryName + "'"}
-                    </div>
+                break;
+            case CREATE_POST:
+                description = 'Replying to thread \'' + this.props.threadIdValue + '\'';
+                threadField = (
+                    <Field
+                        key='threadId'
+                        name='threadId'
+                        component={FieldComponent}
+                        type='text'
+                        validate={this.validate}/>
                 );
-            }
-            if(this.props.postId) {
-                editorDescription = 'Editing post #' + this.props.postId + ' in thread \'' + this.props.threadName + '\'';
-            }else if(this.props.messageId){
-                editorDescription = 'Editing message post #' + this.props.messagePostId + ' in message \'' + this.props.messageName + '\'';
-            }
+                break;
+            case EDIT_POST:
+                description = 'Editing post \'' + this.props.postIdValue + '\'';
+                break;
+            case CREATE_MESSAGE:
+                description = 'Creating new message';
+                membersField = (
+                    <Field
+                        key='members'
+                        name='members'
+                        component={MultiSelect}
+                        type='text'/>
+                );
+                titleField = (
+                    <Field
+                        key='title'
+                        name='title'
+                        component={FieldComponent}
+                        type='text'
+                        validate={this.validate}/>
+                );
+                break;
+            case CREATE_MESSAGE_POST:
+                description = 'Replying to message \'' + this.props.messageIdValue + '\'';
+                break;
+            case EDIT_MESSAGE_POST:
+                description = 'Editing message post \'' + this.props.messagePostIdValue + '\'';
+                break;
+            default:
         }
-        
-        
-        
-
-
         return(
                 <form onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                     <div style={{display: 'flex', flexShrink: '0', padding: '1rem', fontSize: '2rem', justifyContent: 'space-between'}}>
-                        <div>{editorDescription}</div>
-                        {subCategoryDescription}
+                        <div>{description}</div>
+                        {membersField}
+                        {titleField}
+                        {threadField}
                     </div>
                     <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1'}}>
-                        <Field
-                            key='content'
-                            component={PostEditor}
-                            type='text'
-                            name='content'
-                            change={this.props.change}
-                            contentValue={this.props.contentValue}
-                            validate={this.validate}/>
-                        
+                        {contentField}                        
                     </div>
                     <div>
                         <button type="submit">SUBMIT</button>
@@ -143,8 +154,24 @@ class PostForm extends Component {
 const selector = formValueSelector('postForm');
 
 const mapStateToProps = state => {
+    const modeValue = selector(state, 'mode');
+    const subCategoryIdValue = selector(state, 'subCategoryId');
+    const threadIdValue = selector(state, 'threadId');
+    const postIdValue = selector(state, 'postId');
+    const messageIdValue = selector(state, 'messageId');
+    const messagePostIdValue = selector(state, 'messagePostId');
+    const membersValue = selector(state, 'members');
+    const titleValue = selector(state, 'title');
     const contentValue = selector(state, 'content');
     return {
+        modeValue,
+        subCategoryIdValue,
+        threadIdValue,
+        postIdValue,
+        messageIdValue,
+        messagePostIdValue,
+        membersValue,
+        titleValue,
         contentValue
     }
 }
@@ -162,6 +189,7 @@ const mapDispatchToProps = dispatch => {
 
 export default connect(mapStateToProps, mapDispatchToProps)(
     reduxForm({
+        values: {members: []},
         destroyOnUnmount: false,
         form: 'postForm'
     })(withRouter(PostForm))

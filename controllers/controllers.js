@@ -80,16 +80,19 @@ module.exports = {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.User.findOne({where: {id: UserId}, transaction: t})
                     .then(function(user) {
-                        return models.Post.findAndCountAll({where: {ThreadId}, transaction: t})
-                            .then(function ({count}) {
-                                return models.Post.create({
-                                    content,
-                                    position: count + 1,
-                                    ThreadId,
-                                    UserId
-                                }, {transaction: t})
-                                    .then(function(newPost) {
-                                        return {newPost, user};
+                        return models.Thread.findOne({where: {id: ThreadId}, transaction: t})
+                            .then(function(thread) {
+                                return models.Post.findAndCountAll({where: {ThreadId}, transaction: t})
+                                    .then(function ({count}) {
+                                        return models.Post.create({
+                                            content,
+                                            position: count + 1,
+                                            ThreadId,
+                                            UserId
+                                        }, {transaction: t})
+                                            .then(function(newPost) {
+                                                return {newPost, user, thread};
+                                            });
                                     });
                             });
                     });
@@ -101,7 +104,13 @@ module.exports = {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.Post.findOne({where: {id: postId}, transaction: t})
                     .then(function(post) {
-                        return post.updateAttributes({content: updatedContent}, {transaction: t});
+                        return models.Thread.findOne({where: {id: post.ThreadId}, transaction: t})
+                            .then(function(thread) {
+                                return post.updateAttributes({content: updatedContent}, {transaction: t})
+                                    .then(function(updatedPost) {
+                                        return {updatedPost, thread};
+                                    });
+                            });
                     });
                 
             });
@@ -113,16 +122,28 @@ module.exports = {
                     .then(function(post) {
                         
                         if(post.position === 1){
-                            return models.Thread.destroy({where: {id: post.ThreadId}, transaction: t})
-                                .then((result) => {
-                                    return 1;
+                            return models.Thread.findOne({where: {id: post.ThreadId}, transaction: t})
+                                .then((thread) => {
+                                    return models.SubCategory.findOne({where: {id: thread.SubCategoryId}, transaction: t})
+                                        .then((subCategory) => {
+                                            return models.Thread.destroy({where: {id: post.ThreadId}, transaction: t})
+                                                .then((result) => {
+                                                    return [1, subCategory.id, subCategory.name];
+                                                });
+                                        });
                                 });
                         } else {
                             return models.sequelize.query("UPDATE Posts SET position = position - 1 WHERE position > ? AND ThreadId = ?;" , { replacements: [post.position, post.ThreadId], type: models.Sequelize.QueryTypes.UPDATE, transaction: t})
                                 .then(() => {
-                                    return models.Post.destroy({where: {id: postId}, transaction: t})
-                                        .then((result) => {
-                                            return 2;
+                                    return models.Post.findOne({where: {id: postId}, transaction: t})
+                                        .then((post) => {
+                                            return models.Thread.findOne({where: {id: post.ThreadId}, transaction: t})
+                                                .then((thread) => {
+                                                    return models.Post.destroy({where: {id: postId}, transaction: t})
+                                                        .then((result) => {
+                                                            return [2, thread.id, thread.name];
+                                                        });
+                                                });
                                         });
                                 })
                         }
@@ -214,6 +235,16 @@ module.exports = {
                                 }
                             });
                         });
+            });
+        },
+
+        getUserList(search) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.User.findAll({where: {name: {[models.sequelize.Op.like]: `%${search}%`}}, transaction: t})
+                    .then(function(users) {
+                        return users;
+                    });
+                
             });
         },
 

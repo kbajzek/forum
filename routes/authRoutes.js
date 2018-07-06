@@ -24,18 +24,15 @@ module.exports = app => {
         (req, res) => {
             console.log("Authentication was successful");
             console.log("In steam returning function");
+            req.session.csrf = uuid();
             res.redirect("http://localhost:3000");
         }
     );
 
     app.get('/api/fetch_user', (req, res) => {
         const user = req.session && req.session.passport && req.session.passport.user;
-        let csrf = null;
-        if (user) {
-            csrf = uuid();
-            req.session.csrf = csrf;
-        }
-        res.send({user: user, csrf: csrf});
+        console.log(req.session)
+        res.send({user: user, csrf: req.session.csrf});
     });
 
     app.get('/api/logout', (req, res) => {

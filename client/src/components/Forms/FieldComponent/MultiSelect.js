@@ -1,4 +1,8 @@
 import React, {Component} from 'react';
+import debounce from 'lodash/debounce';
+import {connect} from 'react-redux';
+
+import * as actions from '../../../store/actions';
 
 class MultiSelect extends Component {
 
@@ -7,20 +11,76 @@ class MultiSelect extends Component {
         this.textInput = React.createRef();
         this.outerTextInput = React.createRef();
         this.sizeInput = React.createRef();
+        this.suggestions = React.createRef();
         this.state = {
-            suggestions: [{key: 1, label: 'apple'}, {key: 2, label: 'banana'}],
+            suggestionsLoading: false,
             suggestionsOpen: false,
             textWidth: 10,
             textValue: ''
         };
     }
 
-    handleOnChange = (event) => {
-        this.setState(
-            { textValue: event.target.value },
-            () => {this.setState({textWidth: Math.max(10, this.sizeInput.current.scrollWidth)})}
-          );
+    handleKeyDown = (e) => {
+        if (e.keyCode === 8 && this.textInput.current.value === '' && this.props.input.value.length > 0) { // backspace was pressed
+            this.removeSelection(this.props.input.value[this.props.input.value.length - 1].key);
+        }
     }
+
+    changeValues = (newSelections) => {
+        this.props.input.onChange(newSelections);
+    }
+
+    removeSelection = (key) => {
+        const newSelections = this.props.input.value.filter(sel => sel.key !== key);
+        this.changeValues(newSelections);
+    }
+
+    addSelection = (e, key) => {
+        e.preventDefault();
+        const selected = this.props.userlistData.find((sugg) => sugg.key === key);
+        const newSelections = this.props.input.value.concat(selected);
+        this.changeValues(newSelections);
+        this.clearInput();
+    }
+
+    clearInput = () => {
+        this.textInput.current.value = '';
+        this.setState({
+            textValue: '', 
+            textWidth: 10,
+            suggestionsOpen: false,
+            suggestionsLoading: false
+        });
+    }
+
+    handleOnChange = (event) => {
+        let suggestionIsOpen = false;
+        if(event.target.value === ''){
+            suggestionIsOpen = false;
+        }else{
+            suggestionIsOpen = true;
+        }
+        this.setState(
+            { 
+                textValue: event.target.value,
+                suggestionsOpen: suggestionIsOpen,
+                suggestionsLoading: suggestionIsOpen
+            },
+            () => {
+                this.setState({textWidth: Math.max(10, this.sizeInput.current.scrollWidth)});
+                this.handleDebouncing();
+            }
+        );
+        
+        
+    }
+
+    handleDebouncing = debounce(() => {
+        if(this.state.suggestionsOpen){
+            this.props.onFetchUserlistInit(this.state.textValue);
+            this.setState({suggestionsLoading: false})
+        }
+    }, 500)
 
     handleOnClick = () => {
         if (this.textInput.current !== document.activeElement){
@@ -30,33 +90,61 @@ class MultiSelect extends Component {
     }
 
     handleOnFocus = () => {
-        this.setState({suggestionsOpen: true});
+        if(this.state.textValue !== ''){
+            this.setState({suggestionsOpen: true});
+        }
     }
 
     handleOnBlur = (e) => {
-        if (e.relatedTarget === this.outerTextInput.current){
+        if (e.relatedTarget === this.outerTextInput.current || e.relatedTarget === this.suggestions.current){
             e.preventDefault();
             this.textInput.current.focus();
         }else{
             this.setState({suggestionsOpen: false});
         }
-        
     }
     
     render() {
 
         let suggestionList = null;
+        let selectionList = null;
 
-        if(this.state.suggestionsOpen){
-            suggestionList = this.state.suggestions.map(({key, label}) => {
-                return(
-                    <div key={key}>
-                        {label}
+        if(this.state.suggestionsOpen && !this.state.suggestionsLoading){
+            const suggestions = this.props.userlistData.filter(sugg => !this.props.input.value.find(sel => sel.key === sugg.key));
+            if(suggestions.length < 1){
+                suggestionList = (
+                    <div>
+                        No Results
                     </div>
                 );
-            });
+            }else{
+                suggestionList = suggestions.map(({key, label}) => {
+                    return(
+                        <div key={key} onClick={(e) => this.addSelection(e, key)}>
+                            {label}
+                        </div>
+                    );
+                });
+            }
         }
-    
+
+        if(this.state.suggestionsLoading || this.props.userlistLoading){
+            suggestionList = (
+                <div>
+                    Loading...
+                </div>
+            );
+        }
+
+        selectionList = this.props.input.value.map(({key, label}) => {
+            return(
+                <div key={key} style={{display: 'flex', flexDirection: 'row', backgroundColor: 'blue'}}>
+                    <button onClick={(e) => this.removeSelection(key)}>X</button>
+                    <div>{label}</div>
+                </div>
+            );
+        });
+
         return (
             <div>
                 <div 
@@ -64,18 +152,18 @@ class MultiSelect extends Component {
                     tabIndex="0" 
                     onFocus={this.handleOnClick} 
                     onClick={this.handleOnClick} 
-                    style={{padding: '1rem', backgroundColor: 'red', cursor: 'text', position: 'relative', display: 'flex'}}>
-                    <div style={{display: 'flex', flexBasis: 'min-content'}}>
-                        <input 
-                            onFocus={this.handleOnFocus} 
-                            onBlur={this.handleOnBlur} 
-                            style={{outline: 'none', border: 'none', width: `${this.state.textWidth}px`}} 
-                            ref={this.textInput} 
-                            onChange={this.handleOnChange} 
-                            autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"/> 
-                    </div>
+                    style={{padding: '1rem', backgroundColor: 'white', cursor: 'text', position: 'relative', display: 'flex', width: '30rem', flexDirection: 'row', flexWrap: 'wrap'}}>
+                    {selectionList}
+                    <input 
+                        onFocus={this.handleOnFocus} 
+                        onBlur={this.handleOnBlur}
+                        onKeyDown={this.handleKeyDown}
+                        style={{marginLeft: '.5rem', outline: 'none', border: 'none', width: `${this.state.textWidth}px`}} 
+                        ref={this.textInput} 
+                        onChange={this.handleOnChange} 
+                        autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"/> 
                 </div>
-                <div style={{position: 'absolute', display: 'flex', flexDirection: 'column', backgroundColor: 'white'}}>
+                <div ref={this.suggestions} tabIndex="0" style={{position: 'absolute', display: 'flex', flexDirection: 'column', backgroundColor: 'white', cursor: 'pointer'}}>
                     {suggestionList}
                 </div>
                 <input value={this.state.textValue} ref={this.sizeInput} style={{position: 'absolute', top: 0, left: 0, visibility: 'hidden', height: 0, width: 0}}/>
@@ -84,4 +172,19 @@ class MultiSelect extends Component {
     }
 }
 
-export default MultiSelect;
+const mapStateToProps = state => {
+    return {
+        userlistData: state.forums.userlistData,
+        userlistLoading: state.forums.userlistLoading,
+        error: state.forums.error,
+        auth: state.auth.user
+    };
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onFetchUserlistInit: (search) => dispatch(actions.fetchUserlistInit(search))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MultiSelect);

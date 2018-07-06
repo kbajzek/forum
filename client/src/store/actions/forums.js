@@ -186,6 +186,29 @@ export const refreshMessageDataFailed = (error) => {
     };
 };
 
+// USER LIST
+
+export const fetchUserlistInit = ( search ) => {
+    return {
+        type: actionTypes.FETCH_USERLIST_INIT,
+        search: search
+    };
+};
+
+export const fetchUserlistSuccess = (data) => {
+    return {
+        type: actionTypes.FETCH_USERLIST_SUCCESS,
+        data: data
+    };
+};
+
+export const fetchUserlistFailed = (error) => {
+    return {
+        type: actionTypes.FETCH_USERLIST_FAILED,
+        error: error
+    };
+};
+
 // CATEGORY
 
 export const createCategory = ( name ) => {

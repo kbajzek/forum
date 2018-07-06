@@ -60,6 +60,10 @@ export {
     createRatingFailed,
     deleteRating,
     deleteRatingFailed,
+
+    fetchUserlistInit,
+    fetchUserlistSuccess,
+    fetchUserlistFailed,
     
 } from './forums';
 export {

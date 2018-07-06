@@ -14,168 +14,144 @@ import MessagePage from './MessagePage/MessagePage';
 
 import classes from './Forums.module.css';
 
+const CREATE_THREAD = 1;
+const CREATE_POST = 2;
+const EDIT_POST = 3;
+const CREATE_MESSAGE = 4;
+const CREATE_MESSAGE_POST = 5;
+const EDIT_MESSAGE_POST = 6;
+
 class Forums extends Component {
 
     state={
-        postEditorMessageMode: false,
-        postEditorActive: false,
-        showPostEditor: false,
-        postEditorThread: null, //thread or message
-        postEditorPost: null, //post or messagepost
-        postEditorSlug: '',
-        postEditorThreadName: '', //thread or message
-        postEditorSubCategory: null,
-        postEditorSubCategoryName: '',
-        postEditorMembers: []
+        writerActive: false,
+        writerOpen: false,
     }
 
     componentDidMount() {
         this.props.fetchUser();
     }
 
-    handlePostEdit = (postId, postContent, threadId, slug, threadName) => {
-        //this.setState({showPostEditor: true, postEditorThread: threadId, postEditorSlug: slug, postEditorActive: true, postEditorThreadName: threadName});
-        this.props.changePostEditor(postContent);
+    handlePostEdit = (postId, postContent, threadId) => {
+        this.props.changeWriterMode(EDIT_POST);
+        this.props.changeWriterThreadId(threadId);
+        this.props.changeWriterPostId(postId);
+        this.props.changeWriterContent(postContent);
         this.setState({
-            showPostEditor: true, 
-            postEditorThread: threadId, 
-            postEditorSlug: slug, 
-            postEditorActive: true, 
-            postEditorThreadName: threadName, 
-            postEditorPost: postId,
-            postEditorSubCategory: null,
-            postEditorSubCategoryName: '',
-            postEditorMessageMode: false
+            writerOpen: true,
+            writerActive: true
         });
     }
 
-    handlePostDelete = (postId, id, slug) => {
-        const path = "/thread/" + id + "/" + slug;
-        this.props.onDeletePost(postId, path, this.props.history);
+    handlePostDelete = (postId) => {
+        this.props.onDeletePost(postId, null, this.props.history);
     }
 
     handlePostQuote = (userName, postId, threadId, threadSlug, threadName, postContent) => {
+        this.props.changeWriterMode(CREATE_POST);
+        if(!this.props.postValues || !this.props.postValues.threadId || this.props.postValues.threadId === '') {
+            this.props.changeWriterThreadId(threadId);
+        }
+        
+
         let beginning = '\n\n';
         if(!this.props.postValues || !this.props.postValues.content || this.props.postValues.content === '') {
             beginning = '';
         }
         const quoteHeader = beginning + userName + " said in [url=/forums/thread/" + threadId + "/" + threadSlug + "#" + postId + "]" + threadName + "[/url]:";
-
         const quoteContent = "\n[quote]" + postContent + "[/quote]\n\n";
-
         const oldContent = this.props.postValues ? this.props.postValues.content : '';
 
-        if(!this.state.postEditorActive){
-            this.openPostEditor(threadId, threadSlug, threadName);
-        }else if(!this.state.showPostEditor){
-            this.togglePostEditor();
-        }
-        this.props.changePostEditor(oldContent + quoteHeader + quoteContent);
+        this.props.changeWriterContent(oldContent + quoteHeader + quoteContent);
+        this.setState({
+            writerOpen: true,
+            writerActive: true
+        });
     }
 
     handlePostReply = (userName, postId, threadId, threadSlug, threadName, postContent) => {
+        this.props.changeWriterMode(CREATE_POST);
+        this.props.changeWriterThreadId(threadId);
+
         let beginning = '\n\n';
         if(!this.props.postValues || !this.props.postValues.content || this.props.postValues.content === '') {
             beginning = '';
         }
         const quoteHeader = beginning + userName + " said in [url=/forums/thread/" + threadId + "/" + threadSlug + "#" + postId + "]" + threadName + "[/url]:";
-
         const quoteContent = "\n[quote]" + postContent + "[/quote]\n\n";
-
         const oldContent = this.props.postValues ? this.props.postValues.content : '';
 
-        this.openPostEditor(threadId, threadSlug, threadName);
-        this.props.changePostEditor(oldContent + quoteHeader + quoteContent);
-    }
-
-    handleThreadCreate = (slug, subCategoryId, subCategoryName) => {
-        this.props.changePostEditor('');
+        this.props.changeWriterContent(oldContent + quoteHeader + quoteContent);
         this.setState({
-            showPostEditor: true, 
-            postEditorThread: null, 
-            postEditorSlug: slug, 
-            postEditorActive: true, 
-            postEditorThreadName: '', 
-            postEditorSubCategory: subCategoryId,
-            postEditorSubCategoryName: subCategoryName,
-            postEditorMessageMode: false
+            writerOpen: true,
+            writerActive: true
         });
     }
 
-    handleMessageCreate = (slug, members) => {
-        this.props.changePostEditor('');
+    handleThreadCreate = (subCategoryId) => {
+        this.props.changeWriterMode(CREATE_THREAD);
+        this.props.changeWriterSubCategoryId(subCategoryId);
+        this.props.changeWriterContent('');
         this.setState({
-            showPostEditor: true, 
-            postEditorThread: null, 
-            postEditorSlug: slug, 
-            postEditorActive: true, 
-            postEditorThreadName: '', 
-            postEditorSubCategory: '',
-            postEditorSubCategoryName: '',
-            postEditorMembers: members,
-            postEditorMessageMode: true
+            writerOpen: true,
+            writerActive: true
         });
     }
 
-    openPostEditor = (threadId, slug, threadName, subCategoryId, subCategoryName) => {
+    handleMessageCreate = () => {
+        this.props.changeWriterMode(CREATE_MESSAGE);
+        this.props.changeWriterMembers([]);
+        this.props.changeWriterContent('');
         this.setState({
-            showPostEditor: true, 
-            postEditorThread: threadId, 
-            postEditorSlug: slug, 
-            postEditorActive: true, 
-            postEditorThreadName: threadName, 
-            postEditorSubCategory: subCategoryId,
-            postEditorSubCategoryName: subCategoryName
+            writerOpen: true,
+            writerActive: true
         });
     }
 
-    togglePostEditor = () => {
+    handlePostCreate = (threadId) => {
+        this.props.changeWriterMode(CREATE_POST);
+        this.props.changeWriterThreadId(threadId);
+        this.props.changeWriterContent('');
+        this.setState({
+            writerOpen: true,
+            writerActive: true
+        });
+    }
+
+    toggleWriter = () => {
         this.setState((prevState) => {
-            return {showPostEditor: !prevState.showPostEditor}
+            return {writerOpen: !prevState.writerOpen}
          });
     }
 
-    closePostEditor = () => {
+    closeWriter = () => {
         this.setState({
-            postEditorActive: false,
-            showPostEditor: false,
-            postEditorThread: null,
-            postEditorPost: null,
-            postEditorSlug: '',
-            postEditorThreadName: '',
-            postEditorSubCategory: null,
-            postEditorSubCategoryName: ''
+            writerOpen: false,
+            writerActive: false
         });
     }
 
     render() {
 
         let editor=null;
-        // let postCreated=null;
-        // if(this.state.NewPost){
-        //     const path = "/thread/" + this.state.postEditorThread + "/" + this.state.postEditorSlug;
-        //     postCreated=<Redirect to={path} />;
-        // }
+        let editorButton;
+        if (this.state.writerActive) {
+            editorButton = (
+                <button 
+                    onClick={this.toggleWriter} 
+                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
+                    EDITOR
+                </button>
+            );
+        }
 
         let pad='0rem';
 
-        if(this.state.showPostEditor){
+        if(this.state.writerOpen){
             pad = '40rem';
-            let pathBeginning = "/thread/" + this.state.postEditorThread;
-            if (!this.state.postEditorThread){
-                pathBeginning = "/" + this.state.postEditorSubCategory;
-            }
             editor=(
                 <div style={{position: 'fixed', bottom: '0px', left: '0px', right: '0px', backgroundColor: '#778899', height: '40rem'}}>
-                    <PostForm 
-                        closeForm={this.closePostEditor} 
-                        threadId={this.state.postEditorThread || 1} 
-                        path={pathBeginning + "/" + this.state.postEditorSlug}
-                        threadName={this.state.postEditorThreadName || ''}
-                        postId={this.state.postEditorPost}
-                        subCategoryId={this.state.postEditorSubCategory}
-                        subCategoryName={this.state.postEditorSubCategoryName}
-                        message={this.state.postEditorMessageMode} />
+                    <PostForm closeForm={this.closeWriter}/>
                 </div>
             );
         }
@@ -184,16 +160,6 @@ class Forums extends Component {
             <div className={classes.Forums} style={{paddingBottom: `${pad}`}}>
                 <Switch>
                     <Route path="/forums" exact render={() => {
-                        let editorButton;
-                        if (this.state.postEditorActive) {
-                            editorButton = (
-                                <button 
-                                    onClick={this.togglePostEditor} 
-                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
-                                    EDITOR
-                                </button>
-                            );
-                        }
                         return (
                             <div>
                                 <Categories />
@@ -202,23 +168,13 @@ class Forums extends Component {
                         )
                     }} />
                     <Route path="/forums/thread/:id/:slug" render={({match}) => {
-                        let editorButton;
-                        if (this.state.postEditorActive) {
-                            editorButton = (
-                                <button 
-                                    onClick={this.togglePostEditor} 
-                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
-                                    EDITOR
-                                </button>
-                            );
-                        }
                         return (
                             <div>
                                 <Thread 
                                     key={match.params.id} 
                                     id={match.params.id} 
                                     slug={match.params.slug} 
-                                    handlePostCreate={this.openPostEditor}
+                                    handlePostCreate={this.handlePostCreate}
                                     handlePostEdit={this.handlePostEdit}
                                     handlePostDelete={this.handlePostDelete}
                                     handlePostQuote={this.handlePostQuote}
@@ -226,19 +182,8 @@ class Forums extends Component {
                                 {editorButton}
                             </div>
                         );
-                        
                     }} />
                     <Route path="/forums/user/:id/:slug" render={({match}) => {
-                        let editorButton;
-                        if (this.state.postEditorActive) {
-                            editorButton = (
-                                <button 
-                                    onClick={this.togglePostEditor} 
-                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
-                                    EDITOR
-                                </button>
-                            );
-                        }
                         return (
                             <div>
                                 <UserPage 
@@ -248,19 +193,8 @@ class Forums extends Component {
                                 {editorButton}
                             </div>
                         );
-                        
                     }} />
                     <Route path="/forums/message/:id/:slug" render={({match}) => {
-                        let editorButton;
-                        if (this.state.postEditorActive) {
-                            editorButton = (
-                                <button 
-                                    onClick={this.togglePostEditor} 
-                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
-                                    EDITOR
-                                </button>
-                            );
-                        }
                         return (
                             <div>
                                 <MessagePage 
@@ -270,38 +204,16 @@ class Forums extends Component {
                                 {editorButton}
                             </div>
                         );
-                        
                     }} />
                     <Route path="/forums/message" render={({match}) => {
-                        let editorButton;
-                        if (this.state.postEditorActive) {
-                            editorButton = (
-                                <button 
-                                    onClick={this.togglePostEditor} 
-                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
-                                    EDITOR
-                                </button>
-                            );
-                        }
                         return (
                             <div>
                                 <MessagePage handleMessageCreate={this.handleMessageCreate} />
                                 {editorButton}
                             </div>
                         );
-                        
                     }} />
                     <Route path="/forums/:id/:slug" render={({match}) => {
-                        let editorButton;
-                        if (this.state.postEditorActive) {
-                            editorButton = (
-                                <button 
-                                    onClick={this.togglePostEditor} 
-                                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
-                                    EDITOR
-                                </button>
-                            );
-                        }
                         return (
                             <div>
                                 <SubCategoryPage key={match.params.id} id={match.params.id} slug={match.params.slug} handleThreadCreate={this.handleThreadCreate}/>
@@ -312,8 +224,6 @@ class Forums extends Component {
                 </Switch>
                 {editor}
 
-    
-                
             </div>
         );
     }
@@ -323,12 +233,20 @@ const mapStateToProps = state => {
     return {
         threadData: state.forums.threadData,
         postValues: getFormValues('postForm')(state)
-    };
+    }
 }
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-        changePostEditor : (value) => dispatch(change('postForm', 'content', value)),
+        changeWriterMode : (value) => dispatch(change('postForm', 'mode', value)),
+        changeWriterSubCategoryId : (value) => dispatch(change('postForm', 'subCategoryId', value)),
+        changeWriterThreadId : (value) => dispatch(change('postForm', 'threadId', value)),
+        changeWriterPostId : (value) => dispatch(change('postForm', 'postId', value)),
+        changeWriterMessageId : (value) => dispatch(change('postForm', 'messageId', value)),
+        changeWriterMessagePostId : (value) => dispatch(change('postForm', 'messagePostId', value)),
+        changeWriterMembers : (value) => dispatch(change('postForm', 'members', value)),
+        changeWriterTitle : (value) => dispatch(change('postForm', 'title', value)),
+        changeWriterContent : (value) => dispatch(change('postForm', 'content', value)),
         onDeletePost: (postId, path, history) => dispatch(actions.deletePost(postId, path, history)),
         fetchUser: () => dispatch(actions.fetchUserInit())
 	}

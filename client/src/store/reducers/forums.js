@@ -5,6 +5,8 @@ const initialState = {
     subCategoryPageData: null,
     threadData: null,
     userData: null,
+    userlistData: [],
+    userlistLoading: false,
     messageData: null,
     postEditorData: null,
     postCreated: null,
@@ -137,6 +139,37 @@ const refreshMessageDataFailed = (state, action) => {
     return updatedState;
 };
 
+// USER LIST
+
+const fetchUserlistInit = (state, action) => {
+    const updatedState = {
+        ...state,
+        userlistLoading: true,
+        error: false
+    }
+    return updatedState;
+};
+
+const fetchUserlistSuccess = (state, action) => {
+    const userlist = action.data || [];
+    const updatedState = {
+        ...state,
+        userlistData: userlist,
+        userlistLoading: false,
+        error: false
+    }
+    return updatedState;
+};
+
+const fetchUserlistFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        userlistLoading: false,
+        error: action.error
+    }
+    return updatedState;
+};
+
 const createCategoryFailed = (state, action) => {
     const updatedState = {
         ...state,
@@ -249,6 +282,10 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.SET_MESSAGE_DATA: return setMessageData(state, action);
         case actionTypes.INIT_MESSAGE_DATA_FAILED: return initMessageDataFailed(state, action);
         case actionTypes.REFRESH_MESSAGE_DATA_FAILED: return refreshMessageDataFailed(state, action);
+
+        case actionTypes.FETCH_USERLIST_INIT: return fetchUserlistInit(state, action);
+        case actionTypes.FETCH_USERLIST_SUCCESS: return fetchUserlistSuccess(state, action);
+        case actionTypes.FETCH_USERLIST_FAILED: return fetchUserlistFailed(state, action);
 
         case actionTypes.CREATE_CATEGORY_FAILED: return createCategoryFailed(state, action);
         case actionTypes.CREATE_SUB_CATEGORY_FAILED: return createSubCategoryFailed(state, action);

@@ -557,6 +557,20 @@ module.exports = app => {
             })
     });
 
+    app.get('/api/forums/userlist', (req, res) => {
+        console.log(req.query.search)
+        controllers.getUserList(req.query.search)
+            .then((users) => {
+                const userList = users.map((user) => {return {key: user.id, label: user.name}})
+                res.send({users: userList});
+            })
+            .catch((error) => {
+                console.log(error)
+                res.status(500).send({ error: 'Something failed!' })
+            });
+
+    });
+
     app.post('/api/forums/category/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createCategory(req.body.name)
             .then((newCategory) => {
@@ -589,7 +603,7 @@ module.exports = app => {
                 res.send({
                     threadId: result[0].id,
                     postId: result[1].id,
-                    threadPath: `/thread/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
+                    path: `/thread/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
                     name: result[2].name,
                     createdOn: result[0].createdAt,
                     lastUpdated: result[1].updatedAt
@@ -602,13 +616,15 @@ module.exports = app => {
 
     app.post('/api/forums/post/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createPost(req.body.content, req.session.passport.user, req.body.threadId)
-            .then(({newPost, user}) => {
+            .then(({newPost, user, thread}) => {
                 controllers.getUserTotalPosts(req.session.passport.user)
                     .then(({user, count}) => {
                         res.send({
                             postId: newPost.id, 
                             content: newPost.content,
                             threadId: req.body.threadId,
+                            path: `/thread/${req.body.threadId}/${slugify(thread.name).toLowerCase()}`,
+                            pathSpecific: `/thread/${req.body.threadId}/${slugify(thread.name).toLowerCase()}#${newPost.id}`,
                             userName: user.name, 
                             userTotalPosts: count, 
                             userSignature: "to be implemented"
@@ -622,9 +638,10 @@ module.exports = app => {
 
     app.post('/api/forums/post/edit', requireCSRF, requireLogin, (req, res) => {
         controllers.editPost(req.body.content, req.body.postId)
-            .then((updatedPost) => {
+            .then(({updatedPost, thread}) => {
                 res.send({
-                    postId: updatedPost.id
+                    postId: updatedPost.id,
+                    path: `/thread/${thread.id}/${slugify(thread.name).toLowerCase()}`
                 });
             })
             .catch((error) => {
@@ -633,10 +650,12 @@ module.exports = app => {
     })
 
     app.post('/api/forums/post/delete', requireCSRF, requireLogin, (req, res) => {
+        
         controllers.deletePost(req.body.postId)
             .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
                 res.send({
-                    response: response
+                    response: response[0],
+                    path: `/thread/${response[1]}/${slugify(response[2]).toLowerCase()}`
                 });
             })
             .catch((error) => {
@@ -646,12 +665,13 @@ module.exports = app => {
 
     app.post('/api/forums/message/create', requireCSRF, requireLogin, (req, res) => {
         console.log(req.session)
-        controllers.createMessage(req.body.name, req.body.content, req.body.members, req.session.passport.user)
+        const members = req.body.members.map(member => member.key);
+        controllers.createMessage(req.body.name, req.body.content, members, req.session.passport.user)
             .then((result) => {
                 res.send({
                     message: result[0].id,
                     messagePostId: result[1].id,
-                    messagePath: `/message/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
+                    path: `/message/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
                     createdOn: result[0].createdAt,
                     lastUpdated: result[1].updatedAt
                 });

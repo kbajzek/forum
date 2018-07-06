@@ -61,6 +61,7 @@ app.use(session({
     secret: 'your secret',
     resave: false,
     saveUninitialized: false,
+    cookie: { path: '/', httpOnly: true, secure: false, maxAge: 86400000 },
     store:new RedisStore({
         host: 'localhost',
         port: 6379,

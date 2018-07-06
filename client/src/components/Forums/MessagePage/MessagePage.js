@@ -19,7 +19,7 @@ class MessagePage extends Component {
     }
 
     handleMessageCreator = () => {
-        this.props.handleMessageCreate(this.props.id, this.props.slug, this.props.messageData.name);
+        this.props.handleMessageCreate();
     }
     
     render() {
