@@ -12,6 +12,7 @@ import {
   refreshUserDataSaga,
   initMessageDataSaga,
   refreshMessageDataSaga,
+  selectMessageDataSaga,
   createCategorySaga,
   createSubCategorySaga,
   createThreadSaga,
@@ -42,6 +43,7 @@ export function* watchForums() {
   yield takeEvery(actionTypes.REFRESH_USER_DATA, refreshUserDataSaga);
   yield takeEvery(actionTypes.INIT_MESSAGE_DATA, initMessageDataSaga);
   yield takeEvery(actionTypes.REFRESH_MESSAGE_DATA, refreshMessageDataSaga);
+  yield takeEvery(actionTypes.SELECT_MESSAGE_DATA, selectMessageDataSaga);
   yield takeEvery(actionTypes.FETCH_USERLIST_INIT, fetchUserlistSaga);
   yield takeEvery(actionTypes.CREATE_CATEGORY, createCategorySaga);
   yield takeEvery(actionTypes.CREATE_SUB_CATEGORY, createSubCategorySaga);

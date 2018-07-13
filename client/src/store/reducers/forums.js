@@ -11,7 +11,8 @@ const initialState = {
     postEditorData: null,
     postCreated: null,
     request_notifications: [],
-    error: false
+    error: false,
+    noRefreshFlag: false,
 };
 
 const setCategoryData = (state, action) => {
@@ -139,6 +140,26 @@ const refreshMessageDataFailed = (state, action) => {
     return updatedState;
 };
 
+const selectMessageDataFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
+const setMessagePostData = (state, action) => {
+    const updatedState = {
+        ...state,
+        messageData: {
+            ...state.messageData,
+            posts: action.data
+        },
+        error: false
+    }
+    return updatedState;
+};
+
 // USER LIST
 
 const fetchUserlistInit = (state, action) => {
@@ -260,6 +281,16 @@ const createRatingFailed = (state, action) => {
     return updatedState;
 };
 
+// UTILITY
+
+const setNoRefreshFlag = (state, action) => {
+    const updatedState = {
+        ...state,
+        noRefreshFlag: action.flag
+    }
+    return updatedState;
+}
+
 const reducer = ( state = initialState, action ) => {
     switch ( action.type ) {
 
@@ -282,6 +313,8 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.SET_MESSAGE_DATA: return setMessageData(state, action);
         case actionTypes.INIT_MESSAGE_DATA_FAILED: return initMessageDataFailed(state, action);
         case actionTypes.REFRESH_MESSAGE_DATA_FAILED: return refreshMessageDataFailed(state, action);
+        case actionTypes.SELECT_MESSAGE_DATA_FAILED: return selectMessageDataFailed(state, action);
+        case actionTypes.SET_MESSAGE_POST_DATA: return setMessagePostData(state, action);
 
         case actionTypes.FETCH_USERLIST_INIT: return fetchUserlistInit(state, action);
         case actionTypes.FETCH_USERLIST_SUCCESS: return fetchUserlistSuccess(state, action);
@@ -299,6 +332,8 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.DELETE_MESSAGE_POST_FAILED: return deleteMessagePostFailed(state, action);
 
         case actionTypes.CREATE_RATING_FAILED: return createRatingFailed(state, action);
+
+        case actionTypes.SET_NO_REFRESH_FLAG: return setNoRefreshFlag(state, action);
 
         default: return state;
     }

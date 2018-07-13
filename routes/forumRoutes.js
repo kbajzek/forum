@@ -517,7 +517,7 @@ module.exports = app => {
 
         let messageId = Number(req.params.id);
         
-        models.sequelize.query(queries.getUserMessageListQuery(userId), { type: models.Sequelize.QueryTypes.SELECT})
+        models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
             .then(result => {
                 models.sequelize.query(queries.getMessageQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT})
                     .then(result2 => {
@@ -664,8 +664,8 @@ module.exports = app => {
     })
 
     app.post('/api/forums/message/create', requireCSRF, requireLogin, (req, res) => {
-        console.log(req.session)
         const members = req.body.members.map(member => member.key);
+        console.log(req.session)
         controllers.createMessage(req.body.name, req.body.content, members, req.session.passport.user)
             .then((result) => {
                 res.send({
@@ -683,12 +683,13 @@ module.exports = app => {
 
     app.post('/api/forums/messagepost/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createMessagePost(req.body.content, req.session.passport.user, req.body.messageId)
-            .then(({newPost, user}) => {
+            .then(({newPost, user, message}) => {
                 res.send({
                     postId: newPost.id, 
                     content: newPost.content,
                     messageId: req.body.messageId,
-                    userName: user.name
+                    userName: user.name,
+                    path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
                 });
             })
             .catch((error) => {

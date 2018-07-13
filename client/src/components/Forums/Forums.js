@@ -108,6 +108,16 @@ class Forums extends Component {
         });
     }
 
+    handleMessageReply = (id) => {
+        this.props.changeWriterMode(CREATE_MESSAGE_POST);
+        this.props.changeWriterMessageId(id);
+        this.props.changeWriterContent('');
+        this.setState({
+            writerOpen: true,
+            writerActive: true
+        });
+    }
+
     handlePostCreate = (threadId) => {
         this.props.changeWriterMode(CREATE_POST);
         this.props.changeWriterThreadId(threadId);
@@ -200,7 +210,9 @@ class Forums extends Component {
                                 <MessagePage 
                                     key={match.params.id} 
                                     id={match.params.id} 
-                                    slug={match.params.slug} handleMessageCreate={this.handleMessageCreate}/>
+                                    slug={match.params.slug} 
+                                    handleMessageCreate={this.handleMessageCreate}
+                                    handleMessageReply={this.handleMessageReply}/>
                                 {editorButton}
                             </div>
                         );
@@ -208,7 +220,9 @@ class Forums extends Component {
                     <Route path="/forums/message" render={({match}) => {
                         return (
                             <div>
-                                <MessagePage handleMessageCreate={this.handleMessageCreate} />
+                                <MessagePage 
+                                    handleMessageCreate={this.handleMessageCreate}
+                                    handleMessageReply={this.handleMessageReply}/>
                                 {editorButton}
                             </div>
                         );

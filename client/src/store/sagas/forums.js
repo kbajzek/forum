@@ -118,6 +118,20 @@ export function* refreshMessageDataSaga(action) {
   }
 }
 
+export function* selectMessageDataSaga(action) {
+  try {
+    yield put(actions.setNoRefreshFlag(true));
+    yield action.history.push("/forums" + action.path);
+    yield put(actions.setMessagePostData(null));
+    const response = yield axios.get(
+      "/api/forums" + action.path
+    );
+    yield put(actions.setMessagePostData(response.data.posts));
+  } catch (error) {
+    yield put(actions.selectMessageDataFailed());
+  }
+}
+
 export function* fetchUserlistSaga(action) {
   try {
     const response = yield axios.get(
@@ -240,8 +254,8 @@ export function* createMessageSaga(action) {
         members: action.members
       }
     );
-    yield put(actions.refreshMessageData(action.path));
-    yield action.history.push("/forums" + response.data.messagePath);
+    yield put(actions.refreshMessageData(response.data.path));
+    yield action.history.push("/forums" + response.data.path);
   } catch (error) {
     yield put(actions.createMessageFailed(error));
   }
@@ -256,8 +270,8 @@ export function* createMessagePostSaga(action) {
         path: action.path
       }
     );
-    yield put(actions.refreshMessageData(action.path));
-    yield action.history.push("/forums" + response.data.messagePath);
+    yield put(actions.refreshMessageData(response.data.path));
+    yield action.history.push("/forums" + response.data.path);
   } catch (error) {
     yield put(actions.createMessagePostFailed(error));
   }
@@ -273,7 +287,7 @@ export function* editMessagePostSaga(action) {
       }
     );
     yield put(actions.refreshMessageData(action.path));
-    yield action.history.push("/forums" + response.data.messagePath);
+    yield action.history.push("/forums" + response.data.path);
   } catch (error) {
     yield put(actions.editMessagePostFailed(error));
   }
@@ -289,7 +303,7 @@ export function* deleteMessagePostSaga(action) {
       }
     );
     yield put(actions.refreshMessageData(action.path));
-    yield action.history.push("/forums" + response.data.messagePath);
+    yield action.history.push("/forums" + response.data.path);
   } catch (error) {
     yield put(actions.deleteMessagePostFailed(error));
   }

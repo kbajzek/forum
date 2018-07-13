@@ -45,14 +45,14 @@ class Layout extends Component {
                     exact>
                     Forums
                 </NavigationItem>
-                <NavigationItem
+                {this.props.user ? <NavigationItem
                     clicked={() => {
                         this.sideDrawerClosedHandler();
                     }} 
                     link="/forums/message" 
                     exact>
                     Messages
-                </NavigationItem>
+                </NavigationItem> : null}
                 <NavigationItem 
                     clicked={() => {this.sideDrawerClosedHandler(); }}
                     link="https://steamcommunity.com/groups/ExoTerraGaming" 

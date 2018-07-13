@@ -186,6 +186,28 @@ export const refreshMessageDataFailed = (error) => {
     };
 };
 
+export const selectMessageData = (path, history) => {
+    return {
+        type: actionTypes.SELECT_MESSAGE_DATA,
+        path: path,
+        history: history
+    };
+};
+
+export const selectMessageDataFailed = (error) => {
+    return {
+        type: actionTypes.SELECT_MESSAGE_DATA_FAILED,
+        error: error
+    };
+};
+
+export const setMessagePostData = ( data ) => {
+    return {
+        type: actionTypes.SET_MESSAGE_POST_DATA,
+        data: data
+    };
+};
+
 // USER LIST
 
 export const fetchUserlistInit = ( search ) => {
@@ -425,5 +447,14 @@ export const deleteRatingFailed = (error) => {
     return {
         type: actionTypes.DELETE_RATING_FAILED,
         error: error
+    };
+};
+
+// UTILITY
+
+export const setNoRefreshFlag = (flag) => {
+    return {
+        type: actionTypes.SET_NO_REFRESH_FLAG,
+        flag: flag
     };
 };

@@ -151,7 +151,7 @@ module.exports = {
             });
         },
 
-        createMessage(name, content, members, UserId) {
+        createMessage(name, content, members, owner) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.Message.create({
                     name
@@ -159,21 +159,23 @@ module.exports = {
                     .then(function(newMessage) {
                         const perm = 2;
                         return models.MessageMember.create({
-                            perm,
-                            UserId
+                            permission: perm,
+                            UserId: owner,
+                            MessageId: newMessage.id
                         }, {transaction: t})
                             .then(function(user) {
                                 const perm = 1;
                                 return models.sequelize.Promise.map(members, function(member){
                                     return models.MessageMember.create({
-                                        perm,
-                                        member
+                                        permission: perm,
+                                        UserId: member,
+                                        MessageId: newMessage.id
                                     }, {transaction: t})
                                 })
                                     .then(function(newMembers) {
                                         return models.MessagePost.create({
                                             content,
-                                            UserId,
+                                            UserId: owner,
                                             MessageId: newMessage.id
                                         }, {transaction: t})
                                             .then(function(messagepost) {
@@ -189,15 +191,15 @@ module.exports = {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.User.findOne({where: {id: UserId}, transaction: t})
                     .then(function(user) {
-                        return models.MessagePost.findAndCountAll({where: {MessageId}, transaction: t})
-                            .then(function ({count}) {
+                        return models.Message.findOne({where: {id: MessageId}, transaction: t})
+                            .then(function (message) {
                                 return models.MessagePost.create({
                                     content,
                                     MessageId,
                                     UserId
                                 }, {transaction: t})
                                     .then(function(newPost) {
-                                        return {newPost, user};
+                                        return {newPost, user, message};
                                     });
                             });
                     });
