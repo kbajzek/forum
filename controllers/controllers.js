@@ -211,9 +211,14 @@ module.exports = {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.MessagePost.findOne({where: {id: messagePostId}, transaction: t})
                     .then(function(post) {
-                        return post.updateAttributes({content: updatedContent}, {transaction: t});
+                        return models.Message.findOne({where: {id: post.MessageId}, transaction: t})
+                            .then(function(message) {
+                                return post.updateAttributes({content: updatedContent}, {transaction: t})
+                                    .then(function(updatedMessagePost) {
+                                        return {updatedMessagePost, message};
+                                    });
+                            });
                     });
-                
             });
         },
 
@@ -221,22 +226,25 @@ module.exports = {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.MessagePost.findOne({where: {id: messagePostId}, transaction: t})
                     .then(function(post) {
-                        return models.MessagePost.findAndCountAll({where: {MessageId}, transaction: t})
-                            .then(function({count}) {
+                        return models.Message.findOne({where: {id: post.MessageId}, transaction: t})
+                            .then(function(message) {
+                                return models.MessagePost.findAndCountAll({where: {MessageId: post.MessageId}, transaction: t})
+                                    .then(function({count}) {
+                                        if(count === 1){
+                                            return models.Message.destroy({where: {id: post.MessageId}, transaction: t})
+                                                .then((result) => {
+                                                    return [1];
+                                                });
+                                        } else {
+                                            return models.MessagePost.destroy({where: {id: messagePostId}, transaction: t})
+                                                .then((result) => {
+                                                    return [2, message];
+                                                });
+                                        }
+                                    });
                                 
-                                if(count === 1){
-                                    return models.Message.destroy({where: {id: post.MessageId}, transaction: t})
-                                        .then((result) => {
-                                            return 1;
-                                        });
-                                } else {
-                                    return models.MessagePost.destroy({where: {id: messagePostId}, transaction: t})
-                                        .then((result) => {
-                                            return 2;
-                                        });
-                                }
                             });
-                        });
+                    });
             });
         },
 

@@ -11,7 +11,7 @@ class App extends Component {
       <Switch>
         <Route path="/forums" component={Forums} />
         <Redirect from="/" exact to="/forums" />
-        <Route path="/" render={(props) => <div style={{'margin': '20rem', 'font-size': '10rem'}}>404 page dont exist</div>} />
+        <Route path="/" render={(props) => <div style={{'margin': '20rem', 'fontSize': '10rem'}}>404 page dont exist</div>} />
       </Switch>
     );
 

@@ -207,9 +207,23 @@ module.exports = {
         return (
             `SELECT mp.id		as messagePostId,
                 mp.content 		as messagePostContent,
-                mp.createdAt    as messagePostCreatedAt
+                mp.createdAt    as messagePostCreatedAt,
+                u.name          as messageCreatorName,
+                u.id            as messageCreatorId,
+                qc.postCount	as messageCreatorPostCount,
+                m.name          as messageName
             FROM forum_test.messages as m
                 join forum_test.messageposts as mp on mp.MessageId = m.id
+                left join forum_test.users as u on mp.UserId = u.id
+                join (
+                    SELECT count(*) as postCount, p.UserId as userId
+                    FROM forum_test.posts as p 
+                    WHERE p.UserId in ( 
+                                SELECT u.id
+                                FROM (SELECT * FROM forum_test.messageposts as mp WHERE mp.MessageId = ${messageid}) as mp
+                                    join forum_test.users as u on mp.UserId = u.id
+                    )
+                    GROUP BY p.UserId) as qc on qc.userId = u.id
             WHERE m.id = ${messageid}
             ORDER BY messagePostCreatedAt;`
         );

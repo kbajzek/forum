@@ -153,7 +153,8 @@ const setMessagePostData = (state, action) => {
         ...state,
         messageData: {
             ...state.messageData,
-            posts: action.data
+            posts: action.data.posts,
+            messageName: action.data.messageName
         },
         error: false
     }

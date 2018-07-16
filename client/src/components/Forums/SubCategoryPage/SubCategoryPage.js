@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 
 import * as actions from '../../../store/actions';
 
+import ErrorPage from '../ErrorPage/ErrorPage';
 import SubCategory from './../Categories/Category/SubCategory/SubCategory';
 import ThreadPreview from '../ThreadPreview/ThreadPreview';
 import Spinner from '../../UI/Spinner/Spinner';
@@ -39,7 +40,7 @@ class SubCategoryPage extends Component {
 
         let subCatForm;
         
-        let subcategorypage = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
+        let subcategorypage = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 
         let subCatButton = this.props.auth ? <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
 

@@ -3,9 +3,12 @@ import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import slugify from 'slugify';
 
+import classes from './MessagePage.module.css';
+
 import * as actions from '../../../store/actions';
 
-import PostContent from '../Thread/Post/PostContent/PostContent'
+import PostContent from '../Thread/Post/PostContent/PostContent';
+import PostUser from '../Thread/Post/PostUser/PostUser';
 import Spinner from '../../UI/Spinner/Spinner';
 import ErrorPage from '../ErrorPage/ErrorPage';
 
@@ -27,8 +30,8 @@ class MessagePage extends Component {
         this.props.handleMessageCreate();
     }
 
-    handleMessageReply = () => {
-        this.props.handleMessageReply(this.props.id);
+    handleMessagePostCreate = () => {
+        this.props.handleMessagePostCreate(this.props.id);
     }
 
     onSelectMessage = (id, name) => {
@@ -37,7 +40,17 @@ class MessagePage extends Component {
     
     render() {
 
-        let messageButton = this.props.auth ? <button onClick={this.handleMessageCreator}>CREATE MESSAGE</button> : null;
+        let messageButton = this.props.auth ? (
+        <button 
+            style={{background: 'none',
+                    color: 'inherit',
+                    border: 'none',
+                    font: 'inherit',
+                    cursor: 'pointer',
+                    outline: 'inherit'}}
+            onClick={this.handleMessageCreator}>
+            CREATE MESSAGE
+        </button>) : null;
 
         let messageReplyButton = null;
         let replyProps = this.props.id;
@@ -48,8 +61,8 @@ class MessagePage extends Component {
             
             const messageList = this.props.messageData.headers.map(({id, name}) => {
                 return (
-                    <div key={id}>
-                        <div style={{display: 'flex', margin: '1rem', padding: '2rem', boxShadow: '0 1rem 3rem rgba(0, 0, 0, .2)'}} onClick={() => this.onSelectMessage(id, name)}>
+                    <div key={id} className={classes.message}>
+                        <div style={{display: 'flex', padding: '2rem'}} onClick={() => this.onSelectMessage(id, name)}>
                             {name}
                         </div>
                     </div>
@@ -59,31 +72,63 @@ class MessagePage extends Component {
             let messageContent = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 
             if(this.props.messageData.posts){
-                messageContent = this.props.messageData.posts.map(({id, content}) => {
+                messageContent = this.props.messageData.posts.map(({id, content, creatorName, creatorPath, creatorPictureURL, creatorPostCount}) => {
                     return (
                         <div key={id}>
-                            <div style={{display: 'flex', margin: '1rem', padding: '2rem', boxShadow: '0 1rem 3rem rgba(0, 0, 0, .2)'}}>
-                                <PostContent content={content} />
+                            <div style={{display: 'flex', margin: '1rem', boxShadow: '0 1rem 3rem rgba(0, 0, 0, .2)', flexDirection: 'row'}}>
+                                <PostUser 
+                                    name={creatorName}
+                                    pictureURL={creatorPictureURL}
+                                    totalPosts={creatorPostCount}
+                                    path={creatorPath} />
+                                <div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
+                                    <div style={{marginBottom: 'auto'}}>
+                                        <PostContent content={content} />
+                                    </div>
+                                    <div style={{display: 'flex'}}>
+                                        <button onClick={() => {this.props.handleMessagePostEdit(id, content, this.props.id, this.props.slug, this.props.messageData.messageName)}}>EDIT</button>
+                                        <button onClick={() => {this.props.handleMessagePostDelete(id, this.props.id, this.props.slug)}}>DELETE</button>
+                                        <button onClick={() => {this.props.handleMessagePostQuote(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageName, content)}}>QUOTE</button>
+                                        <button onClick={() => {this.props.handleMessagePostReply(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageName, content)}}>REPLY</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     );
                 });
-                messageReplyButton = this.props.id ? <button onClick={this.handleMessageReply}>REPLY MESSAGE</button> : null;
+                messageReplyButton = this.props.id ? (
+                    <button  
+                        style={{background: 'none',
+                            color: 'inherit',
+                            border: 'none',
+                            font: 'inherit',
+                            cursor: 'pointer',
+                            outline: 'inherit'}} 
+                        onClick={this.handleMessagePostCreate}>
+                        REPLY MESSAGE
+                    </button>
+                ) : null;
             }
 
             messagepage = (
-                <div>
-                    {messageButton}
-                    <div style={{fontSize: '3rem', margin: '4rem'}}>
-                        Messages
+                <div style={{height: 'calc(100vh - 5rem)'}}>
+                    <div style={{backgroundColor: 'rgba(240,255,255,255)', height: '5rem', display: 'flex', flexDirection: 'row'}}>
+                        {messageButton}
+                        {messageReplyButton}
                     </div>
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                        <div style={{display: 'flex', flexDirection: 'column'}}>
-                            {messageList}
+                    <div style={{display: 'flex', flexDirection: 'row', height: 'calc(100% - 5rem)'}}>
+                        <div style={{flexBasis: '25%', display: 'flex', flexDirection: 'column', height: '100%', borderRight: '1px solid rgba(230,230,230,255)'}}>
+                            <div style={{height: '10%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(230,230,230,255)'}}>
+                                <div style={{fontSize: '3rem'}}>
+                                    Messages
+                                </div>
+                            </div>
+                            <div style={{height: '90%', overflowY: 'auto'}}>
+                                {messageList}
+                            </div>
                         </div>
-                        <div style={{display: 'flex', flexDirection: 'column'}}>
+                        <div style={{flexBasis: '75%', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto'}}>
                             {messageContent}
-                            {messageReplyButton}
                         </div>
                     </div>
                 </div>

@@ -20,8 +20,8 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new SteamStrategy({
-    returnURL: 'http://localhost:5000/auth/steam/return',
-    realm: 'http://localhost:5000/',
+    returnURL: 'http://192.168.56.1:5000/auth/steam/return',
+    realm: 'http://192.168.56.1:5000/',
     apiKey: 'CF1AE94B18F1E3282342ED1886995157'
   },
   function(identifier, profile, done) {
@@ -63,7 +63,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: { path: '/', httpOnly: true, secure: false, maxAge: 86400000 },
     store:new RedisStore({
-        host: 'localhost',
+        host: '192.168.56.1',
         port: 6379,
         client: redis
     })

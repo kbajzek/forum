@@ -11,7 +11,7 @@ export function* initCategoryDataSaga(action) {
     );
     yield put(actions.setCategoryData(response.data));
   } catch (error) {
-    yield put(actions.initCategoryDataFailed());
+    yield put(actions.initCategoryDataFailed(error.response.data));
   }
 }
 
@@ -22,7 +22,7 @@ export function* refreshCategoryDataSaga(action) {
     );
     yield put(actions.setCategoryData(response.data));
   } catch (error) {
-    yield put(actions.refreshCategoryDataFailed());
+    yield put(actions.refreshCategoryDataFailed(error.response.data));
   }
 }
 
@@ -34,7 +34,7 @@ export function* initSubCategoryPageDataSaga(action) {
     );
     yield put(actions.setSubCategoryPageData(response.data));
   } catch (error) {
-    yield put(actions.initSubCategoryPageDataFailed());
+    yield put(actions.initSubCategoryPageDataFailed(error.response.data));
   }
 }
 
@@ -45,7 +45,7 @@ export function* refreshSubCategoryPageDataSaga(action) {
     );
     yield put(actions.setSubCategoryPageData(response.data));
   } catch (error) {
-    yield put(actions.refreshSubCategoryPageDataFailed());
+    yield put(actions.refreshSubCategoryPageDataFailed(error.response.data));
   }
 }
 
@@ -68,7 +68,7 @@ export function* refreshThreadDataSaga(action) {
     );
     yield put(actions.setThreadData(response.data));
   } catch (error) {
-    yield put(actions.refreshThreadDataFailed());
+    yield put(actions.refreshThreadDataFailed(error.response.data));
   }
 }
 
@@ -91,7 +91,7 @@ export function* refreshUserDataSaga(action) {
     );
     yield put(actions.setUserData(response.data));
   } catch (error) {
-    yield put(actions.refreshUserDataFailed());
+    yield put(actions.refreshUserDataFailed(error.response.data));
   }
 }
 
@@ -114,7 +114,7 @@ export function* refreshMessageDataSaga(action) {
     );
     yield put(actions.setMessageData(response.data));
   } catch (error) {
-    yield put(actions.refreshMessageDataFailed());
+    yield put(actions.refreshMessageDataFailed(error.response.data));
   }
 }
 
@@ -122,13 +122,13 @@ export function* selectMessageDataSaga(action) {
   try {
     yield put(actions.setNoRefreshFlag(true));
     yield action.history.push("/forums" + action.path);
-    yield put(actions.setMessagePostData(null));
+    yield put(actions.setMessagePostData({posts: null, messageName: null}));
     const response = yield axios.get(
       "/api/forums" + action.path
     );
-    yield put(actions.setMessagePostData(response.data.posts));
+    yield put(actions.setMessagePostData(response.data));
   } catch (error) {
-    yield put(actions.selectMessageDataFailed());
+    yield put(actions.selectMessageDataFailed(error.response.data));
   }
 }
 
@@ -143,7 +143,7 @@ export function* fetchUserlistSaga(action) {
     );
     yield put(actions.fetchUserlistSuccess(response.data.users));
   } catch (error) {
-    yield put(actions.fetchUserlistFailed());
+    yield put(actions.fetchUserlistFailed(error.response.data));
   }
 }
 
@@ -156,7 +156,7 @@ export function* createCategorySaga(action) {
     );
     yield put(actions.refreshCategoryData());
   } catch (error) {
-    yield put(actions.createCategoryFailed(error));
+    yield put(actions.createCategoryFailed(error.response.data));
   }
 }
 
@@ -176,7 +176,7 @@ export function* createSubCategorySaga(action) {
       yield put(actions.refreshSubCategoryPageData(action.path));
     }
   } catch (error) {
-    yield put(actions.createSubCategoryFailed(error));
+    yield put(actions.createSubCategoryFailed(error.response.data));
   }
 }
 
@@ -192,7 +192,7 @@ export function* createThreadSaga(action) {
     );
     yield action.history.push("/forums" + response.data.path);
   } catch (error) {
-    yield put(actions.createThreadFailed(error));
+    yield put(actions.createThreadFailed(error.response.data));
   }
 }
 
@@ -208,7 +208,7 @@ export function* createPostSaga(action) {
     yield put(actions.refreshThreadData(response.data.path));
     yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
   } catch (error) {
-    yield put(actions.createPostFailed(error));
+    yield put(actions.createPostFailed(error.response.data));
   }
 }
 
@@ -223,7 +223,7 @@ export function* editPostSaga(action) {
     yield put(actions.refreshThreadData(response.data.path));
     yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
   } catch (error) {
-    yield put(actions.editPostFailed(error));
+    yield put(actions.editPostFailed(error.response.data));
   }
 }
 
@@ -241,7 +241,7 @@ export function* deletePostSaga(action) {
       yield put(actions.refreshThreadData(response.data.path));
     }
   } catch (error) {
-    yield put(actions.deletePostFailed(error));
+    yield put(actions.deletePostFailed(error.response.data));
   }
 }
 
@@ -257,7 +257,7 @@ export function* createMessageSaga(action) {
     yield put(actions.refreshMessageData(response.data.path));
     yield action.history.push("/forums" + response.data.path);
   } catch (error) {
-    yield put(actions.createMessageFailed(error));
+    yield put(actions.createMessageFailed(error.response.data));
   }
 }
 
@@ -273,7 +273,7 @@ export function* createMessagePostSaga(action) {
     yield put(actions.refreshMessageData(response.data.path));
     yield action.history.push("/forums" + response.data.path);
   } catch (error) {
-    yield put(actions.createMessagePostFailed(error));
+    yield put(actions.createMessagePostFailed(error.response.data));
   }
 }
 
@@ -286,10 +286,10 @@ export function* editMessagePostSaga(action) {
         path: action.path
       }
     );
-    yield put(actions.refreshMessageData(action.path));
+    yield put(actions.refreshMessageData(response.data.path));
     yield action.history.push("/forums" + response.data.path);
   } catch (error) {
-    yield put(actions.editMessagePostFailed(error));
+    yield put(actions.editMessagePostFailed(error.response.data));
   }
 }
 
@@ -302,10 +302,10 @@ export function* deleteMessagePostSaga(action) {
         path: action.path
       }
     );
-    yield put(actions.refreshMessageData(action.path));
+    yield put(actions.refreshMessageData(response.data.path));
     yield action.history.push("/forums" + response.data.path);
   } catch (error) {
-    yield put(actions.deleteMessagePostFailed(error));
+    yield put(actions.deleteMessagePostFailed(error.response.data));
   }
 }
 
@@ -321,7 +321,7 @@ export function* createRatingSaga(action) {
     );
     yield put(actions.refreshThreadData(action.path));
   } catch (error) {
-    yield put(actions.createRatingFailed(error));
+    yield put(actions.createRatingFailed(error.response.data));
   }
 }
 
@@ -336,6 +336,6 @@ export function* deleteRatingSaga(action) {
     );
     yield put(actions.refreshThreadData(action.path));
   } catch (error) {
-    yield put(actions.deleteRatingFailed(error));
+    yield put(actions.deleteRatingFailed(error.response.data));
   }
 }

@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 
 import * as actions from '../../../store/actions';
 
+import ErrorPage from '../ErrorPage/ErrorPage';
 import Category from './Category/Category';
 import Spinner from '../../UI/Spinner/Spinner';
 import CategoryForm from '../../Forms/CategoryForm/CategoryForm';
@@ -25,7 +26,7 @@ class Categories extends Component {
     
     render() {
 
-        let categories = this.props.error ? <p>error occured with the backend api</p> : <Spinner />;
+        let categories = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 
         let catForm;
 

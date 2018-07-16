@@ -48,8 +48,12 @@ class Forums extends Component {
     }
 
     handlePostQuote = (userName, postId, threadId, threadSlug, threadName, postContent) => {
-        this.props.changeWriterMode(CREATE_POST);
-        if(!this.props.postValues || !this.props.postValues.threadId || this.props.postValues.threadId === '') {
+        if(!this.props.postValues || 
+            (((!this.props.postValues.threadId || this.props.postValues.threadId === '') && (this.props.postValues.mode === EDIT_POST || this.props.postValues.mode === CREATE_POST || this.props.postValues.mode === CREATE_THREAD)) && 
+            ((!this.props.postValues.messageId || this.props.postValues.messageId === '') && (this.props.postValues.mode === EDIT_MESSAGE_POST || this.props.postValues.mode === CREATE_MESSAGE_POST || this.props.postValues.mode === CREATE_MESSAGE)))
+        ) {
+
+            this.props.changeWriterMode(CREATE_POST);
             this.props.changeWriterThreadId(threadId);
         }
         
@@ -88,6 +92,67 @@ class Forums extends Component {
         });
     }
 
+    handleMessagePostEdit = (messagePostId, messagePostContent, messageId) => {
+        this.props.changeWriterMode(EDIT_MESSAGE_POST);
+        this.props.changeWriterMessageId(messageId);
+        this.props.changeWriterMessagePostId(messagePostId);
+        this.props.changeWriterContent(messagePostContent);
+        this.setState({
+            writerOpen: true,
+            writerActive: true
+        });
+    }
+
+    handleMessagePostDelete = (messagePostId) => {
+        this.props.onDeleteMessagePost(messagePostId, null, this.props.history);
+    }
+
+    handleMessagePostQuote = (userName, messagePostId, messageId, messageSlug, messageName, messagePostContent) => {
+        if(!this.props.postValues || 
+            (((!this.props.postValues.threadId || this.props.postValues.threadId === '') && (this.props.postValues.mode === EDIT_POST || this.props.postValues.mode === CREATE_POST || this.props.postValues.mode === CREATE_THREAD)) && 
+            ((!this.props.postValues.messageId || this.props.postValues.messageId === '') && (this.props.postValues.mode === EDIT_MESSAGE_POST || this.props.postValues.mode === CREATE_MESSAGE_POST || this.props.postValues.mode === CREATE_MESSAGE)))
+        ) {
+
+            this.props.changeWriterMode(CREATE_MESSAGE_POST);
+            this.props.changeWriterMessageId(messageId);
+
+        }
+        
+
+        let beginning = '\n\n';
+        if(!this.props.postValues || !this.props.postValues.content || this.props.postValues.content === '') {
+            beginning = '';
+        }
+        const quoteHeader = beginning + userName + " said in [url=/forums/message/" + messageId + "/" + messageSlug + "#" + messagePostId + "]" + messageName + "[/url]:";
+        const quoteContent = "\n[quote]" + messagePostContent + "[/quote]\n\n";
+        const oldContent = this.props.postValues ? this.props.postValues.content : '';
+
+        this.props.changeWriterContent(oldContent + quoteHeader + quoteContent);
+        this.setState({
+            writerOpen: true,
+            writerActive: true
+        });
+    }
+
+    handleMessagePostReply = (userName, messagePostId, messageId, messageSlug, messageName, messagePostContent) => {
+        this.props.changeWriterMode(CREATE_MESSAGE_POST);
+        this.props.changeWriterMessageId(messageId);
+        
+        let beginning = '\n\n';
+        if(!this.props.postValues || !this.props.postValues.content || this.props.postValues.content === '') {
+            beginning = '';
+        }
+        const quoteHeader = beginning + userName + " said in [url=/forums/message/" + messageId + "/" + messageSlug + "#" + messagePostId + "]" + messageName + "[/url]:";
+        const quoteContent = "\n[quote]" + messagePostContent + "[/quote]\n\n";
+        const oldContent = this.props.postValues ? this.props.postValues.content : '';
+
+        this.props.changeWriterContent(oldContent + quoteHeader + quoteContent);
+        this.setState({
+            writerOpen: true,
+            writerActive: true
+        });
+    }
+
     handleThreadCreate = (subCategoryId) => {
         this.props.changeWriterMode(CREATE_THREAD);
         this.props.changeWriterSubCategoryId(subCategoryId);
@@ -108,7 +173,7 @@ class Forums extends Component {
         });
     }
 
-    handleMessageReply = (id) => {
+    handleMessagePostCreate = (id) => {
         this.props.changeWriterMode(CREATE_MESSAGE_POST);
         this.props.changeWriterMessageId(id);
         this.props.changeWriterContent('');
@@ -212,7 +277,11 @@ class Forums extends Component {
                                     id={match.params.id} 
                                     slug={match.params.slug} 
                                     handleMessageCreate={this.handleMessageCreate}
-                                    handleMessageReply={this.handleMessageReply}/>
+                                    handleMessagePostCreate={this.handleMessagePostCreate}
+                                    handleMessagePostEdit={this.handleMessagePostEdit}
+                                    handleMessagePostDelete={this.handleMessagePostDelete}
+                                    handleMessagePostQuote={this.handleMessagePostQuote}
+                                    handleMessagePostReply={this.handleMessagePostReply}/>
                                 {editorButton}
                             </div>
                         );
@@ -222,7 +291,7 @@ class Forums extends Component {
                             <div>
                                 <MessagePage 
                                     handleMessageCreate={this.handleMessageCreate}
-                                    handleMessageReply={this.handleMessageReply}/>
+                                    handleMessagePostCreate={this.handleMessagePostCreate}/>
                                 {editorButton}
                             </div>
                         );
@@ -262,6 +331,7 @@ const mapDispatchToProps = (dispatch) => {
         changeWriterTitle : (value) => dispatch(change('postForm', 'title', value)),
         changeWriterContent : (value) => dispatch(change('postForm', 'content', value)),
         onDeletePost: (postId, path, history) => dispatch(actions.deletePost(postId, path, history)),
+        onDeleteMessagePost: (messagePostId, path, history) => dispatch(actions.deleteMessagePost(messagePostId, path, history)),
         fetchUser: () => dispatch(actions.fetchUserInit())
 	}
 }

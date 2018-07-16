@@ -222,76 +222,77 @@ module.exports = app => {
     };
 
     app.get('/api/forums', (req, res) => {
+        try {
+            models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT})
+                .then(result => {
 
-        models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT})
-            .then(result => {
+                    let convertedResult = [];
+                    let currentCatPosition = 0;
 
-                let convertedResult = [];
-                let currentCatPosition = 0;
+                    result.forEach((row) => {
 
-                result.forEach((row) => {
+                        let lastUpdated = row.maxDate || 'none';
+                        let lastThreadName = row.ThreadName || 'none';
+                        let lastUser = row.UserName || 'none';
+                        let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
 
-                    let lastUpdated = row.maxDate || 'none';
-                    let lastThreadName = row.ThreadName || 'none';
-                    let lastUser = row.UserName || 'none';
-                    let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
+                        if (currentCatPosition !== row.categoryPosition) {
+                            currentCatPosition = row.categoryPosition;
 
-                    if (currentCatPosition !== row.categoryPosition) {
-                        currentCatPosition = row.categoryPosition;
+                            let subCategories = [];
 
-                        let subCategories = [];
+                            if (row.subCategoryId) {
+                                subCategories = [{
+                                    id: row.subCategoryId,
+                                    name: row.subCategoryName,
+                                    path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                                    description: row.description,
+                                    totalPosts: row.totalPosts || 0,
+                                    lastActiveThread: {
+                                        name: lastThreadName,
+                                        user: lastUser,
+                                        lastUpdated: lastUpdated,
+                                        path: lastActiveThreadPath
+                                    }
+                                }]
+                            }
 
-                        if (row.subCategoryId) {
-                            subCategories = [{
-                                id: row.subCategoryId,
-                                name: row.subCategoryName,
-                                path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
-                                description: row.description,
-                                totalPosts: row.totalPosts || 0,
-                                lastActiveThread: {
-                                    name: lastThreadName,
-                                    user: lastUser,
-                                    lastUpdated: lastUpdated,
-                                    path: lastActiveThreadPath
+                            convertedResult.push(
+                                {
+                                    id: row.categoryId, 
+                                    name: row.categoryName, 
+                                    subCategories
                                 }
-                            }]
+                            );
+                        } else {
+                            //has to have at least 2 subcategories to get to here
+                            convertedResult[convertedResult.length - 1].subCategories.push(
+                                {
+                                    id: row.subCategoryId,
+                                    name: row.subCategoryName,
+                                    path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                                    description: row.description,
+                                    totalPosts: row.totalPosts || 0,
+                                    lastActiveThread: {
+                                        name: lastThreadName,
+                                        user: lastUser,
+                                        lastUpdated: lastUpdated,
+                                        path: lastActiveThreadPath
+                                    }
+
+                                }
+                            )
                         }
+                    });
 
-                        convertedResult.push(
-                            {
-                                id: row.categoryId, 
-                                name: row.categoryName, 
-                                subCategories
-                            }
-                        );
-                    } else {
-                        //has to have at least 2 subcategories to get to here
-                        convertedResult[convertedResult.length - 1].subCategories.push(
-                            {
-                                id: row.subCategoryId,
-                                name: row.subCategoryName,
-                                path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
-                                description: row.description,
-                                totalPosts: row.totalPosts || 0,
-                                lastActiveThread: {
-                                    name: lastThreadName,
-                                    user: lastUser,
-                                    lastUpdated: lastUpdated,
-                                    path: lastActiveThreadPath
-                                }
-
-                            }
-                        )
-                    }
-                });
-
-                res.send(convertedResult);
-            });
+                    res.send(convertedResult);
+                })
+        } catch(err) {
+            res.status(404).send({ error: 'Something failed!' });
+        }
     })
 
     app.get('/api/forums/:id/:slug', async (req, res) => {
-
-        
         try {
             let subcatid = Number(req.params.id);
 
@@ -354,218 +355,233 @@ module.exports = app => {
 
             res.send(finalResult);
         } catch(err) {
-            res.status(404).send(err);
+            res.status(404).send({ error: 'Something failed!' });
         }
-
     })
 
     app.get('/api/forums/thread/:id/:slug', (req, res) => {
+        try {
+            let threadId = Number(req.params.id);
+            models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})
+                .then(ratingTypes => {
+                    models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
+                        .then(result => {
 
-        let threadId = Number(req.params.id);
-        models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})
-            .then(ratingTypes => {
-                models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
-                    .then(result => {
+                            let convertedPosts = [];
+                            let currentPostPosition = 0;
+                            let currentRatingTypeId = 0;
 
-                        let convertedPosts = [];
-                        let currentPostPosition = 0;
-                        let currentRatingTypeId = 0;
+                            result.forEach((row) => {
 
-                        result.forEach((row) => {
+                                let rating;
+                                //if rating is not null, build it. If it exists, it will always have a user
+                                if (row.ratingName) {
+                                    rating = {
+                                        ratingName: row.ratingName,
+                                        users: [
+                                            {
+                                                userName: row.ratingUserName, 
+                                                ratingId: row.ratingId, 
+                                                userId: row.ratingUserId, 
+                                                path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
+                                            }
+                                        ]
+                                    };
+                                }
 
-                            let rating;
-                            //if rating is not null, build it. If it exists, it will always have a user
-                            if (row.ratingName) {
-                                rating = {
-                                    ratingName: row.ratingName,
-                                    users: [
+                                if(currentPostPosition !== row.postPosition) {
+                                    // add another post, may or may not have a rating
+                                    currentPostPosition = row.postPosition;
+                                    convertedPosts.push(
                                         {
+                                            id: row.postId,
+                                            content: row.postContent,
+                                            ratings: [],
+                                            creator: {
+                                                name: row.creatorName,
+                                                userId: row.creatorId,
+                                                path: `/user/${row.creatorId}/${slugify(row.creatorName).toLowerCase()}`,
+                                                pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                                                totalPosts: row.postCount,
+                                                signature: "to be implemented"
+                                            }
+                                        }
+                                    );
+
+                                    if (rating) {
+                                        // add a new rating, reset current rating placeholder
+                                        currentRatingTypeId = row.ratingTypeId;
+                                        convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                                    }
+                                } else {
+                                    //there has to be at least 1 rating to get to here, and user has to exist
+                                    if (currentRatingTypeId !== row.ratingTypeId) {
+                                        currentRatingTypeId = row.ratingTypeId;
+                                        // another rating type
+                                        convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                                    } else {
+                                        // same rating type, different user
+                                        const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
+                                        convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({
                                             userName: row.ratingUserName, 
                                             ratingId: row.ratingId, 
                                             userId: row.ratingUserId, 
                                             path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
-                                        }
-                                    ]
-                                };
-                            }
-
-                            if(currentPostPosition !== row.postPosition) {
-                                // add another post, may or may not have a rating
-                                currentPostPosition = row.postPosition;
-                                convertedPosts.push(
-                                    {
-                                        id: row.postId,
-                                        content: row.postContent,
-                                        ratings: [],
-                                        creator: {
-                                            name: row.creatorName,
-                                            userId: row.creatorId,
-                                            path: `/user/${row.creatorId}/${slugify(row.creatorName).toLowerCase()}`,
-                                            pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                                            totalPosts: row.postCount,
-                                            signature: "to be implemented"
-                                        }
+                                        });
                                     }
-                                );
+                                }
+                            });
 
-                                if (rating) {
-                                    // add a new rating, reset current rating placeholder
-                                    currentRatingTypeId = row.ratingTypeId;
-                                    convertedPosts[convertedPosts.length - 1].ratings.push(rating);
-                                }
-                            } else {
-                                //there has to be at least 1 rating to get to here, and user has to exist
-                                if (currentRatingTypeId !== row.ratingTypeId) {
-                                    currentRatingTypeId = row.ratingTypeId;
-                                    // another rating type
-                                    convertedPosts[convertedPosts.length - 1].ratings.push(rating);
-                                } else {
-                                    // same rating type, different user
-                                    const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
-                                    convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({
-                                        userName: row.ratingUserName, 
-                                        ratingId: row.ratingId, 
-                                        userId: row.ratingUserId, 
-                                        path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
-                                    });
-                                }
+                            const ratings = ratingTypes.map((ratingType) => {
+                                return {
+                                    id: ratingType.id,
+                                    name: ratingType.name
+                                };
+                            })
+
+                            const finalResult = {
+                                name: result[0].threadName,
+                                id: result[0].threadId,
+                                slug: slugify(result[0].threadName).toLowerCase(),
+                                posts: convertedPosts,
+                                ratingTypes: ratings
                             }
+
+                            res.send(finalResult);
                         });
-
-                        const ratings = ratingTypes.map((ratingType) => {
-                            return {
-                                id: ratingType.id,
-                                name: ratingType.name
-                            };
-                        })
-
-                        const finalResult = {
-                            name: result[0].threadName,
-                            id: result[0].threadId,
-                            slug: slugify(result[0].threadName).toLowerCase(),
-                            posts: convertedPosts,
-                            ratingTypes: ratings
-                        }
-
-                        res.send(finalResult);
-                    });
-            });
-        
-        
+                });
+        } catch(err) {
+            res.status(404).send({ error: 'Something failed!' });
+        }
     })
 
     app.get('/api/forums/user/:id/:slug', (req, res) => {
+        try {
+            let userId = Number(req.params.id);
+            
+            models.sequelize.query(queries.getUserQuery(userId), { type: models.Sequelize.QueryTypes.SELECT})
+                .then(result => {
+                    let convertedPosts = [];
 
-        let userId = Number(req.params.id);
-        
-        models.sequelize.query(queries.getUserQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
-            .then(result => {
-                let convertedPosts = [];
+                    result.forEach((row) => {
 
-                result.forEach((row) => {
+                        convertedPosts.push(
+                            {
+                                id: row.postId,
+                                content: row.postContent,
+                                createdAt: row.postCreatedAt,
+                                threadName: row.threadName,
+                                path: `/thread/${row.postThreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
+                            }
+                        );
+                        
+                    });
 
-                    convertedPosts.push(
-                        {
-                            id: row.postId,
-                            content: row.postContent,
-                            createdAt: row.postCreatedAt,
-                            threadName: row.threadName,
-                            path: `/thread/${row.postThreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
-                        }
-                    );
-                    
-                });
+                    let userData = {
+                        userName: result[0].userName,
+                        posts: convertedPosts
+                    }
 
-                let userData = {
-                    userName: result[0].userName,
-                    posts: convertedPosts
-                }
-
-                res.send(userData);
-            })
+                    res.send(userData);
+                })
+        } catch(err) {
+            res.status(404).send({ error: 'Something failed!' });
+        }
     });
 
     app.get('/api/forums/message', requireLogin, (req, res) => {
-        
-        models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
-            .then(result => {
-                let convertedMessageHeaders = [];
-                let convertedMessagePosts = [];
+        try {
+            models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
+                .then(result => {
+                    let convertedMessageHeaders = [];
+                    let convertedMessagePosts = [];
 
-                result.forEach((row) => {
+                    result.forEach((row) => {
 
-                    convertedMessageHeaders.push(
-                        {
-                            id: row.messageId,
-                            name: row.messageName,
-                            path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
-                        }
-                    );
-                    
-                });
+                        convertedMessageHeaders.push(
+                            {
+                                id: row.messageId,
+                                name: row.messageName,
+                                path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
+                            }
+                        );
+                        
+                    });
 
-                let messageData = {
-                    headers: convertedMessageHeaders,
-                    posts: convertedMessagePosts
-                }
+                    let messageData = {
+                        headers: convertedMessageHeaders,
+                        posts: convertedMessagePosts
+                    }
 
-                res.send(messageData);
-            })
+                    res.send(messageData);
+                })
+        } catch(err) {
+            res.status(404).send({ error: 'Something failed!' });
+        }
     });
 
     app.get('/api/forums/message/:id/:slug', requireLogin, (req, res) => {
+        try {
+            let messageId = Number(req.params.id);
+            
+            models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
+                .then(result => {
+                    models.sequelize.query(queries.getMessageQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT})
+                        .then(result2 => {
+                            let convertedMessageHeaders = [];
+                            let convertedMessagePosts = [];
 
-        let messageId = Number(req.params.id);
-        
-        models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
-            .then(result => {
-                models.sequelize.query(queries.getMessageQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT})
-                    .then(result2 => {
-                        let convertedMessageHeaders = [];
-                        let convertedMessagePosts = [];
+                            result.forEach((row) => {
 
-                        result.forEach((row) => {
+                                convertedMessageHeaders.push(
+                                    {
+                                        id: row.messageId,
+                                        name: row.messageName,
+                                        path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
+                                    }
+                                );
+                                
+                            });
 
-                            convertedMessageHeaders.push(
-                                {
-                                    id: row.messageId,
-                                    name: row.messageName,
-                                    path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
-                                }
-                            );
-                            
-                        });
+                            result2.forEach((row) => {
 
-                        result2.forEach((row) => {
+                                convertedMessagePosts.push(
+                                    {
+                                        id: row.messagePostId,
+                                        content: row.messagePostContent,
+                                        creatorId: row.messageCreatorId,
+                                        creatorName: row.messageCreatorName,
+                                        creatorPath: `/user/${row.messageCreatorId}/${slugify(row.messageCreatorName).toLowerCase()}`,
+                                        creatorPictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                                        creatorPostCount: row.messageCreatorPostCount
+                                    }
+                                );
+                                
+                            });
 
-                            convertedMessagePosts.push(
-                                {
-                                    id: row.messagePostId,
-                                    content: row.messagePostContent
-                                }
-                            );
-                            
-                        });
+                            const messageName = result2[0] ? result2[0].messageName : '';
 
-                        let messageData = {
-                            headers: convertedMessageHeaders,
-                            posts: convertedMessagePosts
-                        }
+                            let messageData = {
+                                headers: convertedMessageHeaders,
+                                posts: convertedMessagePosts,
+                                messageName: messageName
+                            }
 
-                        res.send(messageData);
-                    })
-            })
+                            res.send(messageData);
+                        })
+                })
+        } catch(err) {
+            res.status(404).send({ error: 'Something failed!' });
+        }
     });
 
     app.get('/api/forums/userlist', (req, res) => {
-        console.log(req.query.search)
         controllers.getUserList(req.query.search)
             .then((users) => {
                 const userList = users.map((user) => {return {key: user.id, label: user.name}})
                 res.send({users: userList});
             })
             .catch((error) => {
-                console.log(error)
                 res.status(500).send({ error: 'Something failed!' })
             });
 
@@ -597,7 +613,6 @@ module.exports = app => {
     })
 
     app.post('/api/forums/thread/create', requireCSRF, requireLogin, (req, res) => {
-        console.log(req.session)
         controllers.createThread(req.body.name, req.body.content, req.session.passport.user, req.body.subCategoryId)
             .then((result) => {
                 res.send({
@@ -665,7 +680,6 @@ module.exports = app => {
 
     app.post('/api/forums/message/create', requireCSRF, requireLogin, (req, res) => {
         const members = req.body.members.map(member => member.key);
-        console.log(req.session)
         controllers.createMessage(req.body.name, req.body.content, members, req.session.passport.user)
             .then((result) => {
                 res.send({
@@ -699,9 +713,10 @@ module.exports = app => {
 
     app.post('/api/forums/messagepost/edit', requireCSRF, requireLogin, (req, res) => {
         controllers.editMessagePost(req.body.content, req.body.messagePostId)
-            .then((updatedPost) => {
+            .then(({updatedMessagePost, message}) => {
                 res.send({
-                    messagePostId: updatedPost.id
+                    messagePostId: updatedMessagePost.id,
+                    path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
                 });
             })
             .catch((error) => {
@@ -712,8 +727,15 @@ module.exports = app => {
     app.post('/api/forums/messagepost/delete', requireCSRF, requireLogin, (req, res) => {
         controllers.deleteMessagePost(req.body.messagePostId)
             .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
+                let path;
+                if(response[0] === 1){
+                    path = `/message`
+                }else{
+                    path = `/message/${response[1].id}/${slugify(response[1].name).toLowerCase()}`
+                }
                 res.send({
-                    response: response
+                    response: response[0],
+                    path: path
                 });
             })
             .catch((error) => {

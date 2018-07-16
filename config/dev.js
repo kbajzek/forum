@@ -6,5 +6,5 @@ module.exports = {
     stripePublishableKey: 'pk_test_piUsEkEBjcKknqgdNBuVXMY5',
     stripeSecretKey: 'sk_test_HxlCGWU5SNzsJvIACAfOTifp',
     sendGridKey: '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',
-    redirectDomain: 'http://localhost:3000'
+    redirectDomain: 'http://192.168.56.1:3000'
 };

@@ -25,7 +25,7 @@ module.exports = app => {
             console.log("Authentication was successful");
             console.log("In steam returning function");
             req.session.csrf = uuid();
-            res.redirect("http://localhost:3000");
+            res.redirect("http://192.168.56.1:3000");
         }
     );
 
