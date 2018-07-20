@@ -7,6 +7,7 @@ import classes from './MessagePage.module.css';
 
 import * as actions from '../../../store/actions';
 
+import MessageSideBar from './MessageSideBar/MessageSideBar';
 import PostContent from '../Thread/Post/PostContent/PostContent';
 import PostUser from '../Thread/Post/PostUser/PostUser';
 import Spinner from '../../UI/Spinner/Spinner';
@@ -58,16 +59,6 @@ class MessagePage extends Component {
         let messagepage = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 
         if (this.props.messageData) {
-            
-            const messageList = this.props.messageData.headers.map(({id, name}) => {
-                return (
-                    <div key={id} className={classes.message}>
-                        <div style={{display: 'flex', padding: '2rem'}} onClick={() => this.onSelectMessage(id, name)}>
-                            {name}
-                        </div>
-                    </div>
-                );
-            });
 
             let messageContent = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 
@@ -117,16 +108,9 @@ class MessagePage extends Component {
                         {messageReplyButton}
                     </div>
                     <div style={{display: 'flex', flexDirection: 'row', height: 'calc(100% - 5rem)'}}>
-                        <div style={{flexBasis: '25%', display: 'flex', flexDirection: 'column', height: '100%', borderRight: '1px solid rgba(230,230,230,255)'}}>
-                            <div style={{height: '10%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(230,230,230,255)'}}>
-                                <div style={{fontSize: '3rem'}}>
-                                    Messages
-                                </div>
-                            </div>
-                            <div style={{height: '90%', overflowY: 'auto'}}>
-                                {messageList}
-                            </div>
-                        </div>
+                        <MessageSideBar 
+                            messageData={this.props.messageData}
+                            onSelectMessage={this.onSelectMessage} />
                         <div style={{flexBasis: '75%', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto'}}>
                             {messageContent}
                         </div>
