@@ -227,5 +227,17 @@ module.exports = {
             WHERE m.id = ${messageid}
             ORDER BY messagePostCreatedAt;`
         );
+    },
+    getMessageMembersQuery(messageid) {
+        return (
+            `SELECT u.id		as userId,
+                u.name 		    as userName,
+                mm.id           as memberId,
+                mm.permission   as memberPermission
+            FROM forum_test.messagemembers as mm
+                join forum_test.users as u on mm.UserId = u.id
+            WHERE mm.MessageId = ${messageid}
+            ORDER BY memberPermission DESC, userName ASC;`
+        );
     }
 }

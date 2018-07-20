@@ -450,11 +450,35 @@ export const deleteRatingFailed = (error) => {
     };
 };
 
+// MESSAGE MEMBER
+
+export const removeMessageMember = ( memberId, path ) => {
+    return {
+        type: actionTypes.REMOVE_MESSAGE_MEMBER,
+        memberId: memberId,
+        path: path,
+    };
+};
+
+export const removeMessageMemberFailed = (error) => {
+    return {
+        type: actionTypes.REMOVE_MESSAGE_MEMBER_FAILED,
+        error: error
+    };
+};
+
 // UTILITY
 
 export const setNoRefreshFlag = (flag) => {
     return {
         type: actionTypes.SET_NO_REFRESH_FLAG,
         flag: flag
+    };
+};
+
+export const setMessageSidebarState = (state) => {
+    return {
+        type: actionTypes.SET_MESSAGE_SIDEBAR_STATE,
+        state: state
     };
 };

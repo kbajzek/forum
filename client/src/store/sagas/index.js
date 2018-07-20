@@ -26,6 +26,7 @@ import {
   deleteMessagePostSaga,
   createRatingSaga,
   deleteRatingSaga,
+  removeMessageMemberSaga,
 } from "./forums";
 import {
   fetchUserSaga,
@@ -57,6 +58,7 @@ export function* watchForums() {
   yield takeEvery(actionTypes.DELETE_MESSAGE_POST, deleteMessagePostSaga);
   yield takeEvery(actionTypes.CREATE_RATING, createRatingSaga);
   yield takeEvery(actionTypes.DELETE_RATING, deleteRatingSaga);
+  yield takeEvery(actionTypes.REMOVE_MESSAGE_MEMBER, removeMessageMemberSaga);
 }
 
 export function* watchAuth() {

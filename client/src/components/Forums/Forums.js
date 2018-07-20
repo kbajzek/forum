@@ -272,8 +272,7 @@ class Forums extends Component {
                     <Route path="/forums/message/:id/:slug" render={({match}) => {
                         return (
                             <div>
-                                <MessagePage 
-                                    key={match.params.id} 
+                                <MessagePage
                                     id={match.params.id} 
                                     slug={match.params.slug} 
                                     handleMessageCreate={this.handleMessageCreate}
@@ -289,7 +288,7 @@ class Forums extends Component {
                     <Route path="/forums/message" render={({match}) => {
                         return (
                             <div>
-                                <MessagePage 
+                                <MessagePage
                                     handleMessageCreate={this.handleMessageCreate}
                                     handleMessagePostCreate={this.handleMessagePostCreate}/>
                                 {editorButton}

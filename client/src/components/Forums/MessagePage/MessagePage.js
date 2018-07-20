@@ -17,13 +17,11 @@ class MessagePage extends Component {
     
     componentDidMount() {
         if(this.props.id){
-            if(this.props.noRefreshFlag){
-                this.props.setNoRefreshFlag(false);
-            }else{
-                this.props.onInitMessageData("/message/" + this.props.id + "/" + this.props.slug);
-            }
+            this.props.onInitMessageData("/message/" + this.props.id + "/" + this.props.slug);
+            this.props.setMessageSidebarState(1);
         }else{
             this.props.onInitMessageData("/message");
+            this.props.setMessageSidebarState(1);
         }
     }
 
@@ -37,6 +35,18 @@ class MessagePage extends Component {
 
     onSelectMessage = (id, name) => {
         this.props.onSelectMessageData("/message/" + id + "/" + slugify(name), this.props.history);
+    }
+
+    onMessageButtonClick = () => {
+        this.props.setMessageSidebarState(1);
+    }
+
+    onMembersButtonClick = () => {
+        this.props.setMessageSidebarState(2);
+    }
+
+    removeMessageMember = (memberId) => {
+        this.props.removeMessageMember(memberId, "/message/" + this.props.id + "/" + this.props.slug);
     }
     
     render() {
@@ -110,7 +120,11 @@ class MessagePage extends Component {
                     <div style={{display: 'flex', flexDirection: 'row', height: 'calc(100% - 5rem)'}}>
                         <MessageSideBar 
                             messageData={this.props.messageData}
-                            onSelectMessage={this.onSelectMessage} />
+                            onSelectMessage={this.onSelectMessage}
+                            messageButtonClick={this.onMessageButtonClick}
+                            membersButtonClick={this.onMembersButtonClick}
+                            sideBarState={this.props.messageSidebarState}
+                            removeMessageMember={this.removeMessageMember} />
                         <div style={{flexBasis: '75%', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto'}}>
                             {messageContent}
                         </div>
@@ -132,6 +146,7 @@ const mapStateToProps = state => {
         messageData: state.forums.messageData,
         error: state.forums.error,
         noRefreshFlag: state.forums.noRefreshFlag,
+        messageSidebarState: state.forums.messageSidebarState,
         auth: state.auth.user
     };
 }
@@ -140,7 +155,9 @@ const mapDispatchToProps = dispatch => {
     return {
         onInitMessageData: (path) => dispatch(actions.initMessageData(path)),
         onSelectMessageData: (path, history) => dispatch(actions.selectMessageData(path, history)),
-        setNoRefreshFlag: (flag) => dispatch(actions.setNoRefreshFlag(flag))
+        removeMessageMember: (memberId, path) => dispatch(actions.removeMessageMember(memberId, path)),
+        setNoRefreshFlag: (flag) => dispatch(actions.setNoRefreshFlag(flag)),
+        setMessageSidebarState: (state) => dispatch(actions.setMessageSidebarState(state)),
     }
 }
 

@@ -120,7 +120,6 @@ export function* refreshMessageDataSaga(action) {
 
 export function* selectMessageDataSaga(action) {
   try {
-    yield put(actions.setNoRefreshFlag(true));
     yield action.history.push("/forums" + action.path);
     yield put(actions.setMessagePostData({posts: null, messageName: null}));
     const response = yield axios.get(
@@ -337,5 +336,18 @@ export function* deleteRatingSaga(action) {
     yield put(actions.refreshThreadData(action.path));
   } catch (error) {
     yield put(actions.deleteRatingFailed(error.response.data));
+  }
+}
+
+export function* removeMessageMemberSaga(action) {
+  try {
+    yield axios.post(
+      "/api/forums/messagemember/delete", {
+        memberId: action.memberId
+      }
+    );
+    yield put(actions.refreshMessageData(action.path));
+  } catch (error) {
+    yield put(actions.removeMessageMemberFailed(error.response.data));
   }
 }

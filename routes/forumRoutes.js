@@ -8,6 +8,7 @@ const requireCSRF = require('../middlewares/requireCSRF');
 const requireLogin = require('../middlewares/requireLogin');
 const checkCanRate = require('../middlewares/checkCanRate');
 const checkCanUnrate = require('../middlewares/checkCanUnrate');
+const checkCanRemoveMessageMember = require('../middlewares/checkCanRemoveMessageMember');
 
 module.exports = app => {
 
@@ -520,56 +521,74 @@ module.exports = app => {
         }
     });
 
-    app.get('/api/forums/message/:id/:slug', requireLogin, (req, res) => {
+    app.get('/api/forums/message/:id/:slug', requireLogin, async (req, res) => {
         try {
             let messageId = Number(req.params.id);
             
-            models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
-                .then(result => {
-                    models.sequelize.query(queries.getMessageQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT})
-                        .then(result2 => {
-                            let convertedMessageHeaders = [];
-                            let convertedMessagePosts = [];
+            let result = await models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT});
+            let result2 = await models.sequelize.query(queries.getMessageQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT});
+            let result3 = await models.sequelize.query(queries.getMessageMembersQuery(messageId), { type: models.Sequelize.QueryTypes.SELECT});
+                        
+            let convertedMessageHeaders = [];
+            let convertedMessagePosts = [];
+            let convertedMessageMembers = [];
 
-                            result.forEach((row) => {
+            result.forEach((row) => {
 
-                                convertedMessageHeaders.push(
-                                    {
-                                        id: row.messageId,
-                                        name: row.messageName,
-                                        path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
-                                    }
-                                );
-                                
-                            });
+                convertedMessageHeaders.push(
+                    {
+                        id: row.messageId,
+                        name: row.messageName,
+                        path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
+                    }
+                );
+                
+            });
 
-                            result2.forEach((row) => {
+            result2.forEach((row) => {
 
-                                convertedMessagePosts.push(
-                                    {
-                                        id: row.messagePostId,
-                                        content: row.messagePostContent,
-                                        creatorId: row.messageCreatorId,
-                                        creatorName: row.messageCreatorName,
-                                        creatorPath: `/user/${row.messageCreatorId}/${slugify(row.messageCreatorName).toLowerCase()}`,
-                                        creatorPictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                                        creatorPostCount: row.messageCreatorPostCount
-                                    }
-                                );
-                                
-                            });
+                convertedMessagePosts.push(
+                    {
+                        id: row.messagePostId,
+                        content: row.messagePostContent,
+                        creatorId: row.messageCreatorId,
+                        creatorName: row.messageCreatorName,
+                        creatorPath: `/user/${row.messageCreatorId}/${slugify(row.messageCreatorName).toLowerCase()}`,
+                        creatorPictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
+                        creatorPostCount: row.messageCreatorPostCount
+                    }
+                );
+                
+            });
 
-                            const messageName = result2[0] ? result2[0].messageName : '';
+            result3.forEach((row) => {
 
-                            let messageData = {
-                                headers: convertedMessageHeaders,
-                                posts: convertedMessagePosts,
-                                messageName: messageName
-                            }
+                convertedMessageMembers.push(
+                    {
+                        id: row.memberId,
+                        userId: row.userId,
+                        userName: row.userName,
+                        permission: row.memberPermission,
+                        memberPath: `/user/${row.userId}/${slugify(row.userName).toLowerCase()}`,
+                        memberPictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg"
+                    }
+                );
+                
+            });
 
-                            res.send(messageData);
-                        })
-                })
+            const perm = result3.find((row) => row.userId === req.session.passport.user);
+
+            const messageName = result2[0] ? result2[0].messageName : '';
+
+            let messageData = {
+                headers: convertedMessageHeaders,
+                posts: convertedMessagePosts,
+                members: convertedMessageMembers,
+                messageName: messageName,
+                messagePerm: perm.memberPermission
+            }
+
+            res.send(messageData);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
@@ -578,7 +597,7 @@ module.exports = app => {
     app.get('/api/forums/userlist', (req, res) => {
         controllers.getUserList(req.query.search)
             .then((users) => {
-                const userList = users.map((user) => {return {key: user.id, label: user.name}})
+                const userList = users.map((user) => {return {key: user.id, label: user.name}}).filter((user) => {return user.key !== req.session.passport.user})
                 res.send({users: userList});
             })
             .catch((error) => {
@@ -779,6 +798,18 @@ module.exports = app => {
 
     app.post('/api/forums/rating/delete', requireCSRF, requireLogin, checkCanUnrate, (req, res) => {
         controllers.deleteRating(req.session.passport.user, req.body.postId)
+            .then((response) => {
+                res.send({
+                    response: response
+                });
+            })
+            .catch((error) => {
+                res.status(500).send({ error: 'Something failed!' })
+            });
+    })
+
+    app.post('/api/forums/messagemember/delete', requireCSRF, requireLogin, checkCanRemoveMessageMember, (req, res) => {
+        controllers.removeMessageMember(req.body.memberId)
             .then((response) => {
                 res.send({
                     response: response

@@ -18,6 +18,11 @@ class Layout extends Component {
         this.props.onInitCategoryData();
     }
 
+    onForumMessageClicked = () => {
+        this.props.onInitMessageData("/message");
+        this.props.setMessageSidebarState(1);
+    }
+
     sideDrawerClosedHandler = () => {
         this.setState( { showSideDrawer: false } );
     }
@@ -48,6 +53,7 @@ class Layout extends Component {
                 {this.props.user ? <NavigationItem
                     clicked={() => {
                         this.sideDrawerClosedHandler();
+                        this.onForumMessageClicked();
                     }} 
                     link="/forums/message" 
                     exact>
@@ -92,6 +98,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         onInitCategoryData: () => dispatch(actions.initCategoryData()),
+        onInitMessageData: (path) => dispatch(actions.initMessageData(path)),
+        setMessageSidebarState: (state) => dispatch(actions.setMessageSidebarState(state)),
         onLogout: () => dispatch(actions.logoutUserInit())
     }
 }

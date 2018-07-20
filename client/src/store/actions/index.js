@@ -68,7 +68,11 @@ export {
     fetchUserlistSuccess,
     fetchUserlistFailed,
 
+    removeMessageMember,
+    removeMessageMemberFailed,
+
     setNoRefreshFlag,
+    setMessageSidebarState,
     
 } from './forums';
 export {

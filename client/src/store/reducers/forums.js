@@ -13,6 +13,7 @@ const initialState = {
     request_notifications: [],
     error: false,
     noRefreshFlag: false,
+    messageSidebarState: 1,
 };
 
 const setCategoryData = (state, action) => {
@@ -154,7 +155,9 @@ const setMessagePostData = (state, action) => {
         messageData: {
             ...state.messageData,
             posts: action.data.posts,
-            messageName: action.data.messageName
+            members: action.data.members,
+            messageName: action.data.messageName,
+            messagePerm: action.data.messagePerm
         },
         error: false
     }
@@ -282,12 +285,30 @@ const createRatingFailed = (state, action) => {
     return updatedState;
 };
 
+// MESSAGE MEMBER
+
+const removeMessageMemberFailed = (state, action) => {
+    const updatedState = {
+        ...state,
+        error: action.error
+    }
+    return updatedState;
+};
+
 // UTILITY
 
 const setNoRefreshFlag = (state, action) => {
     const updatedState = {
         ...state,
         noRefreshFlag: action.flag
+    }
+    return updatedState;
+}
+
+const setMessageSidebarState = (state, action) => {
+    const updatedState = {
+        ...state,
+        messageSidebarState: action.state
     }
     return updatedState;
 }
@@ -334,7 +355,10 @@ const reducer = ( state = initialState, action ) => {
 
         case actionTypes.CREATE_RATING_FAILED: return createRatingFailed(state, action);
 
+        case actionTypes.REMOVE_MESSAGE_MEMBER_FAILED: return removeMessageMemberFailed(state, action);
+
         case actionTypes.SET_NO_REFRESH_FLAG: return setNoRefreshFlag(state, action);
+        case actionTypes.SET_MESSAGE_SIDEBAR_STATE: return setMessageSidebarState(state, action);
 
         default: return state;
     }

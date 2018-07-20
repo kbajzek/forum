@@ -304,5 +304,14 @@ module.exports = {
                     });
             });
         },
+
+        removeMessageMember(memberId) {
+            return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
+                return models.MessageMember.destroy({where: {id: memberId}, transaction: t})
+                    .then(function(result) {
+                        return 1;
+                    });
+            });
+        },
     
 }
