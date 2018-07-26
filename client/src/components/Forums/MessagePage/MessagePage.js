@@ -25,6 +25,16 @@ class MessagePage extends Component {
         }
     }
 
+    componentDidUpdate(prevProps) {
+        if(this.props.location !== prevProps.location && this.props.history.action === 'POP'){
+            if(this.props.id){
+                this.props.onInitMessageData("/message/" + this.props.id + "/" + this.props.slug);
+            }else{
+                this.props.onInitMessageData("/message");
+            }
+        }
+    }
+
     handleMessageCreator = () => {
         this.props.handleMessageCreate();
     }

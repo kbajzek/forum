@@ -1,4 +1,6 @@
-import { takeEvery} from "redux-saga/effects";
+import { takeEvery, take, put, call, apply, fork } from 'redux-saga/effects'
+import { eventChannel, delay, buffers } from 'redux-saga'
+import io from 'socket.io-client'
 
 import * as actionTypes from "../actions/actionTypes";
 import {
@@ -64,4 +66,57 @@ export function* watchForums() {
 export function* watchAuth() {
   yield takeEvery(actionTypes.FETCH_USER_INIT, fetchUserSaga);
   yield takeEvery(actionTypes.LOGOUT_USER_INIT, logoutUserSaga);
+}
+
+
+
+
+
+
+
+
+
+
+// this function creates an event channel from a given socket
+// Setup subscription to incoming `ping` events
+function createSocketChannel(socket) {
+  // `eventChannel` takes a subscriber function
+  // the subscriber function takes an `emit` argument to put messages onto the channel
+  return eventChannel(emit => {
+
+    const pingHandler = (event) => {
+      // puts event payload into the channel
+      // this allows a Saga to take this payload from the returned channel
+      emit({payload: event})
+    }
+
+    // setup the subscription
+    socket.on('user1', pingHandler)
+
+    // the subscriber must return an unsubscribe function
+    // this will be invoked when the saga calls `channel.close` method
+    const unsubscribe = () => {
+      socket.off('user1', pingHandler)
+    }
+
+    return unsubscribe
+  }, buffers.expanding(10))
+}
+
+// reply with a `response` message by invoking `socket.emit('response')`
+function* pong(socket) {
+  yield call(delay, 5000);
+  yield apply(socket, socket.emit, ['user1response', {my: 'data'}]) // call `emit` as a method with `socket` as context
+}
+
+export function* watchSockets() {
+  const socket = yield call(io, '192.168.56.1:5000')
+  const socketChannel = yield call(createSocketChannel, socket)
+
+  while (true) {
+    const payload = yield take(socketChannel)
+    yield console.log(payload);
+    //yield put({ type: actionTypes.INCOMING_PONG_PAYLOAD, payload })
+    yield fork(pong, socket)
+  }
 }

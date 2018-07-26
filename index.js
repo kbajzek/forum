@@ -56,6 +56,15 @@ models.sequelize
 
 
 const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+io.on('connection', function (socket) {
+    socket.emit('user1', { hello: 'world' });
+    socket.on('user1response', function (data) {
+        console.log('...........................................................................................');
+    });
+});
 
 app.use(session({
     secret: 'your secret',
@@ -94,7 +103,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT);
+server.listen(PORT);
 
 // app.get('/account', ensureAuthenticated, function(req, res){
 //     res.send({ user: req.user });

@@ -10,7 +10,7 @@ import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import authReducer from "./store/reducers/auth";
 import forumReducer from "./store/reducers/forums";
-import { watchForums, watchAuth } from "./store/sagas";
+import { watchForums, watchAuth, watchSockets } from "./store/sagas";
 import { reducer as formReducer } from 'redux-form';
 
 const composeEnhancers =
@@ -35,6 +35,7 @@ const store = createStore(
 
 sagaMiddleware.run(watchAuth);
 sagaMiddleware.run(watchForums);
+sagaMiddleware.run(watchSockets);
 
 const app = (
   <Provider store={store}>
