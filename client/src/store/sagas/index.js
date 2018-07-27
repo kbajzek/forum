@@ -1,6 +1,7 @@
-import { takeEvery, take, put, call, apply, fork } from 'redux-saga/effects'
+import { takeEvery, take, put, call, apply, fork, select } from 'redux-saga/effects'
 import { eventChannel, delay, buffers } from 'redux-saga'
 import io from 'socket.io-client'
+import * as actions from '../actions/index';
 
 import * as actionTypes from "../actions/actionTypes";
 import {
@@ -68,55 +69,35 @@ export function* watchAuth() {
   yield takeEvery(actionTypes.LOGOUT_USER_INIT, logoutUserSaga);
 }
 
+function connect() {
+  const socket = io('192.168.56.1:5000');
+  return new Promise(resolve => {
+    socket.on('connect', () => {
+      resolve(socket);
+    });
+  });
+}
 
-
-
-
-
-
-
-
-
-// this function creates an event channel from a given socket
-// Setup subscription to incoming `ping` events
-function createSocketChannel(socket) {
-  // `eventChannel` takes a subscriber function
-  // the subscriber function takes an `emit` argument to put messages onto the channel
+function createSocketChannel(socket, eventName) {
   return eventChannel(emit => {
-
-    const pingHandler = (event) => {
-      // puts event payload into the channel
-      // this allows a Saga to take this payload from the returned channel
-      emit({payload: event})
-    }
-
-    // setup the subscription
-    socket.on('user1', pingHandler)
-
-    // the subscriber must return an unsubscribe function
-    // this will be invoked when the saga calls `channel.close` method
-    const unsubscribe = () => {
-      socket.off('user1', pingHandler)
-    }
-
-    return unsubscribe
+    const eventHandler = (event) => {emit(event)}
+    socket.on(eventName, eventHandler)
+    return () => {socket.off(eventName, eventHandler)}
   }, buffers.expanding(10))
 }
 
-// reply with a `response` message by invoking `socket.emit('response')`
-function* pong(socket) {
-  yield call(delay, 5000);
-  yield apply(socket, socket.emit, ['user1response', {my: 'data'}]) // call `emit` as a method with `socket` as context
+function* updateMessages(socket) {
+  const channel = yield call(createSocketChannel, socket, 'messages.update');
+  while (true) {
+    const messageId = yield take(channel);
+    const state = yield select();
+    if(state.forums.messageData && state.forums.messageData.messageSelected && state.forums.messageData.messageSelected.messageId == messageId){
+      yield put(actions.selectMessageData("/message/" + messageId + '/' + state.forums.messageData.messageSelected.messageName));
+    }
+  }
 }
 
 export function* watchSockets() {
-  const socket = yield call(io, '192.168.56.1:5000')
-  const socketChannel = yield call(createSocketChannel, socket)
-
-  while (true) {
-    const payload = yield take(socketChannel)
-    yield console.log(payload);
-    //yield put({ type: actionTypes.INCOMING_PONG_PAYLOAD, payload })
-    yield fork(pong, socket)
-  }
+  const socket = yield call(connect)
+  const messageTask = yield fork(updateMessages, socket);
 }

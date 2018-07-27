@@ -211,7 +211,8 @@ module.exports = {
                 u.name          as messageCreatorName,
                 u.id            as messageCreatorId,
                 qc.postCount	as messageCreatorPostCount,
-                m.name          as messageName
+                m.name          as messageName,
+                m.id            as messageId
             FROM forum_test.messages as m
                 join forum_test.messageposts as mp on mp.MessageId = m.id
                 left join forum_test.users as u on mp.UserId = u.id

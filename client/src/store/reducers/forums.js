@@ -154,10 +154,7 @@ const setMessagePostData = (state, action) => {
         ...state,
         messageData: {
             ...state.messageData,
-            posts: action.data.posts,
-            members: action.data.members,
-            messageName: action.data.messageName,
-            messagePerm: action.data.messagePerm
+            messageSelected: action.data,
         },
         error: false
     }

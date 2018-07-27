@@ -59,24 +59,40 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 
-io.on('connection', function (socket) {
-    socket.emit('user1', { hello: 'world' });
-    socket.on('user1response', function (data) {
-        console.log('...........................................................................................');
-    });
-});
-
-app.use(session({
+const sessionMiddleware = session({
     secret: 'your secret',
     resave: false,
     saveUninitialized: false,
     cookie: { path: '/', httpOnly: true, secure: false, maxAge: 86400000 },
-    store:new RedisStore({
+    store: new RedisStore({
         host: '192.168.56.1',
         port: 6379,
         client: redis
     })
-}));
+});
+
+io.use(function(socket, next){
+    sessionMiddleware(socket.request, {}, next);
+})
+
+let socketUsers = new Map();
+
+io.on('connection', function (socket) {
+    const user = socket.request.session && socket.request.session.passport && socket.request.session.passport.user;
+    if(user){
+        socketUsers.set(user, socket.id);
+        console.log('user ' + user + ' connected')
+    }
+    socket.on("disconnect", () => {
+        const user = socket.request.session && socket.request.session.passport && socket.request.session.passport.user;
+        if(user){
+            console.log('user ' + user + ' disconnected')
+            socketUsers.delete(user);
+        }
+    });
+});
+
+app.use(sessionMiddleware);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -87,7 +103,7 @@ app.use(bodyParser.json());
 
 authRoutes(app);
 
-forumRoutes(app);
+forumRoutes(app, io, socketUsers);
 
 if (process.env.NODE_ENV === 'production') {
     // Express will serve up production assets

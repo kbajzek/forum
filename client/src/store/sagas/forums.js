@@ -120,12 +120,14 @@ export function* refreshMessageDataSaga(action) {
 
 export function* selectMessageDataSaga(action) {
   try {
-    yield action.history.push("/forums" + action.path);
-    yield put(actions.setMessagePostData({posts: null, messageName: null}));
+    if(action.history){
+      yield action.history.push("/forums" + action.path);
+      yield put(actions.setMessagePostData(null));
+    }
     const response = yield axios.get(
       "/api/forums" + action.path
     );
-    yield put(actions.setMessagePostData(response.data));
+    yield put(actions.setMessagePostData(response.data.messageSelected));
   } catch (error) {
     yield put(actions.selectMessageDataFailed(error.response.data));
   }

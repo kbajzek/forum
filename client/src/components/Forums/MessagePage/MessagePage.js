@@ -44,7 +44,7 @@ class MessagePage extends Component {
     }
 
     onSelectMessage = (id, name) => {
-        this.props.onSelectMessageData("/message/" + id + "/" + slugify(name), this.props.history);
+        this.props.onSelectMessageData("/message/" + id + "/" + name, this.props.history);
     }
 
     onMessageButtonClick = () => {
@@ -81,9 +81,12 @@ class MessagePage extends Component {
         if (this.props.messageData) {
 
             let messageContent = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
+            if(!this.props.id){
+                messageContent = null;
+            }
 
-            if(this.props.messageData.posts){
-                messageContent = this.props.messageData.posts.map(({id, content, creatorName, creatorPath, creatorPictureURL, creatorPostCount}) => {
+            if(this.props.messageData.messageSelected){
+                messageContent = this.props.messageData.messageSelected.posts.map(({id, content, creatorName, creatorPath, creatorPictureURL, creatorPostCount}) => {
                     return (
                         <div key={id}>
                             <div style={{display: 'flex', margin: '1rem', boxShadow: '0 1rem 3rem rgba(0, 0, 0, .2)', flexDirection: 'row'}}>
@@ -97,10 +100,10 @@ class MessagePage extends Component {
                                         <PostContent content={content} />
                                     </div>
                                     <div style={{display: 'flex'}}>
-                                        <button onClick={() => {this.props.handleMessagePostEdit(id, content, this.props.id, this.props.slug, this.props.messageData.messageName)}}>EDIT</button>
+                                        <button onClick={() => {this.props.handleMessagePostEdit(id, content, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName)}}>EDIT</button>
                                         <button onClick={() => {this.props.handleMessagePostDelete(id, this.props.id, this.props.slug)}}>DELETE</button>
-                                        <button onClick={() => {this.props.handleMessagePostQuote(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageName, content)}}>QUOTE</button>
-                                        <button onClick={() => {this.props.handleMessagePostReply(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageName, content)}}>REPLY</button>
+                                        <button onClick={() => {this.props.handleMessagePostQuote(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName, content)}}>QUOTE</button>
+                                        <button onClick={() => {this.props.handleMessagePostReply(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName, content)}}>REPLY</button>
                                     </div>
                                 </div>
                             </div>

@@ -191,15 +191,18 @@ module.exports = {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
                 return models.User.findOne({where: {id: UserId}, transaction: t})
                     .then(function(user) {
-                        return models.Message.findOne({where: {id: MessageId}, transaction: t})
-                            .then(function (message) {
-                                return models.MessagePost.create({
-                                    content,
-                                    MessageId,
-                                    UserId
-                                }, {transaction: t})
-                                    .then(function(newPost) {
-                                        return {newPost, user, message};
+                        return models.MessageMember.findAll({where: {MessageId: MessageId}, transaction: t})
+                            .then(function (members) {
+                                return models.Message.findOne({where: {id: MessageId}, transaction: t})
+                                    .then(function (message) {
+                                        return models.MessagePost.create({
+                                            content,
+                                            MessageId,
+                                            UserId
+                                        }, {transaction: t})
+                                            .then(function(newPost) {
+                                                return {newPost, user, message, members};
+                                            });
                                     });
                             });
                     });
@@ -213,9 +216,12 @@ module.exports = {
                     .then(function(post) {
                         return models.Message.findOne({where: {id: post.MessageId}, transaction: t})
                             .then(function(message) {
-                                return post.updateAttributes({content: updatedContent}, {transaction: t})
-                                    .then(function(updatedMessagePost) {
-                                        return {updatedMessagePost, message};
+                                return models.MessageMember.findAll({where: {MessageId: post.MessageId}, transaction: t})
+                                    .then(function(members) {
+                                        return post.updateAttributes({content: updatedContent}, {transaction: t})
+                                            .then(function(updatedMessagePost) {
+                                                return {updatedMessagePost, message, members};
+                                            });
                                     });
                             });
                     });

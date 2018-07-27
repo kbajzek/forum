@@ -10,7 +10,7 @@ const checkCanRate = require('../middlewares/checkCanRate');
 const checkCanUnrate = require('../middlewares/checkCanUnrate');
 const checkCanRemoveMessageMember = require('../middlewares/checkCanRemoveMessageMember');
 
-module.exports = app => {
+module.exports = (app,io,ioUsers) => {
 
     const example_thread = {
         name: "jjj",
@@ -510,8 +510,8 @@ module.exports = app => {
                     });
 
                     let messageData = {
-                        headers: convertedMessageHeaders,
-                        posts: convertedMessagePosts
+                        messageList: convertedMessageHeaders,
+                        messageSelected: null
                     }
 
                     res.send(messageData);
@@ -581,11 +581,14 @@ module.exports = app => {
             const messageName = result2[0] ? result2[0].messageName : '';
 
             let messageData = {
-                headers: convertedMessageHeaders,
-                posts: convertedMessagePosts,
-                members: convertedMessageMembers,
-                messageName: messageName,
-                messagePerm: perm.memberPermission
+                messageList: convertedMessageHeaders,
+                messageSelected: {
+                    messageId: messageId,
+                    messageName: messageName,
+                    messagePerm: perm.memberPermission,
+                    posts: convertedMessagePosts,
+                    members: convertedMessageMembers,
+                }
             }
 
             res.send(messageData);
@@ -716,7 +719,15 @@ module.exports = app => {
 
     app.post('/api/forums/messagepost/create', requireCSRF, requireLogin, (req, res) => {
         controllers.createMessagePost(req.body.content, req.session.passport.user, req.body.messageId)
-            .then(({newPost, user, message}) => {
+            .then(({newPost, user, message, members}) => {
+                members.forEach((member) => {
+                    if(member.UserId !== req.session.passport.user){
+                        const socketID = ioUsers.get(member.UserId);
+                        if(socketID && socketID !== undefined){
+                            io.to(socketID).emit('messages.update', req.body.messageId);
+                        }
+                    }
+                })
                 res.send({
                     postId: newPost.id, 
                     content: newPost.content,

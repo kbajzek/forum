@@ -12,7 +12,7 @@ class MessageSideBar extends Component{
 
     render(){
 
-        const messageList = this.props.messageData.headers.map(({id, name}) => {
+        const messageList = this.props.messageData.messageList.map(({id, name}) => {
             return (
                 <div key={id} className={classes.message}>
                     <div style={{display: 'flex', padding: '2rem'}} onClick={() => this.props.onSelectMessage(id, name)}>
@@ -24,10 +24,10 @@ class MessageSideBar extends Component{
 
         let memberList = <Spinner />;
         
-        if(this.props.messageData.members){
-            memberList = this.props.messageData.members.map(({userId, userName, permission, id}) => {
+        if(this.props.messageData.messageSelected){
+            memberList = this.props.messageData.messageSelected.members.map(({userId, userName, permission, id}) => {
                 let userControls = null;
-                if(this.props.messageData.messagePerm === 2 && permission !== 2){
+                if(this.props.messageData.messageSelected.messagePerm === 2 && permission !== 2){
                     userControls = (
                         <div>
                             <button onClick={() => this.removeMember(id)}>X</button>
