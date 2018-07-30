@@ -1,76 +1,78 @@
 import { put } from "redux-saga/effects";
 
 import axios from "../../axios-forums";
+
+import * as threadActions from '../ducks/thread';
 import * as actions from "../actions";
 
-export function* initCategoryDataSaga(action) {
-  try {
-    yield put(actions.setCategoryData(null));
-    const response = yield axios.get(
-      "/api/forums"
-    );
-    yield put(actions.setCategoryData(response.data));
-  } catch (error) {
-    yield put(actions.initCategoryDataFailed(error.response.data));
-  }
-}
+// export function* initCategoryDataSaga(action) {
+//   try {
+//     yield put(actions.setCategoryData(null));
+//     const response = yield axios.get(
+//       "/api/forums"
+//     );
+//     yield put(actions.setCategoryData(response.data));
+//   } catch (error) {
+//     yield put(actions.initCategoryDataFailed(error.response.data));
+//   }
+// }
 
-export function* refreshCategoryDataSaga(action) {
-  try {
-    const response = yield axios.get(
-      "/api/forums"
-    );
-    yield put(actions.setCategoryData(response.data));
-  } catch (error) {
-    yield put(actions.refreshCategoryDataFailed(error.response.data));
-  }
-}
+// export function* refreshCategoryDataSaga(action) {
+//   try {
+//     const response = yield axios.get(
+//       "/api/forums"
+//     );
+//     yield put(actions.setCategoryData(response.data));
+//   } catch (error) {
+//     yield put(actions.refreshCategoryDataFailed(error.response.data));
+//   }
+// }
 
-export function* initSubCategoryPageDataSaga(action) {
-  try {
-    yield put(actions.setSubCategoryPageData(null));
-    const response = yield axios.get(
-      "/api/forums" + action.path
-    );
-    yield put(actions.setSubCategoryPageData(response.data));
-  } catch (error) {
-    yield put(actions.initSubCategoryPageDataFailed(error.response.data));
-  }
-}
+// export function* initSubCategoryPageDataSaga(action) {
+//   try {
+//     yield put(actions.setSubCategoryPageData(null));
+//     const response = yield axios.get(
+//       "/api/forums" + action.subCategoryId
+//     );
+//     yield put(actions.setSubCategoryPageData(response.data));
+//   } catch (error) {
+//     yield put(actions.initSubCategoryPageDataFailed(error.response.data));
+//   }
+// }
 
-export function* refreshSubCategoryPageDataSaga(action) {
-  try {
-    const response = yield axios.get(
-      "/api/forums" + action.path
-    );
-    yield put(actions.setSubCategoryPageData(response.data));
-  } catch (error) {
-    yield put(actions.refreshSubCategoryPageDataFailed(error.response.data));
-  }
-}
+// export function* refreshSubCategoryPageDataSaga(action) {
+//   try {
+//     const response = yield axios.get(
+//       "/api/forums" + action.subCategoryId
+//     );
+//     yield put(actions.setSubCategoryPageData(response.data));
+//   } catch (error) {
+//     yield put(actions.refreshSubCategoryPageDataFailed(error.response.data));
+//   }
+// }
 
-export function* initThreadDataSaga(action) {
-  try {
-    yield put(actions.setThreadData(null));
-    const response = yield axios.get(
-      "/api/forums" + action.path
-    );
-    yield put(actions.setThreadData(response.data));
-  } catch (error) {
-    yield put(actions.initThreadDataFailed(error.response.data));
-  }
-}
+// export function* initThreadDataSaga(action) {
+//   try {
+//     yield put(actions.setThreadData(null));
+//     const response = yield axios.get(
+//       "/api/forums" + action.path
+//     );
+//     yield put(actions.setThreadData(response.data));
+//   } catch (error) {
+//     yield put(actions.initThreadDataFailed(error.response.data));
+//   }
+// }
 
-export function* refreshThreadDataSaga(action) {
-  try {
-    const response = yield axios.get(
-      "/api/forums" + action.path
-    );
-    yield put(actions.setThreadData(response.data));
-  } catch (error) {
-    yield put(actions.refreshThreadDataFailed(error.response.data));
-  }
-}
+// export function* refreshThreadDataSaga(action) {
+//   try {
+//     const response = yield axios.get(
+//       "/api/forums" + action.path
+//     );
+//     yield put(actions.setThreadData(response.data));
+//   } catch (error) {
+//     yield put(actions.refreshThreadDataFailed(error.response.data));
+//   }
+// }
 
 export function* initUserDataSaga(action) {
   try {
@@ -148,103 +150,102 @@ export function* fetchUserlistSaga(action) {
   }
 }
 
-export function* createCategorySaga(action) {
-  try {
-    yield axios.post(
-      "/api/forums/category/create", {
-        name: action.name
-      }
-    );
-    yield put(actions.refreshCategoryData());
-  } catch (error) {
-    yield put(actions.createCategoryFailed(error.response.data));
-  }
-}
+// export function* createCategorySaga(action) {
+//   try {
+//     yield axios.post(
+//       "/api/forums/category/create", {
+//         name: action.name
+//       }
+//     );
+//     yield put(actions.refreshCategoryData());
+//   } catch (error) {
+//     yield put(actions.createCategoryFailed(error.response.data));
+//   }
+// }
 
-export function* createSubCategorySaga(action) {
-  try {
-    yield axios.post(
-      "/api/forums/subcategory/create", {
-        name: action.name,
-        description: action.description,
-        categoryId: action.categoryId,
-        subCategoryId: action.subCategoryId
-      }
-    );
-    if (action.categoryId) {
-      yield put(actions.refreshCategoryData(action.path));
-    } else {
-      yield put(actions.refreshSubCategoryPageData(action.path));
-    }
-  } catch (error) {
-    yield put(actions.createSubCategoryFailed(error.response.data));
-  }
-}
+// export function* createSubCategorySaga(action) {
+//   try {
+//     yield axios.post(
+//       "/api/forums/subcategory/create", {
+//         name: action.name,
+//         description: action.description,
+//         categoryId: action.categoryId,
+//         subCategoryId: action.subCategoryId
+//       }
+//     );
+//     if (action.categoryId) {
+//       yield put(actions.refreshCategoryData(action.path));
+//     } else {
+//       yield put(actions.refreshSubCategoryPageData(action.path));
+//     }
+//   } catch (error) {
+//     yield put(actions.createSubCategoryFailed(error.response.data));
+//   }
+// }
 
-export function* createThreadSaga(action) {
-  try {
-    const response = yield axios.post(
-      "/api/forums/thread/create", {
-        name: action.name,
-        content: action.content,
-        userId: action.userId,
-        subCategoryId: action.subCategoryId
-      }
-    );
-    yield action.history.push("/forums" + response.data.path);
-  } catch (error) {
-    yield put(actions.createThreadFailed(error.response.data));
-  }
-}
+// export function* createThreadSaga(action) {
+//   try {
+//     const response = yield axios.post(
+//       "/api/forums/thread/create", {
+//         name: action.name,
+//         content: action.content,
+//         userId: action.userId,
+//         subCategoryId: action.subCategoryId
+//       }
+//     );
+//     yield action.history.push("/forums" + response.data.path);
+//   } catch (error) {
+//     yield put(actions.createThreadFailed(error.response.data));
+//   }
+// }
 
-export function* createPostSaga(action) {
-  try {
-    const response = yield axios.post(
-      "/api/forums/post/create", {
-        content: action.content,
-        userId: action.userId,
-        threadId: action.threadId
-      }
-    );
-    yield put(actions.refreshThreadData(response.data.path));
-    yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
-  } catch (error) {
-    yield put(actions.createPostFailed(error.response.data));
-  }
-}
+// export function* createPostSaga(action) {
+//   try {
+//     const response = yield axios.post(
+//       "/api/forums/post/create", {
+//         content: action.content,
+//         userId: action.userId,
+//         threadId: action.threadId
+//       }
+//     );
+//     yield put(threadActions.fetchThreadDataBegin(response.data.path));
+//     yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
+//   } catch (error) {
+//     yield put(actions.createPostFailed(error.response.data));
+//   }
+// }
 
-export function* editPostSaga(action) {
-  try {
-    const response = yield axios.post(
-      "/api/forums/post/edit", {
-        content: action.content,
-        postId: action.postId
-      }
-    );
-    yield put(actions.refreshThreadData(response.data.path));
-    yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
-  } catch (error) {
-    yield put(actions.editPostFailed(error.response.data));
-  }
-}
+// export function* editPostSaga(action) {
+//   try {
+//     const response = yield axios.post(
+//       "/api/forums/post/edit", {
+//         content: action.content,
+//         postId: action.postId
+//       }
+//     );
+//     yield put(threadActions.fetchThreadDataBegin(response.data.path));
+//     yield action.history.push("/forums" + response.data.path + "#" + response.data.postId);
+//   } catch (error) {
+//     yield put(actions.editPostFailed(error.response.data));
+//   }
+// }
 
-export function* deletePostSaga(action) {
-  try {
-    const response = yield axios.post(
-      "/api/forums/post/delete", {
-        postId: action.postId
-      }
-    );
-    if (response.data.response === 1) {
-      yield action.history.push("/forums");
-      yield put(actions.setThreadData(null));
-    } else {
-      yield put(actions.refreshThreadData(response.data.path));
-    }
-  } catch (error) {
-    yield put(actions.deletePostFailed(error.response.data));
-  }
-}
+// export function* deletePostSaga(action) {
+//   try {
+//     const response = yield axios.post(
+//       "/api/forums/post/delete", {
+//         postId: action.postId
+//       }
+//     );
+//     if (response.data.response === 1) {
+//       yield action.history.push("/forums");
+//     } else {
+//       yield put(threadActions.fetchThreadDataBegin(response.data.path));
+//     }
+//   } catch (error) {
+//     yield put(actions.deletePostFailed(error.response.data));
+//   }
+// }
 
 export function* createMessageSaga(action) {
   try {
@@ -310,36 +311,36 @@ export function* deleteMessagePostSaga(action) {
   }
 }
 
-export function* createRatingSaga(action) {
-  try {
-    yield axios.post(
-      "/api/forums/rating/create", {
-        userId: action.userId,
-        postId: action.postId,
-        ratingTypeId: action.ratingTypeId,
-        path: action.path
-      }
-    );
-    yield put(actions.refreshThreadData(action.path));
-  } catch (error) {
-    yield put(actions.createRatingFailed(error.response.data));
-  }
-}
+// export function* createRatingSaga(action) {
+//   try {
+//     yield axios.post(
+//       "/api/forums/rating/create", {
+//         userId: action.userId,
+//         postId: action.postId,
+//         ratingTypeId: action.ratingTypeId,
+//         path: action.path
+//       }
+//     );
+//     yield put(threadActions.fetchThreadDataBegin(action.path));
+//   } catch (error) {
+//     yield put(actions.createRatingFailed(error.response.data));
+//   }
+// }
 
-export function* deleteRatingSaga(action) {
-  try {
-    yield axios.post(
-      "/api/forums/rating/delete", {
-        userId: action.userId,
-        postId: action.postId,
-        path: action.path
-      }
-    );
-    yield put(actions.refreshThreadData(action.path));
-  } catch (error) {
-    yield put(actions.deleteRatingFailed(error.response.data));
-  }
-}
+// export function* deleteRatingSaga(action) {
+//   try {
+//     yield axios.post(
+//       "/api/forums/rating/delete", {
+//         userId: action.userId,
+//         postId: action.postId,
+//         path: action.path
+//       }
+//     );
+//     yield put(threadActions.fetchThreadDataBegin(action.path));
+//   } catch (error) {
+//     yield put(actions.deleteRatingFailed(error.response.data));
+//   }
+// }
 
 export function* removeMessageMemberSaga(action) {
   try {

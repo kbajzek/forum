@@ -28,12 +28,12 @@ const Post = (props) => {
                         auth={props.auth} 
                         userId={props.user.userId} 
                         postId={props.id} 
-                        path={"/thread/" + props.threadData.id + "/" + props.threadData.slug}/>
+                        path={"/thread/" + props.threadId + "/" + props.threadSlug}/>
                     {props.auth && (<div style={{display: 'flex'}}>
-                        <button onClick={() => {props.handleEdit(props.id, props.content, props.threadData.id, props.threadData.slug, props.threadData.name)}}>EDIT</button>
-                        <button onClick={() => {props.handleDelete(props.id, props.threadData.id, props.threadData.slug)}}>DELETE</button>
-                        <button onClick={() => {props.handleQuote(props.user.name, props.id, props.threadData.id, props.threadData.slug, props.threadData.name, props.content)}}>QUOTE</button>
-                        <button onClick={() => {props.handleReply(props.user.name, props.id, props.threadData.id, props.threadData.slug, props.threadData.name, props.content)}}>REPLY</button>
+                        <button onClick={() => {props.handleEdit(props.id, props.content, props.threadId, props.threadSlug, props.threadName)}}>EDIT</button>
+                        <button onClick={() => {props.handleDelete(props.id, props.threadId, props.threadSlug)}}>DELETE</button>
+                        <button onClick={() => {props.handleQuote(props.user.name, props.id, props.threadId, props.threadSlug, props.threadName, props.content)}}>QUOTE</button>
+                        <button onClick={() => {props.handleReply(props.user.name, props.id, props.threadId, props.threadSlug, props.threadName, props.content)}}>REPLY</button>
                     </div>)}
                 </div>
         </div>

@@ -3,7 +3,7 @@ import {reduxForm, Field} from 'redux-form';
 import {connect} from 'react-redux';
 import fields from './fields';
 import FieldComponent from '../FieldComponent/FieldComponent';
-import * as actions from '../../../store/actions';
+import * as categoryActions from '../../../store/ducks/category';
 
 class CategoryForm extends Component {
 
@@ -51,7 +51,7 @@ const validate = (values) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreateCategory: (name) => dispatch(actions.createCategory(name))
+        onCreateCategory: (name) => dispatch(categoryActions.createCategoryBegin(name))
     }
 }
 

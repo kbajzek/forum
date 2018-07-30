@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import {change, getFormValues} from 'redux-form';
 
 import * as actions from '../../store/actions';
+import * as threadActions from '../../store/ducks/thread';
 
 import PostForm from '../Forms/PostForm/PostForm';
 import Categories from './Categories/Categories';
@@ -44,7 +45,7 @@ class Forums extends Component {
     }
 
     handlePostDelete = (postId) => {
-        this.props.onDeletePost(postId, null, this.props.history);
+        this.props.onDeletePost(postId, this.props.history);
     }
 
     handlePostQuote = (userName, postId, threadId, threadSlug, threadName, postContent) => {
@@ -329,7 +330,7 @@ const mapDispatchToProps = (dispatch) => {
         changeWriterMembers : (value) => dispatch(change('postForm', 'members', value)),
         changeWriterTitle : (value) => dispatch(change('postForm', 'title', value)),
         changeWriterContent : (value) => dispatch(change('postForm', 'content', value)),
-        onDeletePost: (postId, path, history) => dispatch(actions.deletePost(postId, path, history)),
+        onDeletePost: (postId, history) => dispatch(threadActions.deletePostBegin(postId, history)),
         onDeleteMessagePost: (messagePostId, path, history) => dispatch(actions.deleteMessagePost(messagePostId, path, history)),
         fetchUser: () => dispatch(actions.fetchUserInit())
 	}

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 
-import * as actions from '../../../store/actions';
+import * as threadActions from '../../../store/ducks/thread';
 
 import Post from './Post/Post';
 import Spinner from '../../UI/Spinner/Spinner';
@@ -13,22 +13,39 @@ import classes from './Thread.module.css';
 class Thread extends Component {
     
     componentDidMount() {
-        this.props.onInitThreadData("/thread/" + this.props.id + "/" + this.props.slug);
+        this.props.onInitThreadData(this.props.id);
     }
 
     handlePostCreator = () => {
-        this.props.handlePostCreate(this.props.id, this.props.slug, this.props.threadData.name);
+        const threadName = threadActions.getThreadName(this.props.threadData);
+        this.props.handlePostCreate(this.props.id, this.props.slug, threadName);
     }
 
     render() {
 
-        let threadpage = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
-
         let threadButton = this.props.auth ? <button onClick={this.handlePostCreator}>CREATE POST</button> : null;
+        const threadErrors = threadActions.getThreadErrors(this.props.threadData);
+        const threadLoading = threadActions.getThreadLoading(this.props.threadData);
+        const threadLoaded = threadActions.getThreadLoaded(this.props.threadData);
+        const threadPosts = threadActions.getThreadPosts(this.props.threadData);
+        const threadName = threadActions.getThreadName(this.props.threadData);
+        const threadId = threadActions.getThreadId(this.props.threadData);
+        const threadSlug = threadActions.getThreadSlug(this.props.threadData);
+        const threadRatingTypes = threadActions.getThreadRatingTypes(this.props.threadData);
 
-        if (this.props.threadData) {
+        let threadpage;
 
-            const postList = this.props.threadData.posts.map(({id, content, ratings, creator}) => {
+        if(threadErrors.length > 0){
+
+            threadpage = <ErrorPage error = {threadErrors[0]}/>
+
+        }else if(threadLoading){
+
+            threadpage = <Spinner />
+
+        }else if(threadLoaded){
+
+            const postList = threadPosts.map(({id, content, ratings, creator}) => {
                 return (
                     <Post 
                         threadData = {this.props.threadData}
@@ -37,7 +54,10 @@ class Thread extends Component {
                         ratings={ratings}
                         user={creator}
                         id={id}
-                        ratingTypes={this.props.threadData.ratingTypes}
+                        threadId={threadId}
+                        threadName={threadName}
+                        threadSlug={threadSlug}
+                        ratingTypes={threadRatingTypes}
                         handleEdit={this.props.handlePostEdit}
                         handleDelete={this.props.handlePostDelete}
                         handleQuote={this.props.handlePostQuote}
@@ -49,7 +69,7 @@ class Thread extends Component {
             threadpage = (
                 <div>
                     {threadButton}
-                    <div className={classes.Header}>{this.props.threadData.name}</div>
+                    <div className={classes.Header}>{threadName}</div>
                     <div className={classes.Thread}>
                         {postList}
                     </div>
@@ -67,15 +87,14 @@ class Thread extends Component {
 
 const mapStateToProps = state => {
     return {
-        threadData: state.forums.threadData,
-        error: state.forums.error,
+        threadData: state.thread,
         auth: state.auth.user
     };
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onInitThreadData: (path) => dispatch(actions.initThreadData(path))
+        onInitThreadData: (threadId) => dispatch(threadActions.fetchThreadDataBegin(threadId))
     }
 }
 

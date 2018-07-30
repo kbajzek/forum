@@ -3,12 +3,12 @@ import {reduxForm, Field} from 'redux-form';
 import {connect} from 'react-redux';
 import fields from './fields';
 import FieldComponent from '../FieldComponent/FieldComponent';
-import * as actions from '../../../store/actions';
+import * as subCategoryActions from '../../../store/ducks/subCategory';
 
 class SubCategoryForm extends Component {
 
     onFormSubmit = ({name, description}) => {
-        this.props.onCreateSubCategory(name, description, this.props.categoryId, this.props.subCategoryId, this.props.path);
+        this.props.onCreateSubCategory(name, description, this.props.categoryId, this.props.subCategoryId);
         this.props.closeForm();
     }
 
@@ -51,7 +51,7 @@ const validate = (values) => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreateSubCategory: (name, description, categoryId, subCategoryId, path) => dispatch(actions.createSubCategory(name, description, categoryId, subCategoryId, path))
+        onCreateSubCategory: (name, description, categoryId, subCategoryId) => dispatch(subCategoryActions.createSubCategoryBegin(name, description, categoryId, subCategoryId))
     }
 }
 

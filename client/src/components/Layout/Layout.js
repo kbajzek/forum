@@ -6,8 +6,10 @@ import classes from './Layout.module.css';
 import Navbar from '../../components/Navigation/Navbar/Navbar';
 import SideDrawer from '../../components/Navigation/SideDrawer/SideDrawer';
 import NavigationItem from '../Navigation/Navbar/NavigationItem/NavigationItem';
+import Spinner from '../UI/Spinner/Spinner';
 
 import * as actions from '../../store/actions';
+import * as categoryActions from '../../store/ducks/category';
 
 class Layout extends Component {
     state = {
@@ -68,6 +70,16 @@ class Layout extends Component {
             </Auxiliary>
         );
 
+        let loading;
+        // if(this.props.categoryData.loading || this.props.subCategoryData.loading || this.props.threadData.loading){
+        if(1 === 1){
+            loading = (
+                <div style={{position: 'fixed', top: 0, right: '10rem', width: '1rem', height: '1rem'}}>
+                    <Spinner/>
+                </div>
+            );
+        }
+
         return (
             <Auxiliary>
                 <Navbar
@@ -84,6 +96,7 @@ class Layout extends Component {
                 <main className={classes.Content}>
                     {this.props.children}
                 </main>
+                {loading}
             </Auxiliary>
         )
     }
@@ -91,13 +104,16 @@ class Layout extends Component {
 
 const mapStateToProps = state => {
     return { 
-        user: state.auth.user
+        user: state.auth.user,
+        categoryData: state.category,
+        subCategoryData: state.subCategory,
+        threadData: state.thread,
     };
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onInitCategoryData: () => dispatch(actions.initCategoryData()),
+        onInitCategoryData: () => dispatch(categoryActions.fetchCategoryDataBegin()),
         onInitMessageData: (path) => dispatch(actions.initMessageData(path)),
         setMessageSidebarState: (state) => dispatch(actions.setMessageSidebarState(state)),
         onLogout: () => dispatch(actions.logoutUserInit())

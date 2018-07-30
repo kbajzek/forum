@@ -286,14 +286,18 @@ module.exports = (app,io,ioUsers) => {
                         }
                     });
 
-                    res.send(convertedResult);
+                    const finalResult = {
+                        categories: convertedResult
+                    }
+
+                    res.send(finalResult);
                 })
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
     })
 
-    app.get('/api/forums/:id/:slug', async (req, res) => {
+    app.get('/api/forums/subcategory/:id', async (req, res) => {
         try {
             let subcatid = Number(req.params.id);
 
@@ -350,8 +354,10 @@ module.exports = (app,io,ioUsers) => {
             const finalResult = {
                 id: subcatid,
                 name: result3[0].name,
+                slug: slugify(result3[0].name).toLowerCase(),
                 subCategories: convertedResult,
-                threads: convertedResult2
+                threads: convertedResult2,
+                path: `/${subcatid}/${slugify(result3[0].name).toLowerCase()}`,
             }
 
             res.send(finalResult);
@@ -360,7 +366,7 @@ module.exports = (app,io,ioUsers) => {
         }
     })
 
-    app.get('/api/forums/thread/:id/:slug', (req, res) => {
+    app.get('/api/forums/thread/:id', (req, res) => {
         try {
             let threadId = Number(req.params.id);
             models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})
@@ -441,11 +447,12 @@ module.exports = (app,io,ioUsers) => {
                             })
 
                             const finalResult = {
-                                name: result[0].threadName,
                                 id: result[0].threadId,
+                                name: result[0].threadName,
                                 slug: slugify(result[0].threadName).toLowerCase(),
                                 posts: convertedPosts,
-                                ratingTypes: ratings
+                                ratingTypes: ratings,
+                                path: `/thread/${result[0].threadId}/${slugify(result[0].threadName).toLowerCase()}`,
                             }
 
                             res.send(finalResult);
@@ -660,8 +667,8 @@ module.exports = (app,io,ioUsers) => {
                             postId: newPost.id, 
                             content: newPost.content,
                             threadId: req.body.threadId,
+                            hash: `#${newPost.id}`,
                             path: `/thread/${req.body.threadId}/${slugify(thread.name).toLowerCase()}`,
-                            pathSpecific: `/thread/${req.body.threadId}/${slugify(thread.name).toLowerCase()}#${newPost.id}`,
                             userName: user.name, 
                             userTotalPosts: count, 
                             userSignature: "to be implemented"
@@ -678,6 +685,8 @@ module.exports = (app,io,ioUsers) => {
             .then(({updatedPost, thread}) => {
                 res.send({
                     postId: updatedPost.id,
+                    threadId: thread.id,
+                    hash: `#${updatedPost.id}`,
                     path: `/thread/${thread.id}/${slugify(thread.name).toLowerCase()}`
                 });
             })
@@ -692,6 +701,7 @@ module.exports = (app,io,ioUsers) => {
             .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
                 res.send({
                     response: response[0],
+                    threadId: response[1],
                     path: `/thread/${response[1]}/${slugify(response[2]).toLowerCase()}`
                 });
             })
@@ -797,9 +807,10 @@ module.exports = (app,io,ioUsers) => {
 
     app.post('/api/forums/rating/create', requireCSRF, requireLogin, checkCanRate, (req, res) => {
         controllers.createRating(req.session.passport.user, req.body.postId, req.body.ratingTypeId)
-            .then((newRating) => {
+            .then(({newRating, threadId}) => {
                 res.send({
-                    ratingId: newRating
+                    ratingId: newRating,
+                    threadId: threadId
                 });
             })
             .catch((error) => {
@@ -808,10 +819,11 @@ module.exports = (app,io,ioUsers) => {
     })
 
     app.post('/api/forums/rating/delete', requireCSRF, requireLogin, checkCanUnrate, (req, res) => {
-        controllers.deleteRating(req.session.passport.user, req.body.postId)
-            .then((response) => {
+        controllers.deleteRating(req.body.ratingId)
+            .then((threadId) => {
                 res.send({
-                    response: response
+                    response: 1,
+                    threadId: threadId
                 });
             })
             .catch((error) => {

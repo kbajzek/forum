@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 
-import * as actions from '../../../store/actions';
+import * as categoryActions from '../../../store/ducks/category';
 
 import ErrorPage from '../ErrorPage/ErrorPage';
 import Category from './Category/Category';
@@ -15,7 +15,7 @@ class Categories extends Component {
     };
 
     toggleCategoryCreator = () => {
-        this.setState(function(prevState, props){
+        this.setState(function(prevState){
             return {showCatForm: !prevState.showCatForm}
          });
     }
@@ -26,19 +26,31 @@ class Categories extends Component {
     
     render() {
 
-        let categories = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
-
         let catForm;
-
         let catButton = this.props.auth ? <button onClick={this.toggleCategoryCreator}>CREATE CATEGORY</button> : null;
 
-        if (this.props.categoryData) {
+        const categoryErrors = categoryActions.getCategoryErrors(this.props.categoryData);
+        const categoryLoading = categoryActions.getCategoryLoading(this.props.categoryData);
+        const categoryLoaded = categoryActions.getCategoryLoaded(this.props.categoryData);
+        const categoryCategories = categoryActions.getCategoryCategories(this.props.categoryData);
+
+        let categories;
+
+        if(categoryErrors.length > 0){
+
+            categories = <ErrorPage error = {categoryErrors[0]}/>
+
+        }else if(categoryLoading){
+
+            categories = <Spinner />
+
+        }else if(categoryLoaded){
 
             if(this.state.showCatForm) {
                 catForm = <CategoryForm closeForm={this.toggleCategoryCreator} />
             }
 
-            categories = this.props.categoryData.map(({id, name, subCategories}) => {
+            categories = categoryCategories.map(({id, name, subCategories}) => {
                 return (
                     <Category 
                         key={id}
@@ -64,15 +76,14 @@ class Categories extends Component {
 
 const mapStateToProps = state => {
     return {
-        categoryData: state.forums.categoryData,
-        error: state.forums.error,
+        categoryData: state.category,
         auth: state.auth.user
     };
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onInitCategoryData: () => dispatch(actions.initCategoryData())
+        onInitCategoryData: () => dispatch(categoryActions.fetchCategoryDataBegin())
     }
 }
 

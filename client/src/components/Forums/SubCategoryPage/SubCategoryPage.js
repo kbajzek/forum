@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 
-import * as actions from '../../../store/actions';
+import * as subCategoryActions from '../../../store/ducks/subCategory';
 
 import ErrorPage from '../ErrorPage/ErrorPage';
 import SubCategory from './../Categories/Category/SubCategory/SubCategory';
@@ -33,26 +33,42 @@ class SubCategoryPage extends Component {
     }
 
     componentDidMount() {
-        this.props.onInitSubCategoryPageData("/" + this.props.id + "/" + this.props.slug);
+        this.props.onInitSubCategoryPageData(this.props.id);
     }
     
     render() {
 
         let subCatForm;
-        
-        let subcategorypage = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 
         let subCatButton = this.props.auth ? <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
 
         let threadButton = this.props.auth ? <button onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
 
-        if (this.props.subCategoryPageData) {
+        const subCategoryErrors = subCategoryActions.getSubCategoryErrors(this.props.subCategoryData);
+        const subCategoryLoading = subCategoryActions.getSubCategoryLoading(this.props.subCategoryData);
+        const subCategoryLoaded = subCategoryActions.getSubCategoryLoaded(this.props.subCategoryData);
+        const subCategorySubCategories = subCategoryActions.getSubCategorySubCategories(this.props.subCategoryData);
+        const subCategoryThreads = subCategoryActions.getSubCategoryThreads(this.props.subCategoryData);
+        const subCategoryName = subCategoryActions.getSubCategoryName(this.props.subCategoryData);
+        const subCategoryId = subCategoryActions.getSubCategoryId(this.props.subCategoryData);
+
+        let subcategorypage;
+
+        if(subCategoryErrors.length > 0){
+
+            subcategorypage = <ErrorPage error = {subCategoryErrors[0]}/>
+
+        }else if(subCategoryLoading){
+
+            subcategorypage = <Spinner />
+
+        }else if(subCategoryLoaded){
 
             if(this.state.showSubCatForm) {
-                subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} subCategoryId={this.props.subCategoryPageData.id} path={"/" + this.props.id + "/" + this.props.slug} />
+                subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} subCategoryId={subCategoryId} path={"/" + this.props.id + "/" + this.props.slug} />
             }
 
-            const subcat_markup = this.props.subCategoryPageData.subCategories.map(({id, name, description, totalPosts, lastActiveThread, path}) => {
+            const subcat_markup = subCategorySubCategories.map(({id, name, description, totalPosts, lastActiveThread, path}) => {
                 return (
                     <SubCategory 
                         key={id}
@@ -64,7 +80,7 @@ class SubCategoryPage extends Component {
                 );
             });
         
-            const thread_markup = this.props.subCategoryPageData.threads.map(({id, name, creator, createdOn, totalViews, totalReplies, lastPost, path}) => {
+            const thread_markup = subCategoryThreads.map(({id, name, creator, createdOn, totalViews, totalReplies, lastPost, path}) => {
                 return (
                     <ThreadPreview 
                         key={id}
@@ -83,7 +99,7 @@ class SubCategoryPage extends Component {
                     {subCatButton}
                     {subCatForm}
                     {threadButton}
-                    <div className={classes.Header}>{this.props.subCategoryPageData.name}</div>
+                    <div className={classes.Header}>{subCategoryName}</div>
                     <div className={classes.SubCat}>{subcat_markup}</div>
                     <div>{thread_markup}</div>
         
@@ -108,15 +124,14 @@ class SubCategoryPage extends Component {
 
 const mapStateToProps = state => {
     return {
-        subCategoryPageData: state.forums.subCategoryPageData,
-        error: state.forums.error,
+        subCategoryData: state.subCategory,
         auth: state.auth.user
     };
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onInitSubCategoryPageData: (path) => dispatch(actions.initSubCategoryPageData(path))
+        onInitSubCategoryPageData: (subCategoryId) => dispatch(subCategoryActions.fetchSubCategoryDataBegin(subCategoryId))
     }
 }
 

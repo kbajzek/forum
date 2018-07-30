@@ -3,6 +3,7 @@ import {reduxForm, Field, formValueSelector} from 'redux-form';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import PostEditor from '../FieldComponent/PostEditor';
+import * as threadActions from '../../../store/ducks/thread';
 import * as actions from '../../../store/actions';
 import FieldComponent from '../FieldComponent/FieldComponent';
 import MultiSelect from '../FieldComponent/MultiSelect';
@@ -32,13 +33,13 @@ class PostForm extends Component {
 
         switch(this.props.modeValue) {
             case CREATE_THREAD:
-                this.props.onCreateThread(this.props.titleValue, this.props.contentValue, 1, this.props.subCategoryIdValue, null, this.props.history); //fix userid eventually
+                this.props.onCreateThread(this.props.titleValue, this.props.contentValue, this.props.subCategoryIdValue, this.props.history); //fix userid eventually
                 break;
             case CREATE_POST:
-                this.props.onCreatePost(this.props.contentValue, 1, this.props.threadIdValue, null, this.props.history); //fix userid eventually
+                this.props.onCreatePost(this.props.contentValue, this.props.threadIdValue, this.props.history, this.props.location); //fix userid eventually
                 break;
             case EDIT_POST:
-                this.props.onEditPost(this.props.contentValue, this.props.postIdValue, null, this.props.history);
+                this.props.onEditPost(this.props.contentValue, this.props.postIdValue, this.props.history, this.props.location);
                 break;
             case CREATE_MESSAGE:
                 this.props.onCreateMessage(this.props.titleValue, this.props.contentValue, this.props.membersValue, null, this.props.history);
@@ -178,9 +179,9 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onCreatePost: (content, userId, threadId, path, history) => dispatch(actions.createPost(content, userId, threadId, path, history)),
-        onEditPost: (content, postId, path, history) => dispatch(actions.editPost(content, postId, path, history)),
-        onCreateThread: (name, content, userId, subCategoryId, path, history) => dispatch(actions.createThread(name, content, userId, subCategoryId, path, history)),
+        onCreatePost: (content, threadId, history, location) => dispatch(threadActions.createPostBegin(content, threadId, history, location)),
+        onEditPost: (content, postId, history, location) => dispatch(threadActions.editPostBegin(content, postId, history, location)),
+        onCreateThread: (name, content, subCategoryId, history) => dispatch(threadActions.createThreadBegin(name, content, subCategoryId, history)),
         onCreateMessagePost: (content, messageId, path, history) => dispatch(actions.createMessagePost(content, messageId, path, history)),
         onEditMessagePost: (content, messagePostId, path, history) => dispatch(actions.editMessagePost(content, messagePostId, path, history)),
         onCreateMessage: (name, content, members, path, history) => dispatch(actions.createMessage(name, content, members, path, history))

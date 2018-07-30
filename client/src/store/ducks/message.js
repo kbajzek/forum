@@ -3,47 +3,47 @@ import axios from "../../axios-forums";
 
 // Action Types
 
-export const FETCH_THREAD_DATA_BEGIN = 'FETCH_THREAD_DATA_BEGIN';
-export const FETCH_THREAD_DATA_SUCCESS = 'FETCH_THREAD_DATA_SUCCESS';
-export const FETCH_THREAD_DATA_FAILED = 'FETCH_THREAD_DATA_FAILED';
-export const FETCH_THREAD_DATA_DISMISS_ERROR = 'FETCH_THREAD_DISMISS_ERROR';
+export const FETCH_MESSAGE_DATA_BEGIN = 'FETCH_MESSAGE_DATA_BEGIN';
+export const FETCH_MESSAGE_DATA_SUCCESS = 'FETCH_MESSAGE_DATA_SUCCESS';
+export const FETCH_MESSAGE_DATA_FAILED = 'FETCH_MESSAGE_DATA_FAILED';
+export const FETCH_MESSAGE_DATA_DISMISS_ERROR = 'FETCH_MESSAGE_DATA_DISMISS_ERROR';
 
-export const CREATE_THREAD_BEGIN = 'CREATE_THREAD_BEGIN';
-export const CREATE_THREAD_SUCCESS = 'CREATE_THREAD_SUCCESS';
-export const CREATE_THREAD_FAILED = 'CREATE_THREAD_FAILED';
-export const CREATE_THREAD_DISMISS_ERROR = 'CREATE_THREAD_DISMISS_ERROR';
+export const CREATE_MESSAGE_BEGIN = 'CREATE_MESSAGE_BEGIN';
+export const CREATE_MESSAGE_SUCCESS = 'CREATE_MESSAGE_SUCCESS';
+export const CREATE_MESSAGE_FAILED = 'CREATE_MESSAGE_FAILED';
+export const CREATE_MESSAGE_DISMISS_ERROR = 'CREATE_MESSAGE_DISMISS_ERROR';
 
-export const CREATE_POST_BEGIN = 'CREATE_POST_BEGIN';
-export const CREATE_POST_SUCCESS = 'CREATE_POST_SUCCESS';
-export const CREATE_POST_FAILED = 'CREATE_POST_FAILED';
-export const CREATE_POST_DISMISS_ERROR = 'CREATE_POST_DISMISS_ERROR';
+export const CREATE_MESSAGE_POST_BEGIN = 'CREATE_MESSAGE_POST_BEGIN';
+export const CREATE_MESSAGE_POST_SUCCESS = 'CREATE_MESSAGE_POST_SUCCESS';
+export const CREATE_MESSAGE_POST_FAILED = 'CREATE_MESSAGE_POST_FAILED';
+export const CREATE_MESSAGE_POST_DISMISS_ERROR = 'CREATE_MESSAGE_POST_DISMISS_ERROR';
 
-export const EDIT_POST_BEGIN = 'EDIT_POST_BEGIN';
-export const EDIT_POST_SUCCESS = 'EDIT_POST_SUCCESS';
-export const EDIT_POST_FAILED = 'EDIT_POST_FAILED';
-export const EDIT_POST_DISMISS_ERROR = 'EDIT_POST_DISMISS_ERROR';
+export const EDIT_MESSAGE_POST_BEGIN = 'EDIT_MESSAGE_POST_BEGIN';
+export const EDIT_MESSAGE_POST_SUCCESS = 'EDIT_MESSAGE_POST_SUCCESS';
+export const EDIT_MESSAGE_POST_FAILED = 'EDIT_MESSAGE_POST_FAILED';
+export const EDIT_MESSAGE_POST_DISMISS_ERROR = 'EDIT_MESSAGE_POST_DISMISS_ERROR';
 
-export const DELETE_POST_BEGIN = 'DELETE_POST_BEGIN';
-export const DELETE_POST_SUCCESS = 'DELETE_POST_SUCCESS';
-export const DELETE_POST_FAILED = 'DELETE_POST_FAILED';
-export const DELETE_POST_DISMISS_ERROR = 'DELETE_POST_DISMISS_ERROR';
+export const DELETE_MESSAGE_POST_BEGIN = 'DELETE_MESSAGE_POST_BEGIN';
+export const DELETE_MESSAGE_POST_SUCCESS = 'DELETE_MESSAGE_POST_SUCCESS';
+export const DELETE_MESSAGE_POST_FAILED = 'DELETE_MESSAGE_POST_FAILED';
+export const DELETE_MESSAGE_POST_DISMISS_ERROR = 'DELETE_MESSAGE_POST_DISMISS_ERROR';
 
-export const CREATE_RATING_BEGIN = 'CREATE_RATING_BEGIN';
-export const CREATE_RATING_SUCCESS = 'CREATE_RATING_SUCCESS';
-export const CREATE_RATING_FAILED = 'CREATE_RATING_FAILED';
-export const CREATE_RATING_DISMISS_ERROR = 'CREATE_RATING_DISMISS_ERROR';
+export const CREATE_MESSAGE_MEMBER_BEGIN = 'CREATE_MESSAGE_MEMBER_BEGIN';
+export const CREATE_MESSAGE_MEMBER_SUCCESS = 'CREATE_MESSAGE_MEMBER_SUCCESS';
+export const CREATE_MESSAGE_MEMBER_FAILED = 'CREATE_MESSAGE_MEMBER_FAILED';
+export const CREATE_MESSAGE_MEMBER_DISMISS_ERROR = 'CREATE_MESSAGE_MEMBER_DISMISS_ERROR';
 
-export const DELETE_RATING_BEGIN = 'DELETE_RATING_BEGIN';
-export const DELETE_RATING_SUCCESS = 'DELETE_RATING_SUCCESS';
-export const DELETE_RATING_FAILED = 'DELETE_RATING_FAILED';
-export const DELETE_RATING_DISMISS_ERROR = 'DELETE_RATING_DISMISS_ERROR';
+export const DELETE_MESSAGE_MEMBER_BEGIN = 'DELETE_MESSAGE_MEMBER_BEGIN';
+export const DELETE_MESSAGE_MEMBER_SUCCESS = 'DELETE_MESSAGE_MEMBER_SUCCESS';
+export const DELETE_MESSAGE_MEMBER_FAILED = 'DELETE_MESSAGE_MEMBER_FAILED';
+export const DELETE_MESSAGE_MEMBER_DISMISS_ERROR = 'DELETE_MESSAGE_MEMBER_DISMISS_ERROR';
 
 // Actions
 
-export const fetchThreadDataBegin = (threadId) => ({type: FETCH_THREAD_DATA_BEGIN, threadId});
-export const fetchThreadDataSuccess = (result) => ({type: FETCH_THREAD_DATA_SUCCESS, result});
-export const fetchThreadDataFailed = (error) => ({type: FETCH_THREAD_DATA_FAILED, error});
-export const fetchThreadDataDismissError = () => ({type: FETCH_THREAD_DATA_DISMISS_ERROR});
+export const fetchMessageDataBegin = (messageList, messageMembers, messageId) => ({type: FETCH_MESSAGE_DATA_BEGIN, messageList, messageMembers, messageId});
+export const fetchMessageDataSuccess = (result) => ({type: FETCH_MESSAGE_DATA_SUCCESS, result});
+export const fetchMessageDataFailed = (error) => ({type: FETCH_MESSAGE_DATA_FAILED, error});
+export const fetchMessageDataDismissError = () => ({type: FETCH_MESSAGE_DATA_DISMISS_ERROR});
 
 export const createThreadBegin = (name, content, subCategoryId, history) => ({type: CREATE_THREAD_BEGIN, name, content, subCategoryId, history});
 export const createThreadSuccess = (result) => ({type: CREATE_THREAD_SUCCESS, result});
@@ -112,15 +112,22 @@ export const getThreadErrors = (threadData) => {
 // Reducer
 
 const initialState = {
-    id: null,
-    name: null,
-    slug: null,
-    posts: null,
-    ratingTypes: null,
-    path: null,
-    loading: false,
-    loaded: false,
-    errors: []
+    messageList: null,
+    messageListLoading: false,
+    messageListLoaded: false,
+
+    selectedMessageId: null,
+    selectedMessageName: null,
+    selectedMessagePerm: null,
+    selectedMessagePosts: null,
+    selectedMessageLoading: false,
+    selectedMessageLoaded: false,
+
+    MessageMembers: null,
+    MessageMembersLoading: false,
+    MessageMembersLoaded: false,
+
+    errors: [],
 };
 
 const reducer = ( state = initialState, action ) => {

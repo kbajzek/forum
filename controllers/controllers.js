@@ -286,7 +286,14 @@ module.exports = {
                     UserId,
                     PostId,
                     RatingTypeId
-                }, {transaction: t}); 
+                }, {transaction: t})
+                    .then(function (newRating) {
+                        return models.Post.findOne({where: {id: PostId}, transaction: t})
+                            .then(function (post) {
+                                const threadId = post.ThreadId;
+                                return {newRating, threadId};
+                            });
+                    });
             });
         },
 
@@ -302,11 +309,17 @@ module.exports = {
             });
         },
 
-        deleteRating(UserId, PostId) {
+        deleteRating(ratingId) {
             return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, function (t) {
-                return models.Rating.destroy({where: {postId: PostId, userId: UserId}, transaction: t})
-                    .then(function(result) {
-                        return 1;
+                return models.Rating.findOne({where: {id: ratingId}, transaction: t})
+                    .then(function(rating) {
+                        return models.Post.findOne({where: {id: rating.PostId}, transaction: t})
+                            .then(function(post) {
+                                return models.Rating.destroy({where: {id: ratingId}, transaction: t})
+                                    .then(function(result) {
+                                        return post.ThreadId;
+                                    });
+                            });
                     });
             });
         },
