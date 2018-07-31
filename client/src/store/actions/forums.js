@@ -482,3 +482,16 @@ export const setMessageSidebarState = (state) => {
         state: state
     };
 };
+
+export const populateNewData = (flag) => {
+    return {
+        type: actionTypes.POPULATE_NEW_DATA,
+        flag: flag
+    };
+};
+
+export const populateNewDataReady = () => {
+    return {
+        type: actionTypes.POPULATE_NEW_DATA_READY
+    };
+};

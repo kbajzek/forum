@@ -58,9 +58,9 @@ class SubCategoryPage extends Component {
 
             subcategorypage = <ErrorPage error = {subCategoryErrors[0]}/>
 
-        }else if(subCategoryLoading){
+        // }else if(subCategoryLoading){
 
-            subcategorypage = <Spinner />
+        //     subcategorypage = <Spinner />
 
         }else if(subCategoryLoaded){
 

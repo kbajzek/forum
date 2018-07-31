@@ -1,3 +1,44 @@
 .Forums {
     padding-top: 5rem;
 }
+
+.fade {
+    opacity: 1;
+}
+
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: all 10s;
+}
+
+.fade-enter-done {
+    opacity: 1;
+    transition: all 10s;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: all 10s;
+}
+
+.fade-exit-done {
+    opacity: 0;
+    transition: all 10s;
+}
+
+.fade-appear {
+    opacity: 0;
+}
+
+.fade-appear-active {
+    opacity: 1;
+    transition: all 10s;
+}

@@ -1,5 +1,8 @@
-import { put, takeEvery } from "redux-saga/effects";
+import { put, takeEvery, take, select } from "redux-saga/effects";
 import axios from "../../axios-forums";
+
+import * as actions from '../actions/forums';
+import * as actionTypes from '../actions/actionTypes';
 
 // Action Types
 
@@ -349,6 +352,10 @@ export function* fetchThreadDataSaga(action) {
         const response = yield axios.get(
             "/api/forums/thread/" + action.threadId
         );
+        const state = yield select();
+        if(state.forums.populateNewData){
+            yield take(actionTypes.POPULATE_NEW_DATA_READY);
+        }
         yield put(fetchThreadDataSuccess(response.data));
     } catch (error) {
         yield put(fetchThreadDataFailed(error.response.data));

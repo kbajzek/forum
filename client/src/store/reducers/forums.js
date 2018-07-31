@@ -14,6 +14,7 @@ const initialState = {
     error: false,
     noRefreshFlag: false,
     messageSidebarState: 1,
+    populateNewData: false,
 };
 
 // const setCategoryData = (state, action) => {
@@ -310,6 +311,22 @@ const setMessageSidebarState = (state, action) => {
     return updatedState;
 }
 
+const populateNewData = (state, action) => {
+    const updatedState = {
+        ...state,
+        populateNewData: action.flag
+    }
+    return updatedState;
+}
+
+const populateNewDataReady = (state, action) => {
+    const updatedState = {
+        ...state,
+        populateNewData: false
+    }
+    return updatedState;
+}
+
 const reducer = ( state = initialState, action ) => {
     switch ( action.type ) {
 
@@ -356,6 +373,9 @@ const reducer = ( state = initialState, action ) => {
 
         case actionTypes.SET_NO_REFRESH_FLAG: return setNoRefreshFlag(state, action);
         case actionTypes.SET_MESSAGE_SIDEBAR_STATE: return setMessageSidebarState(state, action);
+
+        case actionTypes.POPULATE_NEW_DATA: return populateNewData(state, action);
+        case actionTypes.POPULATE_NEW_DATA_READY: return populateNewDataReady(state, action);
 
         default: return state;
     }

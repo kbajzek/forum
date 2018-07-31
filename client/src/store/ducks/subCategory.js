@@ -1,7 +1,10 @@
-import { put, takeEvery } from "redux-saga/effects";
+import { put, takeEvery, take, select } from "redux-saga/effects";
 import axios from "../../axios-forums";
 
 import * as categoryActions from './category';
+
+import * as actions from '../actions/forums';
+import * as actionTypes from '../actions/actionTypes';
 
 // Action Types
 
@@ -143,6 +146,10 @@ export function* fetchSubCategoryDataSaga(action) {
         const response = yield axios.get(
             "/api/forums/subcategory/" + action.subCategoryId
         );
+        const state = yield select();
+        if(state.forums.populateNewData){
+            yield take(actionTypes.POPULATE_NEW_DATA_READY);
+        }
         yield put(fetchSubCategoryDataSuccess(response.data));
     } catch (error) {
         yield put(fetchSubCategoryDataFailed(error.response.data));

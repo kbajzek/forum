@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import {withRouter} from 'react-router-dom';
 
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import classes from './Layout.module.css';
@@ -17,7 +18,9 @@ class Layout extends Component {
     }
 
     onForumNavClicked = () => {
-        this.props.onInitCategoryData();
+        if(this.props.location.pathname === "/forums"){
+            this.props.onInitCategoryData();
+        }
     }
 
     onForumMessageClicked = () => {
@@ -71,13 +74,14 @@ class Layout extends Component {
         );
 
         let loading;
-        // if(this.props.categoryData.loading || this.props.subCategoryData.loading || this.props.threadData.loading){
-        if(1 === 1){
+        let loadClass = classes.Loaded;
+        if(this.props.categoryData.loading || this.props.subCategoryData.loading || this.props.threadData.loading){
             loading = (
-                <div style={{position: 'fixed', top: 0, right: '10rem', width: '1rem', height: '1rem'}}>
-                    <Spinner/>
+                <div style={{position: 'fixed', top: '.5rem', right: '.5rem', width: '4rem', height: '4rem', zIndex: 1000}}>
+                    <Spinner />
                 </div>
             );
+            //loadClass = classes.Loading;
         }
 
         return (
@@ -93,7 +97,7 @@ class Layout extends Component {
                     close={this.sideDrawerClosedHandler} >
                     {navItems}
                 </SideDrawer>
-                <main className={classes.Content}>
+                <main className={loadClass}>
                     {this.props.children}
                 </main>
                 {loading}
@@ -120,4 +124,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Layout);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Layout));

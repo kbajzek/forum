@@ -13,6 +13,8 @@ import Thread from './Thread/Thread';
 import UserPage from './UserPage/UserPage';
 import MessagePage from './MessagePage/MessagePage';
 
+import { Transition, TransitionGroup } from 'react-transition-group';
+
 import classes from './Forums.module.css';
 
 const CREATE_THREAD = 1;
@@ -31,6 +33,15 @@ class Forums extends Component {
 
     componentDidMount() {
         this.props.fetchUser();
+    }
+
+    onExit = () => {
+        this.props.populateNewData();
+    }
+
+    onExited = () => {
+        this.props.populateNewDataReady();
+        window.scrollTo(0,0);
     }
 
     handlePostEdit = (postId, postContent, threadId) => {
@@ -232,9 +243,9 @@ class Forums extends Component {
             );
         }
 
-        return (
-            <div className={classes.Forums} style={{paddingBottom: `${pad}`}}>
-                <Switch>
+        const switchElement = (
+            <div className={classes.Forums} style={{paddingBottom: `${pad}`, position: 'absolute', width: '100%', height: '100%'}}>
+                <Switch location={this.props.location}>
                     <Route path="/forums" exact render={() => {
                         return (
                             <div>
@@ -309,13 +320,56 @@ class Forums extends Component {
 
             </div>
         );
+
+        const duration = 500;
+        let opac = 1;
+        let vis = 'visible';
+        if(this.props.populateNewDataFlag){
+            opac = 0;
+            vis = 'hidden';
+        }
+
+        const transitionStyles = {
+            entering: { opacity: 0, visibility: 'hidden' },
+            entered:  { opacity: opac, transition: `opacity ${duration}ms`, visibility: vis },
+            exiting:  { opacity: 0, transition: `opacity ${duration}ms` },
+            exited:   { opacity: 0, transition: `opacity ${duration}ms` }
+        };
+
+        const defaultStyle = {
+            transition: `opacity ${duration}ms`,
+            opacity: 1,
+            position: 'relative'
+        }
+
+        return (
+            <TransitionGroup>
+                <Transition key={this.props.location.pathname} timeout={duration} onExit={this.onExit} onExited={this.onExited} unmountOnExit appear>
+                    {(state) => {console.log(state);
+                    
+                    return (
+                        <div style={{
+                            ...defaultStyle,
+                            ...transitionStyles[state]
+                            }}>
+                            {switchElement}
+                        </div>
+                    )
+                    
+                    }}
+                </Transition>
+            </TransitionGroup>
+        );
     }
 }
 
 const mapStateToProps = state => {
     return {
-        threadData: state.forums.threadData,
-        postValues: getFormValues('postForm')(state)
+        populateNewDataFlag: state.forums.populateNewData,
+        postValues: getFormValues('postForm')(state),
+        categoryData: state.category,
+        subCategoryData: state.subCategory,
+        threadData2: state.thread,
     }
 }
 
@@ -332,7 +386,9 @@ const mapDispatchToProps = (dispatch) => {
         changeWriterContent : (value) => dispatch(change('postForm', 'content', value)),
         onDeletePost: (postId, history) => dispatch(threadActions.deletePostBegin(postId, history)),
         onDeleteMessagePost: (messagePostId, path, history) => dispatch(actions.deleteMessagePost(messagePostId, path, history)),
-        fetchUser: () => dispatch(actions.fetchUserInit())
+        fetchUser: () => dispatch(actions.fetchUserInit()),
+        populateNewData: () => dispatch(actions.populateNewData(true)),
+        populateNewDataReady: () => dispatch(actions.populateNewDataReady()),
 	}
 }
 

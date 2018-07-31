@@ -40,9 +40,9 @@ class Categories extends Component {
 
             categories = <ErrorPage error = {categoryErrors[0]}/>
 
-        }else if(categoryLoading){
+        // }else if(categoryLoading){
 
-            categories = <Spinner />
+        //     categories = <Spinner />
 
         }else if(categoryLoaded){
 

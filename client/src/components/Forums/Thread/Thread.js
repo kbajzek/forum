@@ -39,9 +39,9 @@ class Thread extends Component {
 
             threadpage = <ErrorPage error = {threadErrors[0]}/>
 
-        }else if(threadLoading){
+        // }else if(threadLoading){
 
-            threadpage = <Spinner />
+        //     threadpage = <Spinner />
 
         }else if(threadLoaded){
 

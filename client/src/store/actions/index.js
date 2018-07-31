@@ -73,6 +73,8 @@ export {
 
     setNoRefreshFlag,
     setMessageSidebarState,
+    populateNewData,
+    populateNewDataReady
     
 } from './forums';
 export {

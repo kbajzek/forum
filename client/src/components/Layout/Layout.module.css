@@ -1,3 +1,9 @@
-/* .Content {
-    margin-top: 72px;
-} */
+.Loading{
+    transition: all .5s;
+    opacity: 0;
+}
+
+.Loaded{
+    transition: all .5s;
+    opacity: 1;
+}
