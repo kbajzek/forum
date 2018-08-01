@@ -134,7 +134,7 @@ class PostForm extends Component {
         }
         return(
                 <form onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', flexShrink: '0', padding: '1rem', fontSize: '2rem', justifyContent: 'space-between'}}>
+                    <div style={{display: 'flex', flexShrink: '0', padding: '1rem', paddingTop: '2rem', fontSize: '2rem', justifyContent: 'space-between'}}>
                         <div>{description}</div>
                         {membersField}
                         {titleField}

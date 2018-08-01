@@ -166,6 +166,7 @@ export function* createSubCategorySaga(action) {
           subCategoryId: action.subCategoryId
         }
       );
+      yield put(createSubCategorySuccess());
       if (action.categoryId) {
         yield put(categoryActions.fetchCategoryDataBegin());
       } else {

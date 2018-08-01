@@ -144,6 +144,7 @@ export function* createCategorySaga(action) {
                 name: action.name
             }
         );
+        yield put(createCategorySuccess());
         yield put(fetchCategoryDataBegin());
     } catch (error) {
         yield put(createCategoryFailed(error.response.data));

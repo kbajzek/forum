@@ -10,10 +10,12 @@ import ErrorPage from '../ErrorPage/ErrorPage';
 
 import classes from './Thread.module.css';
 
+import FlipMove from 'react-flip-move';
+
 class Thread extends Component {
     
     componentDidMount() {
-        this.props.onInitThreadData(this.props.id);
+        this.props.onInitThreadData(this.props.id, true);
     }
 
     handlePostCreator = () => {
@@ -47,22 +49,23 @@ class Thread extends Component {
 
             const postList = threadPosts.map(({id, content, ratings, creator}) => {
                 return (
-                    <Post 
-                        threadData = {this.props.threadData}
-                        key={id}
-                        content={content}
-                        ratings={ratings}
-                        user={creator}
-                        id={id}
-                        threadId={threadId}
-                        threadName={threadName}
-                        threadSlug={threadSlug}
-                        ratingTypes={threadRatingTypes}
-                        handleEdit={this.props.handlePostEdit}
-                        handleDelete={this.props.handlePostDelete}
-                        handleQuote={this.props.handlePostQuote}
-                        handleReply={this.props.handlePostReply}
-                        auth={this.props.auth} />
+                    <div key={id}>
+                        <Post 
+                            threadData = {this.props.threadData}
+                            content={content}
+                            ratings={ratings}
+                            user={creator}
+                            id={id}
+                            threadId={threadId}
+                            threadName={threadName}
+                            threadSlug={threadSlug}
+                            ratingTypes={threadRatingTypes}
+                            handleEdit={this.props.handlePostEdit}
+                            handleDelete={this.props.handlePostDelete}
+                            handleQuote={this.props.handlePostQuote}
+                            handleReply={this.props.handlePostReply}
+                            auth={this.props.auth} />
+                    </div>
                 );
             });
 
@@ -71,7 +74,12 @@ class Thread extends Component {
                     {threadButton}
                     <div className={classes.Header}>{threadName}</div>
                     <div className={classes.Thread}>
-                        {postList}
+                        <FlipMove
+                            duration={500}
+                            enterAnimation="fade"
+                            leaveAnimation={false}>
+                            {postList}
+                        </FlipMove>
                     </div>
                 </div>
             );
@@ -94,7 +102,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onInitThreadData: (threadId) => dispatch(threadActions.fetchThreadDataBegin(threadId))
+        onInitThreadData: (threadId, clearFirst) => dispatch(threadActions.fetchThreadDataBegin(threadId, clearFirst))
     }
 }
 

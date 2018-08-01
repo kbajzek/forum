@@ -43,7 +43,7 @@ export const DELETE_RATING_DISMISS_ERROR = 'DELETE_RATING_DISMISS_ERROR';
 
 // Actions
 
-export const fetchThreadDataBegin = (threadId) => ({type: FETCH_THREAD_DATA_BEGIN, threadId});
+export const fetchThreadDataBegin = (threadId, clearFirst) => ({type: FETCH_THREAD_DATA_BEGIN, threadId, clearFirst});
 export const fetchThreadDataSuccess = (result) => ({type: FETCH_THREAD_DATA_SUCCESS, result});
 export const fetchThreadDataFailed = (error) => ({type: FETCH_THREAD_DATA_FAILED, error});
 export const fetchThreadDataDismissError = () => ({type: FETCH_THREAD_DATA_DISMISS_ERROR});
@@ -142,9 +142,9 @@ const reducer = ( state = initialState, action ) => {
         case FETCH_THREAD_DATA_SUCCESS: 
             updatedState = {
                 ...state,
-                ...action.result,
                 loading: false,
                 loaded: true,
+                ...action.result,
                 errors: []
             }
             return updatedState;
@@ -349,6 +349,17 @@ const reducer = ( state = initialState, action ) => {
 
 export function* fetchThreadDataSaga(action) {
     try {
+        if(action.clearFirst){
+            yield put(fetchThreadDataSuccess({
+                id: null,
+                name: null,
+                slug: null,
+                posts: null,
+                ratingTypes: null,
+                path: null,
+                loaded: false,
+            }));
+        }
         const response = yield axios.get(
             "/api/forums/thread/" + action.threadId
         );
@@ -371,6 +382,7 @@ export function* createThreadSaga(action) {
                 subCategoryId: action.subCategoryId
             }
         );
+        yield put(createThreadSuccess());
         yield action.history.push("/forums" + response.data.path);
     } catch (error) {
         yield put(createThreadFailed(error.response.data));
@@ -385,6 +397,7 @@ export function* createPostSaga(action) {
                 threadId: action.threadId
             }
         );
+        yield put(createPostSuccess());
         if(action.location.pathname === "/forums" + response.data.path){
             yield put(fetchThreadDataBegin(response.data.threadId));
         }
@@ -402,6 +415,7 @@ export function* editPostSaga(action) {
                 postId: action.postId
             }
         );
+        yield put(editPostSuccess());
         if(action.location.pathname === "/forums" + response.data.path){
             yield put(fetchThreadDataBegin(response.data.threadId));
         }
@@ -418,6 +432,7 @@ export function* deletePostSaga(action) {
                 postId: action.postId
             }
         );
+        yield put(deletePostSuccess());
         if (response.data.response === 1) {
             yield action.history.replace("/forums");
         } else {
@@ -436,6 +451,7 @@ export function* createRatingSaga(action) {
                 ratingTypeId: action.ratingTypeId
             }
         );
+        yield put(createRatingSuccess());
         yield put(fetchThreadDataBegin(response.data.threadId));
     } catch (error) {
         yield put(createRatingFailed(error.response.data));
@@ -449,6 +465,7 @@ export function* deleteRatingSaga(action) {
                 ratingId: action.ratingId
             }
         );
+        yield put(deleteRatingSuccess());
         yield put(fetchThreadDataBegin(response.data.threadId));
     } catch (error) {
         yield put(deleteRatingFailed(error.response.data));

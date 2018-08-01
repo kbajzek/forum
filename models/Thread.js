@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Thread.associate = function (models) {
-        models.Thread.belongsTo(models.SubCategory);
+        models.Thread.belongsTo(models.SubCategory, { onDelete: 'cascade' });
     };
 
     return Thread;

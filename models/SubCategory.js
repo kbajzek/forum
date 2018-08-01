@@ -21,8 +21,8 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     SubCategory.associate = function (models) {
-        models.SubCategory.belongsTo(models.Category);
-        models.SubCategory.belongsTo(models.SubCategory);
+        models.SubCategory.belongsTo(models.Category, { onDelete: 'cascade' });
+        models.SubCategory.belongsTo(models.SubCategory, { onDelete: 'cascade' });
     };
 
     return SubCategory;

@@ -12,6 +12,7 @@ import SubCategoryPage from './SubCategoryPage/SubCategoryPage';
 import Thread from './Thread/Thread';
 import UserPage from './UserPage/UserPage';
 import MessagePage from './MessagePage/MessagePage';
+import doubleArrow from './DoubleArrow.svg';
 
 import { Transition, TransitionGroup } from 'react-transition-group';
 
@@ -29,11 +30,63 @@ class Forums extends Component {
     state={
         writerActive: false,
         writerOpen: false,
+        topDeltaY: 0,
+        writerY: 500
     }
 
     componentDidMount() {
         this.props.fetchUser();
     }
+
+    handleTouchStart = ({ touches: [{ screenY }] }) => {
+        const mouseY = screenY;
+        this.setState((prevState) => ({
+            topDeltaY: mouseY - prevState.writerY,
+            isPressed: true
+        }));
+        window.addEventListener("touchmove", this.handleTouchMove);
+        window.addEventListener("touchend", this.handleTouchEnd);
+      };
+
+    handleTouchMove = ({touches: [{ screenY }] }) => {
+        const { isPressed, topDeltaY } = this.state;
+        if (isPressed) {
+            const mouseY = Math.max(Math.min(screenY-topDeltaY,window.innerHeight-250),50);
+            this.setState({ writerY: mouseY })
+        }
+    }
+
+    handleTouchEnd = () => {
+        this.setState({ isPressed: false, topDeltaY: 0 });
+        window.removeEventListener("touchmove", this.handleTouchMove);
+        window.removeEventListener("touchend", this.handleTouchEnd);
+    };
+
+    handleMouseDown = ({ screenY }) => {
+        const mouseY = screenY;
+        this.setState((prevState) => ({
+            topDeltaY: mouseY - prevState.writerY,
+            isPressed: true
+        }));
+        window.addEventListener("mousemove", this.handleMouseMove);
+        window.addEventListener("mouseup", this.handleMouseUp);
+    }
+
+    handleMouseMove = (e) => {
+        e.preventDefault();
+        const screenY = e.screenY;
+        const { isPressed, topDeltaY } = this.state;
+        if (isPressed) {
+            const mouseY = Math.max(Math.min(screenY-topDeltaY,window.innerHeight-250),50);
+            this.setState({ writerY: mouseY })
+        }
+    }
+
+    handleMouseUp = () => {
+        this.setState({ isPressed: false, topDeltaY: 0 });
+        window.removeEventListener("mouseup", this.handleMouseUp);
+        window.removeEventListener("mousemove", this.handleMouseMove);
+    };
 
     onExit = () => {
         this.props.populateNewData();
@@ -218,6 +271,10 @@ class Forums extends Component {
         });
     }
 
+    onWriterDragStart = (e) => {
+
+    }
+
     render() {
 
         let editor=null;
@@ -226,7 +283,7 @@ class Forums extends Component {
             editorButton = (
                 <button 
                     onClick={this.toggleWriter} 
-                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '10'}}>
+                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '1001'}}>
                     EDITOR
                 </button>
             );
@@ -235,93 +292,94 @@ class Forums extends Component {
         let pad='0rem';
 
         if(this.state.writerOpen){
-            pad = '40rem';
+            pad = `calc(100vh - ${this.state.writerY}px)`;
             editor=(
-                <div style={{position: 'fixed', bottom: '0px', left: '0px', right: '0px', backgroundColor: '#778899', height: '40rem'}}>
+                <div style={{zIndex: '1000', cursor: 'pointer', position: 'fixed', bottom: '0px', left: '0px', right: '0px', backgroundColor: '#778899', height: `calc(100vh - ${this.state.writerY}px)`}}>
+                    <div 
+                        style={{width: '3rem', height: '3rem', borderRadius: '50%', backgroundColor: 'black', touchAction: 'none', position: 'absolute', top: '-1.5rem', left: '1rem'}}
+                        onMouseDown={this.handleMouseDown}
+                        onTouchStart={this.handleTouchStart}>
+                        <img src={doubleArrow} style={{width: '2rem', height: '2rem', marginTop: '.5rem', marginLeft: '.5rem'}}/>
+                    </div>
                     <PostForm closeForm={this.closeWriter}/>
                 </div>
             );
         }
 
         const switchElement = (
-            <div className={classes.Forums} style={{paddingBottom: `${pad}`, position: 'absolute', width: '100%', height: '100%'}}>
-                <Switch location={this.props.location}>
-                    <Route path="/forums" exact render={() => {
-                        return (
-                            <div>
-                                <Categories />
-                                {editorButton}
-                            </div>
-                        )
-                    }} />
-                    <Route path="/forums/thread/:id/:slug" render={({match}) => {
-                        return (
-                            <div>
-                                <Thread 
-                                    key={match.params.id} 
-                                    id={match.params.id} 
-                                    slug={match.params.slug} 
-                                    handlePostCreate={this.handlePostCreate}
-                                    handlePostEdit={this.handlePostEdit}
-                                    handlePostDelete={this.handlePostDelete}
-                                    handlePostQuote={this.handlePostQuote}
-                                    handlePostReply={this.handlePostReply}/>
-                                {editorButton}
-                            </div>
-                        );
-                    }} />
-                    <Route path="/forums/user/:id/:slug" render={({match}) => {
-                        return (
-                            <div>
-                                <UserPage 
-                                    key={match.params.id} 
-                                    id={match.params.id} 
-                                    slug={match.params.slug}/>
-                                {editorButton}
-                            </div>
-                        );
-                    }} />
-                    <Route path="/forums/message/:id/:slug" render={({match}) => {
-                        return (
-                            <div>
-                                <MessagePage
-                                    id={match.params.id} 
-                                    slug={match.params.slug} 
-                                    handleMessageCreate={this.handleMessageCreate}
-                                    handleMessagePostCreate={this.handleMessagePostCreate}
-                                    handleMessagePostEdit={this.handleMessagePostEdit}
-                                    handleMessagePostDelete={this.handleMessagePostDelete}
-                                    handleMessagePostQuote={this.handleMessagePostQuote}
-                                    handleMessagePostReply={this.handleMessagePostReply}/>
-                                {editorButton}
-                            </div>
-                        );
-                    }} />
-                    <Route path="/forums/message" render={({match}) => {
-                        return (
-                            <div>
-                                <MessagePage
-                                    handleMessageCreate={this.handleMessageCreate}
-                                    handleMessagePostCreate={this.handleMessagePostCreate}/>
-                                {editorButton}
-                            </div>
-                        );
-                    }} />
-                    <Route path="/forums/:id/:slug" render={({match}) => {
-                        return (
-                            <div>
-                                <SubCategoryPage key={match.params.id} id={match.params.id} slug={match.params.slug} handleThreadCreate={this.handleThreadCreate}/>
-                                {editorButton}
-                            </div>
-                        );
-                    }} />
-                </Switch>
-                {editor}
-
+            <div className={classes.Forums} style={{position: 'absolute', width: '100%', height: '100%'}}>
+                <div style={{paddingBottom: `${pad}`}}>
+                    <Switch location={this.props.location}>
+                        <Route path="/forums" exact render={() => {
+                            return (
+                                <div>
+                                    <Categories />
+                                </div>
+                            )
+                        }} />
+                        <Route path="/forums/thread/:id/:slug" render={({match}) => {
+                            return (
+                                <div>
+                                    <Thread 
+                                        key={match.params.id} 
+                                        id={match.params.id} 
+                                        slug={match.params.slug} 
+                                        handlePostCreate={this.handlePostCreate}
+                                        handlePostEdit={this.handlePostEdit}
+                                        handlePostDelete={this.handlePostDelete}
+                                        handlePostQuote={this.handlePostQuote}
+                                        handlePostReply={this.handlePostReply}/>
+                                </div>
+                            );
+                        }} />
+                        <Route path="/forums/user/:id/:slug" render={({match}) => {
+                            return (
+                                <div>
+                                    <UserPage 
+                                        key={match.params.id} 
+                                        id={match.params.id} 
+                                        slug={match.params.slug}/>
+                                </div>
+                            );
+                        }} />
+                        <Route path="/forums/message/:id/:slug" render={({match}) => {
+                            return (
+                                <div>
+                                    <MessagePage
+                                        id={match.params.id} 
+                                        slug={match.params.slug} 
+                                        handleMessageCreate={this.handleMessageCreate}
+                                        handleMessagePostCreate={this.handleMessagePostCreate}
+                                        handleMessagePostEdit={this.handleMessagePostEdit}
+                                        handleMessagePostDelete={this.handleMessagePostDelete}
+                                        handleMessagePostQuote={this.handleMessagePostQuote}
+                                        handleMessagePostReply={this.handleMessagePostReply}/>
+                                </div>
+                            );
+                        }} />
+                        <Route path="/forums/message" render={({match}) => {
+                            return (
+                                <div>
+                                    <MessagePage
+                                        handleMessageCreate={this.handleMessageCreate}
+                                        handleMessagePostCreate={this.handleMessagePostCreate}/>
+                                </div>
+                            );
+                        }} />
+                        <Route path="/forums/:id/:slug" render={({match}) => {
+                            return (
+                                <div>
+                                    <SubCategoryPage key={match.params.id} id={match.params.id} slug={match.params.slug} handleThreadCreate={this.handleThreadCreate}/>
+                                </div>
+                            );
+                        }} />
+                    </Switch>
+                    
+                </div>
             </div>
         );
 
-        const duration = 500;
+        const duration = 400;
         let opac = 1;
         let vis = 'visible';
         if(this.props.populateNewDataFlag){
@@ -343,22 +401,24 @@ class Forums extends Component {
         }
 
         return (
-            <TransitionGroup>
-                <Transition key={this.props.location.pathname} timeout={duration} onExit={this.onExit} onExited={this.onExited} unmountOnExit appear>
-                    {(state) => {console.log(state);
-                    
-                    return (
-                        <div style={{
-                            ...defaultStyle,
-                            ...transitionStyles[state]
-                            }}>
-                            {switchElement}
-                        </div>
-                    )
-                    
-                    }}
-                </Transition>
-            </TransitionGroup>
+            <div>
+                <TransitionGroup>
+                    <Transition key={this.props.location.pathname} timeout={duration} onExit={this.onExit} onExited={this.onExited} unmountOnExit appear>
+                        {(state) => {
+                            return (
+                                <div style={{
+                                    ...defaultStyle,
+                                    ...transitionStyles[state]
+                                    }}>
+                                    {switchElement}
+                                </div>
+                            )
+                        }}
+                    </Transition>
+                </TransitionGroup>
+                {editor}
+                {editorButton}
+            </div>
         );
     }
 }
