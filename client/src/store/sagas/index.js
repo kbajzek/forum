@@ -100,4 +100,12 @@ function* updateMessages(socket) {
 export function* watchSockets() {
   const socket = yield call(connect)
   const messageTask = yield fork(updateMessages, socket);
+  const locationTask = yield fork(handleLocationChange, socket);
+}
+
+export function* handleLocationChange(socket) {
+  while(true){
+    const action = yield take(actionTypes.LOCATION_CHANGE);
+    socket.emit('location.change', {main: action.main, id: action.id});
+  }
 }

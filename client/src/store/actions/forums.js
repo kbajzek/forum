@@ -495,3 +495,24 @@ export const populateNewDataReady = () => {
         type: actionTypes.POPULATE_NEW_DATA_READY
     };
 };
+
+export const populateNewDataShow = () => {
+    return {
+        type: actionTypes.POPULATE_NEW_DATA_SHOW
+    };
+};
+
+export const fadeout = (fadeout) => {
+    return {
+        type: actionTypes.FADEOUT,
+        fadeout
+    };
+};
+
+export const locationChange = (main, id) => {
+    return {
+        type: actionTypes.LOCATION_CHANGE,
+        main,
+        id
+    };
+};

@@ -74,12 +74,12 @@ class Thread extends Component {
                     {threadButton}
                     <div className={classes.Header}>{threadName}</div>
                     <div className={classes.Thread}>
-                        <FlipMove
+                        {/* <FlipMove
                             duration={500}
                             enterAnimation="fade"
-                            leaveAnimation={false}>
+                            leaveAnimation={false}> */}
                             {postList}
-                        </FlipMove>
+                        {/* </FlipMove> */}
                     </div>
                 </div>
             );

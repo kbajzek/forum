@@ -123,6 +123,7 @@ const initialState = {
     path: null,
     loading: false,
     loaded: false,
+    usersViewing: [],
     errors: []
 };
 
@@ -357,6 +358,7 @@ export function* fetchThreadDataSaga(action) {
                 posts: null,
                 ratingTypes: null,
                 path: null,
+                loading: true,
                 loaded: false,
             }));
         }
@@ -368,8 +370,10 @@ export function* fetchThreadDataSaga(action) {
             yield take(actionTypes.POPULATE_NEW_DATA_READY);
         }
         yield put(fetchThreadDataSuccess(response.data));
+        yield put(actions.populateNewDataShow());
     } catch (error) {
         yield put(fetchThreadDataFailed(error.response.data));
+        yield put(actions.populateNewDataShow());
     }
 }
 

@@ -46,7 +46,7 @@ class Forums extends Component {
         }));
         window.addEventListener("touchmove", this.handleTouchMove);
         window.addEventListener("touchend", this.handleTouchEnd);
-      };
+    };
 
     handleTouchMove = ({touches: [{ screenY }] }) => {
         const { isPressed, topDeltaY } = this.state;
@@ -94,6 +94,11 @@ class Forums extends Component {
 
     onExited = () => {
         this.props.populateNewDataReady();
+        window.scrollTo(0,0);
+    }
+
+    onExited2 = () => {
+        this.props.onFadeout();
         window.scrollTo(0,0);
     }
 
@@ -382,7 +387,7 @@ class Forums extends Component {
         const duration = 400;
         let opac = 1;
         let vis = 'visible';
-        if(this.props.populateNewDataFlag){
+        if(this.props.hidePage){
             opac = 0;
             vis = 'hidden';
         }
@@ -394,23 +399,31 @@ class Forums extends Component {
             exited:   { opacity: 0, transition: `opacity ${duration}ms` }
         };
 
+        const fadeStyle = { opacity: `${this.props.fadeout ? 0 : 1}`, transition: `opacity ${duration}ms`, visibility: 'visible' };
+
         const defaultStyle = {
             transition: `opacity ${duration}ms`,
             opacity: 1,
             position: 'relative'
         }
 
+        const locationKey = this.props.location.pathname;
+
         return (
             <div>
                 <TransitionGroup>
-                    <Transition key={this.props.location.pathname} timeout={duration} onExit={this.onExit} onExited={this.onExited} unmountOnExit appear>
+                    <Transition key={locationKey} timeout={duration} onExit={this.onExit} onExited={this.onExited} unmountOnExit appear>
                         {(state) => {
                             return (
                                 <div style={{
                                     ...defaultStyle,
                                     ...transitionStyles[state]
                                     }}>
-                                    {switchElement}
+                                    <div style={{
+                                        ...fadeStyle
+                                        }}>
+                                        {switchElement}
+                                    </div>
                                 </div>
                             )
                         }}
@@ -425,7 +438,8 @@ class Forums extends Component {
 
 const mapStateToProps = state => {
     return {
-        populateNewDataFlag: state.forums.populateNewData,
+        hidePage: state.forums.hidePage,
+        fadeout: state.forums.fadeout,
         postValues: getFormValues('postForm')(state),
         categoryData: state.category,
         subCategoryData: state.subCategory,

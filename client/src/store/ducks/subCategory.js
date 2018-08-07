@@ -71,6 +71,7 @@ const initialState = {
     path: null,
     loading: false,
     loaded: false,
+    usersViewing: [],
     errors: []
 };
 
@@ -151,8 +152,10 @@ export function* fetchSubCategoryDataSaga(action) {
             yield take(actionTypes.POPULATE_NEW_DATA_READY);
         }
         yield put(fetchSubCategoryDataSuccess(response.data));
+        yield put(actions.populateNewDataShow());
     } catch (error) {
         yield put(fetchSubCategoryDataFailed(error.response.data));
+        yield put(actions.populateNewDataShow());
     }
 }
 

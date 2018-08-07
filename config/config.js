@@ -4,7 +4,8 @@ module.exports = {
         password: 'password',
         database: 'forum_test',
         dialect: 'mysql',
-        operatorsAliases: false
+        operatorsAliases: false,
+        logging: false,
     },
     production: {
       username: process.env.DB_USERNAME,
@@ -12,6 +13,7 @@ module.exports = {
       database: process.env.DB_NAME,
       host: process.env.DB_HOSTNAME,
       dialect: 'mysql',
-      operatorsAliases: false
+      operatorsAliases: false,
+      logging: false,
     }
   };

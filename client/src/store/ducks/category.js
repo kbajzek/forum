@@ -46,12 +46,17 @@ export const getCategoryErrors = (categoryData) => {
     return categoryData.errors
 }
 
+export const getCategoryUsersViewing = (categoryData) => {
+    return categoryData.usersViewing
+}
+
 // Reducer
 
 const initialState = {
     categories: null,
     loading: false,
     loaded: false,
+    usersViewing: [],
     errors: []
 };
 
@@ -132,8 +137,12 @@ export function* fetchCategoryDataSaga() {
             yield take(actionTypes.POPULATE_NEW_DATA_READY);
         }
         yield put(fetchCategoryDataSuccess(response.data));
+        yield put(actions.populateNewDataShow());
+        yield put(actions.fadeout(false))
     } catch (error) {
         yield put(fetchCategoryDataFailed(error.response.data));
+        yield put(actions.populateNewDataShow());
+        yield put(actions.fadeout(false))
     }
 }
 

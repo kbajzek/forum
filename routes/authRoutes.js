@@ -31,7 +31,7 @@ module.exports = app => {
 
     app.get('/api/fetch_user', (req, res) => {
         const user = req.session && req.session.passport && req.session.passport.user;
-        console.log(req.session)
+        //console.log(req.session)
         res.send({user: user, csrf: req.session.csrf});
     });
 

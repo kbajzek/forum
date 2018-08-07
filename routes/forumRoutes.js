@@ -10,7 +10,7 @@ const checkCanRate = require('../middlewares/checkCanRate');
 const checkCanUnrate = require('../middlewares/checkCanUnrate');
 const checkCanRemoveMessageMember = require('../middlewares/checkCanRemoveMessageMember');
 
-module.exports = (app,io,ioUsers) => {
+module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     const example_thread = {
         name: "jjj",
@@ -286,10 +286,14 @@ module.exports = (app,io,ioUsers) => {
                         }
                     });
 
-                    const finalResult = {
-                        categories: convertedResult
-                    }
+                    setUserLocation(req.session.passport.user,'1');
+                    console.log(ioLocations.get('1'))
 
+                    const finalResult = {
+                        categories: convertedResult,
+                        usersViewing: ioLocations.get('1'),
+                    }
+                    
                     res.send(finalResult);
                 })
         } catch(err) {
@@ -359,7 +363,7 @@ module.exports = (app,io,ioUsers) => {
                 threads: convertedResult2,
                 path: `/${subcatid}/${slugify(result3[0].name).toLowerCase()}`,
             }
-
+            setUserLocation(req.session.passport.user,'1/'+subcatid);
             res.send(finalResult);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
@@ -446,6 +450,8 @@ module.exports = (app,io,ioUsers) => {
                                 };
                             })
 
+                            setUserLocation(req.session.passport.user,'2/'+threadId);
+
                             const finalResult = {
                                 id: result[0].threadId,
                                 name: result[0].threadName,
@@ -453,8 +459,9 @@ module.exports = (app,io,ioUsers) => {
                                 posts: convertedPosts,
                                 ratingTypes: ratings,
                                 path: `/thread/${result[0].threadId}/${slugify(result[0].threadName).toLowerCase()}`,
+                                usersViewing: ioLocations.get('2/'+threadId),
                             }
-
+                            
                             res.send(finalResult);
                         });
                 });
@@ -485,11 +492,14 @@ module.exports = (app,io,ioUsers) => {
                         
                     });
 
+                    setUserLocation(req.session.passport.user,'3/'+userId);
+
                     let userData = {
                         userName: result[0].userName,
-                        posts: convertedPosts
+                        posts: convertedPosts,
+                        usersViewing: ioLocations.get('3/'+userId),
                     }
-
+                    
                     res.send(userData);
                 })
         } catch(err) {
@@ -520,7 +530,7 @@ module.exports = (app,io,ioUsers) => {
                         messageList: convertedMessageHeaders,
                         messageSelected: null
                     }
-
+                    setUserLocation(req.session.passport.user,'4');
                     res.send(messageData);
                 })
         } catch(err) {
@@ -597,7 +607,7 @@ module.exports = (app,io,ioUsers) => {
                     members: convertedMessageMembers,
                 }
             }
-
+            setUserLocation(req.session.passport.user,'4/'+messageId);
             res.send(messageData);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });

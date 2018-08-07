@@ -74,7 +74,10 @@ export {
     setNoRefreshFlag,
     setMessageSidebarState,
     populateNewData,
-    populateNewDataReady
+    populateNewDataReady,
+    populateNewDataShow,
+    fadeout,
+    locationChange,
     
 } from './forums';
 export {

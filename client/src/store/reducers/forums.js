@@ -15,6 +15,8 @@ const initialState = {
     noRefreshFlag: false,
     messageSidebarState: 1,
     populateNewData: false,
+    hidePage: false,
+    fadeout: false,
 };
 
 // const setCategoryData = (state, action) => {
@@ -314,7 +316,8 @@ const setMessageSidebarState = (state, action) => {
 const populateNewData = (state, action) => {
     const updatedState = {
         ...state,
-        populateNewData: action.flag
+        populateNewData: action.flag,
+        hidePage: true,
     }
     return updatedState;
 }
@@ -322,7 +325,23 @@ const populateNewData = (state, action) => {
 const populateNewDataReady = (state, action) => {
     const updatedState = {
         ...state,
-        populateNewData: false
+        populateNewData: false,
+    }
+    return updatedState;
+}
+
+const populateNewDataShow = (state, action) => {
+    const updatedState = {
+        ...state,
+        hidePage: false,
+    }
+    return updatedState;
+}
+
+const fadeout = (state, action) => {
+    const updatedState = {
+        ...state,
+        fadeout: action.fadeout
     }
     return updatedState;
 }
@@ -376,6 +395,8 @@ const reducer = ( state = initialState, action ) => {
 
         case actionTypes.POPULATE_NEW_DATA: return populateNewData(state, action);
         case actionTypes.POPULATE_NEW_DATA_READY: return populateNewDataReady(state, action);
+        case actionTypes.POPULATE_NEW_DATA_SHOW: return populateNewDataShow(state, action);
+        case actionTypes.FADEOUT: return fadeout(state, action);
 
         default: return state;
     }

@@ -25,7 +25,7 @@ passport.use(new SteamStrategy({
     apiKey: 'CF1AE94B18F1E3282342ED1886995157'
   },
   function(identifier, profile, done) {
-    console.log(profile);
+    //console.log(profile);
 
       const beginningString = 'https://steamcommunity.com/openid/id/';
       const steamId = identifier.substring(beginningString.length);
@@ -76,18 +76,69 @@ io.use(function(socket, next){
 })
 
 let socketUsers = new Map();
+let socketLocations = new Map();
+
+const setUserId = (user, id) => {
+    const userInfo = socketUsers.get(user);
+    if(userInfo && userInfo !== undefined){
+        const newUserInfo = {
+            ...userInfo,
+            id
+        }
+        socketUsers.set(user,newUserInfo);
+    }else{
+        const newUserInfo = {
+            location: null,
+            id
+        }
+        socketUsers.set(user,newUserInfo);
+    }
+}
+
+const deleteUser = (user) => {
+    const userInfo = socketUsers.get(user);
+    if(userInfo && userInfo !== undefined){
+        const locationInfo = socketLocations.get(userInfo.location);
+        if(locationInfo && locationInfo !== undefined){
+            const newLocationInfo = locationInfo.filter(u => u !== user);
+            socketLocations.set(userInfo.location, newLocationInfo);
+        }
+    }
+    socketUsers.delete(user);
+}
+
+const setUserLocation = (user, location) => {
+    const userInfo = socketUsers.get(user);
+    if(userInfo && userInfo !== undefined && userInfo.location !== location){
+        let locationInfo = socketLocations.get(userInfo.location);
+        if(locationInfo && locationInfo !== undefined){
+            const newLocationInfo = locationInfo.filter(u => u !== user);
+            socketLocations.set(userInfo.location, newLocationInfo);
+        }
+        locationInfo = socketLocations.get(location);
+        if(locationInfo && locationInfo !== undefined){
+            const newLocationInfo = locationInfo.concat(user);
+            socketLocations.set(location, newLocationInfo);
+        }
+        const newUserInfo = {
+            ...userInfo,
+            location
+        }
+        socketUsers.set(user,newUserInfo);
+    }
+}
 
 io.on('connection', function (socket) {
     const user = socket.request.session && socket.request.session.passport && socket.request.session.passport.user;
     if(user){
-        socketUsers.set(user, socket.id);
+        setUserId(user, socket.id);
         console.log('user ' + user + ' connected')
     }
     socket.on("disconnect", () => {
         const user = socket.request.session && socket.request.session.passport && socket.request.session.passport.user;
         if(user){
             console.log('user ' + user + ' disconnected')
-            socketUsers.delete(user);
+            deleteUser(user);
         }
     });
 });
@@ -103,7 +154,7 @@ app.use(bodyParser.json());
 
 authRoutes(app);
 
-forumRoutes(app, io, socketUsers);
+forumRoutes(app, io, socketUsers, socketLocations, setUserLocation);
 
 if (process.env.NODE_ENV === 'production') {
     // Express will serve up production assets

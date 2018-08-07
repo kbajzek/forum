@@ -33,8 +33,10 @@ class Categories extends Component {
         const categoryLoading = categoryActions.getCategoryLoading(this.props.categoryData);
         const categoryLoaded = categoryActions.getCategoryLoaded(this.props.categoryData);
         const categoryCategories = categoryActions.getCategoryCategories(this.props.categoryData);
+        const categoryUsersViewing = categoryActions.getCategoryUsersViewing(this.props.categoryData);
 
         let categories;
+        let usersViewing;
 
         if(categoryErrors.length > 0){
 
@@ -49,6 +51,14 @@ class Categories extends Component {
             if(this.state.showCatForm) {
                 catForm = <CategoryForm closeForm={this.toggleCategoryCreator} />
             }
+
+            usersViewing = categoryUsersViewing.map((id) => {
+                return (
+                    <div>
+                        {id}
+                    </div>
+                );
+            });
 
             categories = categoryCategories.map(({id, name, subCategories}) => {
                 return (
@@ -69,6 +79,7 @@ class Categories extends Component {
                 {catButton}
                 {catForm}
                 {categories}
+                {usersViewing}
             </div>
         );
     }

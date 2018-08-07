@@ -19,6 +19,7 @@ class Layout extends Component {
 
     onForumNavClicked = () => {
         if(this.props.location.pathname === "/forums"){
+            this.props.fadeout();
             this.props.onInitCategoryData();
         }
     }
@@ -120,7 +121,8 @@ const mapDispatchToProps = dispatch => {
         onInitCategoryData: () => dispatch(categoryActions.fetchCategoryDataBegin()),
         onInitMessageData: (path) => dispatch(actions.initMessageData(path)),
         setMessageSidebarState: (state) => dispatch(actions.setMessageSidebarState(state)),
-        onLogout: () => dispatch(actions.logoutUserInit())
+        onLogout: () => dispatch(actions.logoutUserInit()),
+        fadeout: () => dispatch(actions.fadeout(true)),
     }
 }
 
