@@ -34,8 +34,10 @@ class Thread extends Component {
         const threadId = threadActions.getThreadId(this.props.threadData);
         const threadSlug = threadActions.getThreadSlug(this.props.threadData);
         const threadRatingTypes = threadActions.getThreadRatingTypes(this.props.threadData);
+        const threadUsersViewing = threadActions.getThreadUsersViewing(this.props.threadData);
 
         let threadpage;
+        let usersViewing;
 
         if(threadErrors.length > 0){
 
@@ -69,6 +71,16 @@ class Thread extends Component {
                 );
             });
 
+            usersViewing = threadUsersViewing.map((user) => {
+                return (
+                    <img
+                        key={user.id}
+                        style={{display: 'inline-block', width: '5rem', height: '5rem', borderRadius: '50%'}}
+                        src={user.avatar} 
+                        alt={user.name} />
+                );
+            });
+
             threadpage = (
                 <div>
                     {threadButton}
@@ -88,6 +100,7 @@ class Thread extends Component {
         return (
             <div>
                 {threadpage}
+                {usersViewing}
             </div>
         )
     }

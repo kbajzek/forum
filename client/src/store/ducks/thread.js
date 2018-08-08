@@ -41,6 +41,8 @@ export const DELETE_RATING_SUCCESS = 'DELETE_RATING_SUCCESS';
 export const DELETE_RATING_FAILED = 'DELETE_RATING_FAILED';
 export const DELETE_RATING_DISMISS_ERROR = 'DELETE_RATING_DISMISS_ERROR';
 
+export const SET_THREAD_USERS_VIEWING = 'SET_THREAD_USERS_VIEWING';
+
 // Actions
 
 export const fetchThreadDataBegin = (threadId, clearFirst) => ({type: FETCH_THREAD_DATA_BEGIN, threadId, clearFirst});
@@ -78,6 +80,8 @@ export const deleteRatingSuccess = (result) => ({type: DELETE_RATING_SUCCESS, re
 export const deleteRatingFailed = (error) => ({type: DELETE_RATING_FAILED, error});
 export const deleteRatingDismissError = () => ({type: DELETE_RATING_DISMISS_ERROR});
 
+export const setThreadUsersViewing = (users) => ({type: SET_THREAD_USERS_VIEWING, users});
+
 // Selectors
 
 export const getThreadId = (threadData) => {
@@ -110,6 +114,10 @@ export const getThreadLoaded = (threadData) => {
 
 export const getThreadErrors = (threadData) => {
     return threadData.errors
+}
+
+export const getThreadUsersViewing = (threadData) => {
+    return threadData.usersViewing
 }
 
 // Reducer
@@ -340,6 +348,13 @@ const reducer = ( state = initialState, action ) => {
             updatedState = {
                 ...state,
                 errors: []
+            }
+            return updatedState;
+
+        case SET_THREAD_USERS_VIEWING:
+            updatedState = {
+                ...state,
+                usersViewing: action.users
             }
             return updatedState;
 

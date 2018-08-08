@@ -3,6 +3,10 @@ import { eventChannel, delay, buffers } from 'redux-saga'
 import io from 'socket.io-client'
 import * as actions from '../actions/index';
 
+import * as categoryActions from '../ducks/category';
+import * as subCategoryActions from '../ducks/subCategory';
+import * as threadActions from '../ducks/thread';
+
 import * as actionTypes from "../actions/actionTypes";
 import {
   // initCategoryDataSaga,
@@ -104,8 +108,17 @@ export function* watchSockets() {
 }
 
 export function* handleLocationChange(socket) {
+  const channel = yield call(createSocketChannel, socket, 'usersViewing.update');
   while(true){
-    const action = yield take(actionTypes.LOCATION_CHANGE);
-    socket.emit('location.change', {main: action.main, id: action.id});
+    const userViewingInfo = yield take(channel);
+    const location = userViewingInfo.location.substring(0,2);
+    
+    if(location === '1'){
+      yield put(categoryActions.setCategoryUsersViewing(userViewingInfo.users));
+    }else if(location === '1/'){
+      yield put(subCategoryActions.setSubCategoryUsersViewing(userViewingInfo.users));
+    }else if(location === '2/'){
+      yield put(threadActions.setThreadUsersViewing(userViewingInfo.users));
+    }
   }
 }

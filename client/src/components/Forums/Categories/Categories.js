@@ -52,11 +52,13 @@ class Categories extends Component {
                 catForm = <CategoryForm closeForm={this.toggleCategoryCreator} />
             }
 
-            usersViewing = categoryUsersViewing.map((id) => {
+            usersViewing = categoryUsersViewing.map((user) => {
                 return (
-                    <div>
-                        {id}
-                    </div>
+                    <img
+                        key={user.id}
+                        style={{display: 'inline-block', width: '5rem', height: '5rem', borderRadius: '50%'}}
+                        src={user.avatar} 
+                        alt={user.name} />
                 );
             });
 

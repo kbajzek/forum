@@ -29,7 +29,7 @@ describe('Tests', () => {
                     thread2, thread3, subCategory, subCategory2, subCategory3, subCategory4, subCategory5, category,
                     rating, rating1, rating2, rating3, rating4, rating5, rating6, rating7, rating8, rating9, result;
                     
-                    user = await controllers.createUser('User 1');
+                    user = await controllers.createUser('User 1', 'https://www.publicdomainpictures.net/pictures/40000/velka/question-mark.jpg');
                     category = await controllers.createCategory('Category 1');
                     subCategory = await controllers.createSubCategory('SubCategory 1', 'first subcategory', category.id);
                     subCategory2 = await controllers.createSubCategory('SubCategory 2', 'second subcategory', category.id);

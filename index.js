@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const forumRoutes = require('./routes/forumRoutes');
 const authRoutes = require('./routes/authRoutes');
 const models = require('./models');
+const keys = require('./config/keys');
 
 passport.serializeUser(function(id, done) {
     done(null, id);
@@ -22,7 +23,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SteamStrategy({
     returnURL: 'http://192.168.56.1:5000/auth/steam/return',
     realm: 'http://192.168.56.1:5000/',
-    apiKey: 'CF1AE94B18F1E3282342ED1886995157'
+    apiKey: keys.steamAPIKey
   },
   function(identifier, profile, done) {
     //console.log(profile);
@@ -33,7 +34,7 @@ passport.use(new SteamStrategy({
       models.User.findOne({where: {steam: steamId}})
         .then((result) => {
             if(!result){
-                models.User.create({steam: steamId, name: profile.displayName})
+                models.User.create({steam: steamId, name: profile.displayName, avatar: profile.photos[2].value})
                     .then((newUser) => {
                         return done(null, newUser.id);
                     })
@@ -101,6 +102,23 @@ const deleteUser = (user) => {
         const locationInfo = socketLocations.get(userInfo.location);
         if(locationInfo && locationInfo !== undefined){
             const newLocationInfo = locationInfo.filter(u => u !== user);
+            models.User.findAll({where: {id: newLocationInfo}})
+                .then(users => {
+                    const usersViewing = users.map(user => {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            avatar: user.avatar
+                        }
+                    })
+                    newLocationInfo.forEach(u => {
+                        const socketID = socketUsers.get(u);
+                        if(socketID && socketID !== undefined){
+                            io.to(socketID.id).emit('usersViewing.update', {location: userInfo.location, users: usersViewing});
+                        }
+                    })
+                })
+            
             socketLocations.set(userInfo.location, newLocationInfo);
         }
     }
@@ -113,12 +131,46 @@ const setUserLocation = (user, location) => {
         let locationInfo = socketLocations.get(userInfo.location);
         if(locationInfo && locationInfo !== undefined){
             const newLocationInfo = locationInfo.filter(u => u !== user);
+            models.User.findAll({where: {id: newLocationInfo}})
+                .then(users => {
+                    const usersViewing = users.map(user => {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            avatar: user.avatar
+                        }
+                    })
+                    newLocationInfo.forEach(u => {
+                        const socketID = socketUsers.get(u);
+                        if(socketID && socketID !== undefined){
+                            io.to(socketID.id).emit('usersViewing.update', {location: userInfo.location, users: usersViewing});
+                        }
+                    })
+                })
             socketLocations.set(userInfo.location, newLocationInfo);
         }
         locationInfo = socketLocations.get(location);
         if(locationInfo && locationInfo !== undefined){
             const newLocationInfo = locationInfo.concat(user);
+            models.User.findAll({where: {id: newLocationInfo}})
+                .then(users => {
+                    const usersViewing = users.map(user => {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            avatar: user.avatar
+                        }
+                    })
+                    newLocationInfo.forEach(u => {
+                        const socketID = socketUsers.get(u);
+                        if(socketID && socketID !== undefined){
+                            io.to(socketID.id).emit('usersViewing.update', {location: location, users: usersViewing});
+                        }
+                    })
+                })
             socketLocations.set(location, newLocationInfo);
+        }else{
+            socketLocations.set(location, [user]);
         }
         const newUserInfo = {
             ...userInfo,

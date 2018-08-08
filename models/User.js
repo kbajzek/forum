@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         
         steam: {
             type: DataTypes.STRING
+        },
+
+        avatar: {
+            type: DataTypes.STRING
         }
 
     });

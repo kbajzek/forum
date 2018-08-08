@@ -222,80 +222,86 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
         ]
     };
 
-    app.get('/api/forums', (req, res) => {
+    app.get('/api/forums', async (req, res) => {
         try {
-            models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT})
-                .then(result => {
+            const result = await models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT});
 
-                    let convertedResult = [];
-                    let currentCatPosition = 0;
+            let convertedResult = [];
+            let currentCatPosition = 0;
 
-                    result.forEach((row) => {
+            result.forEach((row) => {
 
-                        let lastUpdated = row.maxDate || 'none';
-                        let lastThreadName = row.ThreadName || 'none';
-                        let lastUser = row.UserName || 'none';
-                        let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
+                let lastUpdated = row.maxDate || 'none';
+                let lastThreadName = row.ThreadName || 'none';
+                let lastUser = row.UserName || 'none';
+                let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
 
-                        if (currentCatPosition !== row.categoryPosition) {
-                            currentCatPosition = row.categoryPosition;
+                if (currentCatPosition !== row.categoryPosition) {
+                    currentCatPosition = row.categoryPosition;
 
-                            let subCategories = [];
+                    let subCategories = [];
 
-                            if (row.subCategoryId) {
-                                subCategories = [{
-                                    id: row.subCategoryId,
-                                    name: row.subCategoryName,
-                                    path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
-                                    description: row.description,
-                                    totalPosts: row.totalPosts || 0,
-                                    lastActiveThread: {
-                                        name: lastThreadName,
-                                        user: lastUser,
-                                        lastUpdated: lastUpdated,
-                                        path: lastActiveThreadPath
-                                    }
-                                }]
+                    if (row.subCategoryId) {
+                        subCategories = [{
+                            id: row.subCategoryId,
+                            name: row.subCategoryName,
+                            path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                            description: row.description,
+                            totalPosts: row.totalPosts || 0,
+                            lastActiveThread: {
+                                name: lastThreadName,
+                                user: lastUser,
+                                lastUpdated: lastUpdated,
+                                path: lastActiveThreadPath
+                            }
+                        }]
+                    }
+
+                    convertedResult.push(
+                        {
+                            id: row.categoryId, 
+                            name: row.categoryName, 
+                            subCategories
+                        }
+                    );
+                } else {
+                    //has to have at least 2 subcategories to get to here
+                    convertedResult[convertedResult.length - 1].subCategories.push(
+                        {
+                            id: row.subCategoryId,
+                            name: row.subCategoryName,
+                            path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                            description: row.description,
+                            totalPosts: row.totalPosts || 0,
+                            lastActiveThread: {
+                                name: lastThreadName,
+                                user: lastUser,
+                                lastUpdated: lastUpdated,
+                                path: lastActiveThreadPath
                             }
 
-                            convertedResult.push(
-                                {
-                                    id: row.categoryId, 
-                                    name: row.categoryName, 
-                                    subCategories
-                                }
-                            );
-                        } else {
-                            //has to have at least 2 subcategories to get to here
-                            convertedResult[convertedResult.length - 1].subCategories.push(
-                                {
-                                    id: row.subCategoryId,
-                                    name: row.subCategoryName,
-                                    path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
-                                    description: row.description,
-                                    totalPosts: row.totalPosts || 0,
-                                    lastActiveThread: {
-                                        name: lastThreadName,
-                                        user: lastUser,
-                                        lastUpdated: lastUpdated,
-                                        path: lastActiveThreadPath
-                                    }
-
-                                }
-                            )
                         }
-                    });
+                    )
+                }
+            });
+            if(req.session && req.session.passport && req.session.passport.user){
+                setUserLocation(req.session.passport.user,'1');
+            }
 
-                    setUserLocation(req.session.passport.user,'1');
-                    console.log(ioLocations.get('1'))
-
-                    const finalResult = {
-                        categories: convertedResult,
-                        usersViewing: ioLocations.get('1'),
-                    }
-                    
-                    res.send(finalResult);
-                })
+            const users = await models.User.findAll({where: {id: ioLocations.get('1')}});
+            const usersViewing = users.map(user => {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    avatar: user.avatar
+                }
+            })
+            const finalResult = {
+                categories: convertedResult,
+                usersViewing,
+            }
+            
+            res.send(finalResult);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
@@ -363,176 +369,182 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 threads: convertedResult2,
                 path: `/${subcatid}/${slugify(result3[0].name).toLowerCase()}`,
             }
-            setUserLocation(req.session.passport.user,'1/'+subcatid);
+            if(req.session && req.session.passport && req.session.passport.user){
+                setUserLocation(req.session.passport.user,'1/'+subcatid);
+            }
             res.send(finalResult);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
     })
 
-    app.get('/api/forums/thread/:id', (req, res) => {
+    app.get('/api/forums/thread/:id', async (req, res) => {
         try {
             let threadId = Number(req.params.id);
-            models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT})
-                .then(ratingTypes => {
-                    models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT})
-                        .then(result => {
+            const ratingTypes = await models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT});
+            const result = await models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT});
 
-                            let convertedPosts = [];
-                            let currentPostPosition = 0;
-                            let currentRatingTypeId = 0;
+            let convertedPosts = [];
+            let currentPostPosition = 0;
+            let currentRatingTypeId = 0;
 
-                            result.forEach((row) => {
+            result.forEach((row) => {
 
-                                let rating;
-                                //if rating is not null, build it. If it exists, it will always have a user
-                                if (row.ratingName) {
-                                    rating = {
-                                        ratingName: row.ratingName,
-                                        users: [
-                                            {
-                                                userName: row.ratingUserName, 
-                                                ratingId: row.ratingId, 
-                                                userId: row.ratingUserId, 
-                                                path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
-                                            }
-                                        ]
-                                    };
-                                }
-
-                                if(currentPostPosition !== row.postPosition) {
-                                    // add another post, may or may not have a rating
-                                    currentPostPosition = row.postPosition;
-                                    convertedPosts.push(
-                                        {
-                                            id: row.postId,
-                                            content: row.postContent,
-                                            ratings: [],
-                                            creator: {
-                                                name: row.creatorName,
-                                                userId: row.creatorId,
-                                                path: `/user/${row.creatorId}/${slugify(row.creatorName).toLowerCase()}`,
-                                                pictureURL: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/81/8117d1780455347891a44ccb80a45c6d693ebfae_full.jpg",
-                                                totalPosts: row.postCount,
-                                                signature: "to be implemented"
-                                            }
-                                        }
-                                    );
-
-                                    if (rating) {
-                                        // add a new rating, reset current rating placeholder
-                                        currentRatingTypeId = row.ratingTypeId;
-                                        convertedPosts[convertedPosts.length - 1].ratings.push(rating);
-                                    }
-                                } else {
-                                    //there has to be at least 1 rating to get to here, and user has to exist
-                                    if (currentRatingTypeId !== row.ratingTypeId) {
-                                        currentRatingTypeId = row.ratingTypeId;
-                                        // another rating type
-                                        convertedPosts[convertedPosts.length - 1].ratings.push(rating);
-                                    } else {
-                                        // same rating type, different user
-                                        const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
-                                        convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({
-                                            userName: row.ratingUserName, 
-                                            ratingId: row.ratingId, 
-                                            userId: row.ratingUserId, 
-                                            path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
-                                        });
-                                    }
-                                }
-                            });
-
-                            const ratings = ratingTypes.map((ratingType) => {
-                                return {
-                                    id: ratingType.id,
-                                    name: ratingType.name
-                                };
-                            })
-
-                            setUserLocation(req.session.passport.user,'2/'+threadId);
-
-                            const finalResult = {
-                                id: result[0].threadId,
-                                name: result[0].threadName,
-                                slug: slugify(result[0].threadName).toLowerCase(),
-                                posts: convertedPosts,
-                                ratingTypes: ratings,
-                                path: `/thread/${result[0].threadId}/${slugify(result[0].threadName).toLowerCase()}`,
-                                usersViewing: ioLocations.get('2/'+threadId),
+                let rating;
+                //if rating is not null, build it. If it exists, it will always have a user
+                if (row.ratingName) {
+                    rating = {
+                        ratingName: row.ratingName,
+                        users: [
+                            {
+                                userName: row.ratingUserName, 
+                                ratingId: row.ratingId, 
+                                userId: row.ratingUserId, 
+                                path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
                             }
-                            
-                            res.send(finalResult);
+                        ]
+                    };
+                }
+
+                if(currentPostPosition !== row.postPosition) {
+                    // add another post, may or may not have a rating
+                    currentPostPosition = row.postPosition;
+                    convertedPosts.push(
+                        {
+                            id: row.postId,
+                            content: row.postContent,
+                            ratings: [],
+                            creator: {
+                                name: row.creatorName,
+                                userId: row.creatorId,
+                                path: `/user/${row.creatorId}/${slugify(row.creatorName).toLowerCase()}`,
+                                pictureURL: row.creatorAvatar,
+                                totalPosts: row.postCount,
+                                signature: "to be implemented"
+                            }
+                        }
+                    );
+
+                    if (rating) {
+                        // add a new rating, reset current rating placeholder
+                        currentRatingTypeId = row.ratingTypeId;
+                        convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                    }
+                } else {
+                    //there has to be at least 1 rating to get to here, and user has to exist
+                    if (currentRatingTypeId !== row.ratingTypeId) {
+                        currentRatingTypeId = row.ratingTypeId;
+                        // another rating type
+                        convertedPosts[convertedPosts.length - 1].ratings.push(rating);
+                    } else {
+                        // same rating type, different user
+                        const lastRating = convertedPosts[convertedPosts.length - 1].ratings.length - 1;
+                        convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({
+                            userName: row.ratingUserName, 
+                            ratingId: row.ratingId, 
+                            userId: row.ratingUserId, 
+                            path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
                         });
-                });
+                    }
+                }
+            });
+
+            const ratings = ratingTypes.map((ratingType) => {
+                return {
+                    id: ratingType.id,
+                    name: ratingType.name
+                };
+            })
+            if(req.session && req.session.passport && req.session.passport.user){
+                setUserLocation(req.session.passport.user,'2/'+threadId);
+            }
+
+            const users = await models.User.findAll({where: {id: ioLocations.get('2/'+threadId)}});
+            const usersViewing = users.map(user => {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    avatar: user.avatar
+                }
+            })
+            const finalResult = {
+                id: result[0].threadId,
+                name: result[0].threadName,
+                slug: slugify(result[0].threadName).toLowerCase(),
+                posts: convertedPosts,
+                ratingTypes: ratings,
+                path: `/thread/${result[0].threadId}/${slugify(result[0].threadName).toLowerCase()}`,
+                usersViewing,
+            }
+            
+            res.send(finalResult);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
     })
 
-    app.get('/api/forums/user/:id/:slug', (req, res) => {
+    app.get('/api/forums/user/:id/:slug', async (req, res) => {
         try {
             let userId = Number(req.params.id);
             
-            models.sequelize.query(queries.getUserQuery(userId), { type: models.Sequelize.QueryTypes.SELECT})
-                .then(result => {
-                    let convertedPosts = [];
+            const result = await models.sequelize.query(queries.getUserQuery(userId), { type: models.Sequelize.QueryTypes.SELECT});
+            let convertedPosts = [];
 
-                    result.forEach((row) => {
+            result.forEach((row) => {
 
-                        convertedPosts.push(
-                            {
-                                id: row.postId,
-                                content: row.postContent,
-                                createdAt: row.postCreatedAt,
-                                threadName: row.threadName,
-                                path: `/thread/${row.postThreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
-                            }
-                        );
-                        
-                    });
-
-                    setUserLocation(req.session.passport.user,'3/'+userId);
-
-                    let userData = {
-                        userName: result[0].userName,
-                        posts: convertedPosts,
-                        usersViewing: ioLocations.get('3/'+userId),
+                convertedPosts.push(
+                    {
+                        id: row.postId,
+                        content: row.postContent,
+                        createdAt: row.postCreatedAt,
+                        threadName: row.threadName,
+                        path: `/thread/${row.postThreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
                     }
-                    
-                    res.send(userData);
-                })
+                );
+                
+            });
+            if(req.session && req.session.passport && req.session.passport.user){
+                setUserLocation(req.session.passport.user,'3/'+userId);
+            }
+
+            let userData = {
+                userName: result[0].userName,
+                posts: convertedPosts,
+                usersViewing: ioLocations.get('3/'+userId),
+            }
+            
+            res.send(userData);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
     });
 
-    app.get('/api/forums/message', requireLogin, (req, res) => {
+    app.get('/api/forums/message', requireLogin, async (req, res) => {
         try {
-            models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT})
-                .then(result => {
-                    let convertedMessageHeaders = [];
-                    let convertedMessagePosts = [];
+            const result = await models.sequelize.query(queries.getUserMessageListQuery(req.session.passport.user), { type: models.Sequelize.QueryTypes.SELECT});
+            let convertedMessageHeaders = [];
+            let convertedMessagePosts = [];
 
-                    result.forEach((row) => {
+            result.forEach((row) => {
 
-                        convertedMessageHeaders.push(
-                            {
-                                id: row.messageId,
-                                name: row.messageName,
-                                path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
-                            }
-                        );
-                        
-                    });
-
-                    let messageData = {
-                        messageList: convertedMessageHeaders,
-                        messageSelected: null
+                convertedMessageHeaders.push(
+                    {
+                        id: row.messageId,
+                        name: row.messageName,
+                        path: `/message/${row.messageId}/${slugify(row.messageName).toLowerCase()}`
                     }
-                    setUserLocation(req.session.passport.user,'4');
-                    res.send(messageData);
-                })
+                );
+                
+            });
+
+            let messageData = {
+                messageList: convertedMessageHeaders,
+                messageSelected: null
+            }
+            if(req.session && req.session.passport && req.session.passport.user){
+                setUserLocation(req.session.passport.user,'4');
+            }
+            res.send(messageData);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
@@ -607,249 +619,225 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     members: convertedMessageMembers,
                 }
             }
-            setUserLocation(req.session.passport.user,'4/'+messageId);
+            if(req.session && req.session.passport && req.session.passport.user){
+                setUserLocation(req.session.passport.user,'4/'+messageId);
+            }
             res.send(messageData);
         } catch(err) {
             res.status(404).send({ error: 'Something failed!' });
         }
     });
 
-    app.get('/api/forums/userlist', (req, res) => {
-        controllers.getUserList(req.query.search)
-            .then((users) => {
-                const userList = users.map((user) => {return {key: user.id, label: user.name}}).filter((user) => {return user.key !== req.session.passport.user})
-                res.send({users: userList});
+    app.get('/api/forums/userlist', async (req, res) => {
+        try{
+            const users = await controllers.getUserList(req.query.search);
+            const userList = users.map((user) => {
+                return {
+                    key: user.id, 
+                    label: user.name
+                }
+            }).filter((user) => {
+                return user.key !== req.session.passport.user
             })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
-
+            res.send({users: userList});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     });
 
-    app.post('/api/forums/category/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createCategory(req.body.name)
-            .then((newCategory) => {
-                res.send({
-                    id: newCategory.id
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/category/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const newCategory = await controllers.createCategory(req.body.name);
+            res.send({
+                id: newCategory.id
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/subcategory/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createSubCategory(req.body.name, req.body.description, req.body.categoryId, req.body.subCategoryId)
-            .then((newSubCategory) => {
-                res.send({
-                    id: newSubCategory.id,
-                    path: `/${newSubCategory.id}/${slugify(newSubCategory.name).toLowerCase()}`
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/subcategory/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const newSubCategory = await controllers.createSubCategory(req.body.name, req.body.description, req.body.categoryId, req.body.subCategoryId);
+            res.send({
+                id: newSubCategory.id,
+                path: `/${newSubCategory.id}/${slugify(newSubCategory.name).toLowerCase()}`
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/thread/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createThread(req.body.name, req.body.content, req.session.passport.user, req.body.subCategoryId)
-            .then((result) => {
-                res.send({
-                    threadId: result[0].id,
-                    postId: result[1].id,
-                    path: `/thread/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
-                    name: result[2].name,
-                    createdOn: result[0].createdAt,
-                    lastUpdated: result[1].updatedAt
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/thread/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const result = await controllers.createThread(req.body.name, req.body.content, req.session.passport.user, req.body.subCategoryId);
+            res.send({
+                threadId: result[0].id,
+                postId: result[1].id,
+                path: `/thread/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
+                name: result[2].name,
+                createdOn: result[0].createdAt,
+                lastUpdated: result[1].updatedAt
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' });
+        }
     })
 
-    app.post('/api/forums/post/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createPost(req.body.content, req.session.passport.user, req.body.threadId)
-            .then(({newPost, user, thread}) => {
-                controllers.getUserTotalPosts(req.session.passport.user)
-                    .then(({user, count}) => {
-                        res.send({
-                            postId: newPost.id, 
-                            content: newPost.content,
-                            threadId: req.body.threadId,
-                            hash: `#${newPost.id}`,
-                            path: `/thread/${req.body.threadId}/${slugify(thread.name).toLowerCase()}`,
-                            userName: user.name, 
-                            userTotalPosts: count, 
-                            userSignature: "to be implemented"
-                        });
-                    })
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/post/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const result1 = await controllers.createPost(req.body.content, req.session.passport.user, req.body.threadId);
+            const result2 = await controllers.getUserTotalPosts(req.session.passport.user);
+            res.send({
+                postId: result1.newPost.id, 
+                content: result1.newPost.content,
+                threadId: req.body.threadId,
+                hash: `#${result1.newPost.id}`,
+                path: `/thread/${req.body.threadId}/${slugify(result1.thread.name).toLowerCase()}`,
+                userName: result2.user.name, 
+                userTotalPosts: result2.count, 
+                userSignature: "to be implemented"
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/post/edit', requireCSRF, requireLogin, (req, res) => {
-        controllers.editPost(req.body.content, req.body.postId)
-            .then(({updatedPost, thread}) => {
-                res.send({
-                    postId: updatedPost.id,
-                    threadId: thread.id,
-                    hash: `#${updatedPost.id}`,
-                    path: `/thread/${thread.id}/${slugify(thread.name).toLowerCase()}`
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/post/edit', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const {updatedPost, thread} = await controllers.editPost(req.body.content, req.body.postId);
+            res.send({
+                postId: updatedPost.id,
+                threadId: thread.id,
+                hash: `#${updatedPost.id}`,
+                path: `/thread/${thread.id}/${slugify(thread.name).toLowerCase()}`
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/post/delete', requireCSRF, requireLogin, (req, res) => {
-        
-        controllers.deletePost(req.body.postId)
-            .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
-                res.send({
-                    response: response[0],
-                    threadId: response[1],
-                    path: `/thread/${response[1]}/${slugify(response[2]).toLowerCase()}`
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/post/delete', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const response = await controllers.deletePost(req.body.postId);//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
+            res.send({
+                response: response[0],
+                threadId: response[1],
+                path: `/thread/${response[1]}/${slugify(response[2]).toLowerCase()}`
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/message/create', requireCSRF, requireLogin, (req, res) => {
-        const members = req.body.members.map(member => member.key);
-        controllers.createMessage(req.body.name, req.body.content, members, req.session.passport.user)
-            .then((result) => {
-                res.send({
-                    message: result[0].id,
-                    messagePostId: result[1].id,
-                    path: `/message/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
-                    createdOn: result[0].createdAt,
-                    lastUpdated: result[1].updatedAt
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/message/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const members = req.body.members.map(member => member.key);
+            const result = await controllers.createMessage(req.body.name, req.body.content, members, req.session.passport.user);
+            res.send({
+                message: result[0].id,
+                messagePostId: result[1].id,
+                path: `/message/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
+                createdOn: result[0].createdAt,
+                lastUpdated: result[1].updatedAt
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        };
     })
 
-    app.post('/api/forums/messagepost/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createMessagePost(req.body.content, req.session.passport.user, req.body.messageId)
-            .then(({newPost, user, message, members}) => {
-                members.forEach((member) => {
-                    if(member.UserId !== req.session.passport.user){
-                        const socketID = ioUsers.get(member.UserId);
-                        if(socketID && socketID !== undefined){
-                            io.to(socketID).emit('messages.update', req.body.messageId);
-                        }
+    app.post('/api/forums/messagepost/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const {newPost, user, message, members} = await controllers.createMessagePost(req.body.content, req.session.passport.user, req.body.messageId);
+            members.forEach((member) => {
+                if(member.UserId !== req.session.passport.user){
+                    const socketID = ioUsers.get(member.UserId);
+                    if(socketID && socketID !== undefined){
+                        io.to(socketID).emit('messages.update', req.body.messageId);
                     }
-                })
-                res.send({
-                    postId: newPost.id, 
-                    content: newPost.content,
-                    messageId: req.body.messageId,
-                    userName: user.name,
-                    path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
-    })
-
-    app.post('/api/forums/messagepost/edit', requireCSRF, requireLogin, (req, res) => {
-        controllers.editMessagePost(req.body.content, req.body.messagePostId)
-            .then(({updatedMessagePost, message}) => {
-                res.send({
-                    messagePostId: updatedMessagePost.id,
-                    path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
-    })
-
-    app.post('/api/forums/messagepost/delete', requireCSRF, requireLogin, (req, res) => {
-        controllers.deleteMessagePost(req.body.messagePostId)
-            .then((response) => {//response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
-                let path;
-                if(response[0] === 1){
-                    path = `/message`
-                }else{
-                    path = `/message/${response[1].id}/${slugify(response[1].name).toLowerCase()}`
                 }
-                res.send({
-                    response: response[0],
-                    path: path
-                });
             })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+            res.send({
+                postId: newPost.id, 
+                content: newPost.content,
+                messageId: req.body.messageId,
+                userName: user.name,
+                path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        };
     })
 
-    app.post('/api/forums/user/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createUser(req.body.name)
-            .then((newUser) => {
-                res.send({
-                    id: newUser.id
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
+    app.post('/api/forums/messagepost/edit', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const {updatedMessagePost, message} = await controllers.editMessagePost(req.body.content, req.body.messagePostId);
+            res.send({
+                messagePostId: updatedMessagePost.id,
+                path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
             });
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/ratingtype/create', requireCSRF, requireLogin, (req, res) => {
-        controllers.createRatingType(req.body.name)
-            .then(() => {
-                res.send({});
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
+    app.post('/api/forums/messagepost/delete', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const response = await controllers.deleteMessagePost(req.body.messagePostId); //response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
+            let path;
+            if(response[0] === 1){
+                path = `/message`
+            }else{
+                path = `/message/${response[1].id}/${slugify(response[1].name).toLowerCase()}`
+            }
+            res.send({response: response[0], path});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 
-    app.post('/api/forums/rating/create', requireCSRF, requireLogin, checkCanRate, (req, res) => {
-        controllers.createRating(req.session.passport.user, req.body.postId, req.body.ratingTypeId)
-            .then(({newRating, threadId}) => {
-                res.send({
-                    ratingId: newRating,
-                    threadId: threadId
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
+    app.post('/api/forums/user/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            const newUser = await controllers.createUser(req.body.name);
+            res.send({id: newUser.id});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' });
+        }
     })
 
-    app.post('/api/forums/rating/delete', requireCSRF, requireLogin, checkCanUnrate, (req, res) => {
-        controllers.deleteRating(req.body.ratingId)
-            .then((threadId) => {
-                res.send({
-                    response: 1,
-                    threadId: threadId
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
+    app.post('/api/forums/ratingtype/create', requireCSRF, requireLogin, async (req, res) => {
+        try{
+            await controllers.createRatingType(req.body.name);
+            res.send({});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' });
+        }
     })
 
-    app.post('/api/forums/messagemember/delete', requireCSRF, requireLogin, checkCanRemoveMessageMember, (req, res) => {
-        controllers.removeMessageMember(req.body.memberId)
-            .then((response) => {
-                res.send({
-                    response: response
-                });
-            })
-            .catch((error) => {
-                res.status(500).send({ error: 'Something failed!' })
-            });
+    app.post('/api/forums/rating/create', requireCSRF, requireLogin, checkCanRate, async (req, res) => {
+        try{
+            const {newRating, threadId} = await controllers.createRating(req.session.passport.user, req.body.postId, req.body.ratingTypeId);
+            res.send({ratingId: newRating, threadId: threadId});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' });
+        }
+    })
+
+    app.post('/api/forums/rating/delete', requireCSRF, requireLogin, checkCanUnrate, async (req, res) => {
+        try{
+            const threadId = await controllers.deleteRating(req.body.ratingId);
+            res.send({response: 1, threadId});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
+    })
+
+    app.post('/api/forums/messagemember/delete', requireCSRF, requireLogin, checkCanRemoveMessageMember, async (req, res) => {
+        try{
+            const response = await controllers.removeMessageMember(req.body.memberId);
+            res.send({response});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
     })
 }

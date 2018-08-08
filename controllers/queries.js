@@ -145,6 +145,7 @@ module.exports = {
                     r.userId		as ratingUserId,
                     u.id			as creatorId,
                     u.name			as creatorName,
+                    u.avatar        as creatorAvatar,
                     qc.postCount	as postCount,
                     p.position      as postPosition
                 

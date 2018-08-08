@@ -16,6 +16,8 @@ export const CREATE_CATEGORY_SUCCESS = 'CREATE_CATEGORY_SUCCESS';
 export const CREATE_CATEGORY_FAILED = 'CREATE_CATEGORY_FAILED';
 export const CREATE_CATEGORY_DISMISS_ERROR = 'CREATE_CATEGORY_DISMISS_ERROR';
 
+export const SET_CATEGORY_USERS_VIEWING = 'SET_CATEGORY_USERS_VIEWING';
+
 // Actions
 
 export const fetchCategoryDataBegin = () => ({type: FETCH_CATEGORY_DATA_BEGIN});
@@ -27,6 +29,8 @@ export const createCategoryBegin = (name) => ({type: CREATE_CATEGORY_BEGIN, name
 export const createCategorySuccess = (result) => ({type: CREATE_CATEGORY_SUCCESS, result});
 export const createCategoryFailed = (error) => ({type: CREATE_CATEGORY_FAILED, error});
 export const createCategoryDismissError = () => ({type: CREATE_CATEGORY_DISMISS_ERROR});
+
+export const setCategoryUsersViewing = (users) => ({type: SET_CATEGORY_USERS_VIEWING, users});
 
 // Selectors
 
@@ -121,6 +125,12 @@ const reducer = ( state = initialState, action ) => {
             updatedState = {
                 ...state,
                 errors: []
+            }
+            return updatedState;
+        case SET_CATEGORY_USERS_VIEWING:
+            updatedState = {
+                ...state,
+                usersViewing: action.users
             }
             return updatedState;
         default: return state;

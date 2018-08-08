@@ -18,6 +18,8 @@ export const CREATE_SUBCATEGORY_SUCCESS = 'CREATE_SUBCATEGORY_SUCCESS';
 export const CREATE_SUBCATEGORY_FAILED = 'CREATE_SUBCATEGORY_FAILED';
 export const CREATE_SUBCATEGORY_DISMISS_ERROR = 'CREATE_SUBCATEGORY_DISMISS_ERROR';
 
+export const SET_SUBCATEGORY_USERS_VIEWING = 'SET_SUBCATEGORY_USERS_VIEWING';
+
 // Actions
 
 export const fetchSubCategoryDataBegin = (subCategoryId) => ({type: FETCH_SUBCATEGORY_DATA_BEGIN, subCategoryId});
@@ -29,6 +31,8 @@ export const createSubCategoryBegin = (name, description, categoryId, subCategor
 export const createSubCategorySuccess = (result) => ({type: CREATE_SUBCATEGORY_SUCCESS, result});
 export const createSubCategoryFailed = (error) => ({type: CREATE_SUBCATEGORY_FAILED, error});
 export const createSubCategoryDismissError = () => ({type: CREATE_SUBCATEGORY_DISMISS_ERROR});
+
+export const setSubCategoryUsersViewing = (users) => ({type: SET_SUBCATEGORY_USERS_VIEWING, users});
 
 // Selectors
 
@@ -136,6 +140,12 @@ const reducer = ( state = initialState, action ) => {
             updatedState = {
                 ...state,
                 errors: []
+            }
+            return updatedState;
+        case SET_SUBCATEGORY_USERS_VIEWING:
+            updatedState = {
+                ...state,
+                usersViewing: action.users
             }
             return updatedState;
         default: return state;
