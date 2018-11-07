@@ -74,7 +74,7 @@ export function* watchAuth() {
 }
 
 function connect() {
-  const socket = io('192.168.56.1:5000');
+  const socket = io('localhost:5000');
   return new Promise(resolve => {
     socket.on('connect', () => {
       resolve(socket);

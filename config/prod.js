@@ -1,11 +1,12 @@
 module.exports = {
-    googleClientID: process.env.GOOGLE_CLIENT_ID,
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    mongoURI: process.env.MONGO_URI,
-    cookieKey: process.env.COOKIE_KEY,
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
-    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-    sendGridKey: process.env.SEND_GRID_KEY,
-    redirectDomain: process.env.REDIRECT_DOMAIN,
-    steamAPIKey: process.env.STEAM_API_KEY,
+    redirectDomain: 'http://localhost:5000',
+    steamAPIKey: 'CF1AE94B18F1E3282342ED1886995157',
+    database: {
+        username: 'root',
+        password: 'password',
+        database: 'forum_test',
+        dialect: 'mysql',
+        operatorsAliases: false,
+        logging: false,
+    }
 };

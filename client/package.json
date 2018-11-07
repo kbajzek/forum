@@ -4,13 +4,13 @@
   "private": true,
   "proxy": {
     "/auth/steam": {
-      "target": "http://192.168.56.1:5000"
+      "target": "http://localhost:5000"
     },
     "/api/*": {
-      "target": "http://192.168.56.1:5000"
+      "target": "http://localhost:5000"
     },
     "/socket.io/*": {
-      "target": "http://192.168.56.1:5000"
+      "target": "http://localhost:5000"
     }
   },
   "dependencies": {

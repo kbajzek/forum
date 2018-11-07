@@ -1,5 +1,6 @@
 const passport = require('passport');
 const uuid = require('uuid/v4');
+const config = require('../config/keys');
 
 const ensureAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) { return next(); }
@@ -25,7 +26,7 @@ module.exports = app => {
             console.log("Authentication was successful");
             console.log("In steam returning function");
             req.session.csrf = uuid();
-            res.redirect("http://192.168.56.1:3000");
+            res.redirect(config.redirectDomain);
         }
     );
 
