@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const Rating = sequelize.define('rating', {
+    const rating = sequelize.define('rating', {
 
         id: {
             type: DataTypes.INTEGER,
@@ -10,11 +10,11 @@ module.exports = (sequelize, DataTypes) => {
 
     });
 
-    Rating.associate = function (models) {
-        models.Rating.belongsTo(models.User);
-        models.Rating.belongsTo(models.Post, { onDelete: 'cascade' });
-        models.Rating.belongsTo(models.RatingType);
+    rating.associate = function (models) {
+        models.rating.belongsTo(models.user);
+        models.rating.belongsTo(models.post, { onDelete: 'cascade' });
+        models.rating.belongsTo(models.ratingtype);
     };
 
-    return Rating;
+    return rating;
 };

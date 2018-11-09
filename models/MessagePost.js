@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const MessagePost = sequelize.define('messagepost', {
+    const messagepost = sequelize.define('messagepost', {
 
         content: {
             type: DataTypes.TEXT
@@ -8,10 +8,10 @@ module.exports = (sequelize, DataTypes) => {
 
     });
 
-    MessagePost.associate = function (models) {
-        models.MessagePost.belongsTo(models.User);
-        models.MessagePost.belongsTo(models.Message, { onDelete: 'cascade' });
+    messagepost.associate = function (models) {
+        models.messagepost.belongsTo(models.user);
+        models.messagepost.belongsTo(models.message, { onDelete: 'cascade' });
     };
 
-    return MessagePost;
+    return messagepost;
 };

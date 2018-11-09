@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const Post = sequelize.define('post', {
+    const post = sequelize.define('post', {
             
         content: {
             type: DataTypes.TEXT
@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         
     });
 
-    Post.associate = function (models) {
-        models.Post.belongsTo(models.Thread, { onDelete: 'cascade' });
-        models.Post.belongsTo(models.User);
+    post.associate = function (models) {
+        models.post.belongsTo(models.thread, { onDelete: 'cascade' });
+        models.post.belongsTo(models.user);
     };
 
-    return Post;
+    return post;
 };

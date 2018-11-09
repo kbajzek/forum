@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const RatingType = sequelize.define('ratingtype', {
+    const ratingtype = sequelize.define('ratingtype', {
 
         name: {
             type: DataTypes.STRING
@@ -8,5 +8,5 @@ module.exports = (sequelize, DataTypes) => {
 
     });
 
-    return RatingType;
+    return ratingtype;
 };

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const Thread = sequelize.define('thread', {
+    const thread = sequelize.define('thread', {
 
         name: {
             type: DataTypes.STRING
@@ -12,9 +12,9 @@ module.exports = (sequelize, DataTypes) => {
 
     });
 
-    Thread.associate = function (models) {
-        models.Thread.belongsTo(models.SubCategory, { onDelete: 'cascade' });
+    thread.associate = function (models) {
+        models.thread.belongsTo(models.subcategory, { onDelete: 'cascade' });
     };
 
-    return Thread;
+    return thread;
 };

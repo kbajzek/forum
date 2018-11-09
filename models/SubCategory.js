@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const SubCategory = sequelize.define('subcategory', {
+    const subcategory = sequelize.define('subcategory', {
 
         name: {
             type: DataTypes.STRING
@@ -20,10 +20,10 @@ module.exports = (sequelize, DataTypes) => {
 
     });
 
-    SubCategory.associate = function (models) {
-        models.SubCategory.belongsTo(models.Category, { onDelete: 'cascade' });
-        models.SubCategory.belongsTo(models.SubCategory, { onDelete: 'cascade' });
+    subcategory.associate = function (models) {
+        models.subcategory.belongsTo(models.category, { onDelete: 'cascade' });
+        models.subcategory.belongsTo(models.subcategory, { onDelete: 'cascade' });
     };
 
-    return SubCategory;
+    return subcategory;
 };

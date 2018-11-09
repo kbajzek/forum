@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const MessageMember = sequelize.define('messagemember', {
+    const messagemember = sequelize.define('messagemember', {
 
         permission: {
             type: DataTypes.INTEGER, // 1 = normal, 2 = owner
@@ -9,10 +9,10 @@ module.exports = (sequelize, DataTypes) => {
 
     });
 
-    MessageMember.associate = function (models) {
-        models.MessageMember.belongsTo(models.Message, { onDelete: 'cascade' });
-        models.MessageMember.belongsTo(models.User);
+    messagemember.associate = function (models) {
+        models.messagemember.belongsTo(models.message, { onDelete: 'cascade' });
+        models.messagemember.belongsTo(models.user);
     };
 
-    return MessageMember;
+    return messagemember;
 };
