@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const SubCategory = sequelize.define('SubCategory', {
+    const SubCategory = sequelize.define('subcategory', {
 
         name: {
             type: DataTypes.STRING

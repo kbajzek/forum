@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const Thread = sequelize.define('Thread', {
+    const Thread = sequelize.define('thread', {
 
         name: {
             type: DataTypes.STRING

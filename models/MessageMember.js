@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
 
-    const MessageMember = sequelize.define('MessageMember', {
+    const MessageMember = sequelize.define('messagemember', {
 
         permission: {
             type: DataTypes.INTEGER, // 1 = normal, 2 = owner
