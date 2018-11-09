@@ -288,7 +288,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 setUserLocation(req.session.passport.user,'1');
             }
 
-            const users = await models.User.findAll({where: {id: ioLocations.get('1')}});
+            const users = await models.user.findAll({where: {id: ioLocations.get('1')}});
             const usersViewing = users.map(user => {
                 return {
                     id: user.id,
@@ -381,7 +381,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
     app.get('/api/forums/thread/:id', async (req, res) => {
         try {
             let threadId = Number(req.params.id);
-            const ratingTypes = await models.RatingType.findAll({ type: models.Sequelize.QueryTypes.SELECT});
+            const ratingTypes = await models.ratingtype.findAll({ type: models.Sequelize.QueryTypes.SELECT});
             const result = await models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT});
 
             let convertedPosts = [];
@@ -459,7 +459,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 setUserLocation(req.session.passport.user,'2/'+threadId);
             }
 
-            const users = await models.User.findAll({where: {id: ioLocations.get('2/'+threadId)}});
+            const users = await models.user.findAll({where: {id: ioLocations.get('2/'+threadId)}});
             const usersViewing = users.map(user => {
                 return {
                     id: user.id,

@@ -31,10 +31,10 @@ passport.use(new SteamStrategy({
       const beginningString = 'https://steamcommunity.com/openid/id/';
       const steamId = identifier.substring(beginningString.length);
 
-      models.User.findOne({where: {steam: steamId}})
+      models.user.findOne({where: {steam: steamId}})
         .then((result) => {
             if(!result){
-                models.User.create({steam: steamId, name: profile.displayName, avatar: profile.photos[2].value})
+                models.user.create({steam: steamId, name: profile.displayName, avatar: profile.photos[2].value})
                     .then((newUser) => {
                         return done(null, newUser.id);
                     })
@@ -102,7 +102,7 @@ const deleteUser = (user) => {
         const locationInfo = socketLocations.get(userInfo.location);
         if(locationInfo && locationInfo !== undefined){
             const newLocationInfo = locationInfo.filter(u => u !== user);
-            models.User.findAll({where: {id: newLocationInfo}})
+            models.user.findAll({where: {id: newLocationInfo}})
                 .then(users => {
                     const usersViewing = users.map(user => {
                         return {
@@ -131,7 +131,7 @@ const setUserLocation = (user, location) => {
         let locationInfo = socketLocations.get(userInfo.location);
         if(locationInfo && locationInfo !== undefined){
             const newLocationInfo = locationInfo.filter(u => u !== user);
-            models.User.findAll({where: {id: newLocationInfo}})
+            models.user.findAll({where: {id: newLocationInfo}})
                 .then(users => {
                     const usersViewing = users.map(user => {
                         return {
@@ -152,7 +152,7 @@ const setUserLocation = (user, location) => {
         locationInfo = socketLocations.get(location);
         if(locationInfo && locationInfo !== undefined){
             const newLocationInfo = locationInfo.concat(user);
-            models.User.findAll({where: {id: newLocationInfo}})
+            models.user.findAll({where: {id: newLocationInfo}})
                 .then(users => {
                     const usersViewing = users.map(user => {
                         return {
