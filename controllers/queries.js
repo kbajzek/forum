@@ -18,15 +18,15 @@ module.exports = {
                     
             FROM forum_test.categories as c
                     left join forum_test.subcategories as s on s.CategoryId = c.id
-                    left join (SELECT 	ANY_VALUE(q1.categoryId) as categoryId, 
+                    left join (SELECT 	q1.categoryId as categoryId, 
                                         q1.subCategoryId as subCategoryId, 
-                                        ANY_VALUE(q1.totalPosts) as totalPosts, 
-                                        ANY_VALUE(q1.maxDate) as maxDate, 
-                                        ANY_VALUE(t.name) as threadName, 
-                                        ANY_VALUE(t.id) as threadId, 
-                                        ANY_VALUE(u.name) as userName, 
-                                        ANY_VALUE(u.id) as userId,
-                                        ANY_VALUE(p.id) as postId
+                                        q1.totalPosts as totalPosts, 
+                                        q1.maxDate as maxDate, 
+                                        t.name as threadName, 
+                                        t.id as threadId, 
+                                        u.name as userName, 
+                                        u.id as userId,
+                                        p.id as postId
                                     FROM forum_test.categories as c
                                         join forum_test.subcategories 	as s 	on s.CategoryId = c.id
                                         join forum_test.subcategories 	as s2 	on ((s2.ancestors like CONCAT("%/", s.id, "/%")) or s.id = s2.id)
@@ -44,7 +44,7 @@ module.exports = {
                                                     join forum_test.threads as t on t.SubCategoryId = s2.id
                                                     join forum_test.posts as p on p.ThreadId = t.id
                                             GROUP BY categoryId, subCategoryId) as q1 on c.id = q1.categoryId and s.id = q1.subCategoryId and p.updatedAt = q1.maxDate 
-                                        GROUP BY subCategoryId
+                                        GROUP BY subCategoryId, categoryId, totalPosts, maxDate, threadName, threadId, userName, userId, postId
                                         ) as q2 on q2.categoryId = c.id and q2.subCategoryId = s.id
             ORDER BY categoryPosition, subCategoryPosition;`
         );
@@ -67,15 +67,15 @@ module.exports = {
                     
             FROM (SELECT * FROM forum_test.subcategories as c WHERE c.id = ${subcatid}) as c
                     join forum_test.subcategories as s on s.SubCategoryId = c.id
-                    left join (SELECT 	ANY_VALUE(q1.mainSubCategoryId) as mainSubCategoryId, 
+                    left join (SELECT 	q1.mainSubCategoryId as mainSubCategoryId, 
                                         q1.subCategoryId as subCategoryId, 
-                                        ANY_VALUE(q1.totalPosts) as totalPosts, 
-                                        ANY_VALUE(q1.maxDate) as maxDate, 
-                                        ANY_VALUE(t.name) as threadName, 
-                                        ANY_VALUE(t.id) as threadId, 
-                                        ANY_VALUE(u.name) as userName, 
-                                        ANY_VALUE(u.id) as userId,
-                                        ANY_VALUE(p.id) as postId
+                                        q1.totalPosts as totalPosts, 
+                                        q1.maxDate as maxDate, 
+                                        t.name as threadName, 
+                                        t.id as threadId, 
+                                        u.name as userName, 
+                                        u.id as userId,
+                                        p.id as postId
                                     FROM (SELECT * FROM forum_test.subcategories as c WHERE c.id = ${subcatid}) as c
                                         join forum_test.subcategories 	as s 	on s.SubCategoryId = c.id
                                         join forum_test.subcategories 	as s2 	on ((s2.ancestors like CONCAT("%/", s.id, "/%")) or s.id = s2.id)
@@ -93,26 +93,26 @@ module.exports = {
                                                     join forum_test.threads as t on t.SubCategoryId = s2.id
                                                     join forum_test.posts as p on p.ThreadId = t.id
                                             GROUP BY mainSubCategoryId, subCategoryId) as q1 on c.id = q1.mainSubCategoryId and s.id = q1.subCategoryId and p.updatedAt = q1.maxDate 
-                                        GROUP BY subCategoryId
+                                        GROUP BY subCategoryId, mainSubCategoryId, totalPosts, maxDate, threadName, threadId, userName, userId, postId
                                         ) as q2 on q2.mainSubCategoryId = c.id and q2.subCategoryId = s.id
             ORDER BY subCategoryPosition;`
         );
     },
     getThreadsQuery(subcatid) {
         return (
-            `SELECT ANY_VALUE(q1.mainSubCategoryId as mainSubCategoryId,
-                ANY_VALUE(c.name) as mainSubCategoryName, 
-                t.id as ThreadId,
-                ANY_VALUE(t.name) as ThreadName, 
-                ANY_VALUE(t.createdAt) as ThreadMade,
-                ANY_VALUE(q1.totalPosts) as totalPosts, 
-                ANY_VALUE(q1.maxDate) as maxDate, 
-                ANY_VALUE(t.name) as threadName,
-                ANY_VALUE(u.name) as userName, 
-                ANY_VALUE(u.id) as userId,
-                ANY_VALUE(p.id) as postId,
-                ANY_VALUE(u2.id) as creatorId,
-                ANY_VALUE(u2.name) as creatorName
+            `SELECT q1.mainSubCategoryId as mainSubCategoryId,
+                    c.name as mainSubCategoryName, 
+                    t.id as ThreadId,
+                    t.name as ThreadName, 
+                    t.createdAt as ThreadMade,
+                    q1.totalPosts as totalPosts, 
+                    q1.maxDate as maxDate, 
+                    t.name as threadName,
+                    u.name as userName, 
+                    u.id as userId,
+                    p.id as postId,
+                    u2.id as creatorId,
+                    u2.name as creatorName
             FROM    (SELECT * FROM forum_test.subcategories as c WHERE c.id = ${subcatid}) as c
                     join forum_test.threads			as t 	on t.SubCategoryId = c.id
                     join forum_test.posts			as p 	on p.ThreadId = t.id
@@ -128,7 +128,7 @@ module.exports = {
                         GROUP BY mainSubCategoryId, threadId) as q1 on c.id = q1.mainSubCategoryId and t.id = q1.threadId and p.updatedAt = q1.maxDate
                     join forum_test.posts			as p2	on p2.ThreadId = t.id and p2.position = 1
                     join forum_test.users			as u2	on p2.UserId = u2.id
-            GROUP BY ThreadId
+            GROUP BY ThreadId, mainSubCategoryId, mainSubCategoryName, ThreadName, ThreadMade, totalPosts, maxDate, threadName, userName, userId, postId, creatorId, creatorName
             ORDER BY maxDate DESC;`
         );
     },
