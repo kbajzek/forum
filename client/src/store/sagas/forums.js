@@ -170,7 +170,7 @@ export function* fetchUserlistSaga(action) {
 //         name: action.name,
 //         description: action.description,
 //         categoryId: action.categoryId,
-//         subCategoryId: action.subCategoryId
+//         subcategoryId: action.subCategoryId
 //       }
 //     );
 //     if (action.categoryId) {
@@ -190,7 +190,7 @@ export function* fetchUserlistSaga(action) {
 //         name: action.name,
 //         content: action.content,
 //         userId: action.userId,
-//         subCategoryId: action.subCategoryId
+//         subcategoryId: action.subCategoryId
 //       }
 //     );
 //     yield action.history.push("/forums" + response.data.path);
@@ -284,7 +284,7 @@ export function* editMessagePostSaga(action) {
     const response = yield axios.post(
       "/api/forums/messagepost/edit", {
         content: action.content,
-        messagePostId: action.messagePostId,
+        messagepostId: action.messagePostId,
         path: action.path
       }
     );
@@ -300,7 +300,7 @@ export function* deleteMessagePostSaga(action) {
     const response = yield axios.post(
       "/api/forums/messagepost/delete", {
         content: action.content,
-        messagePostId: action.messagePostId,
+        messagepostId: action.messagePostId,
         path: action.path
       }
     );
@@ -317,7 +317,7 @@ export function* deleteMessagePostSaga(action) {
 //       "/api/forums/rating/create", {
 //         userId: action.userId,
 //         postId: action.postId,
-//         ratingTypeId: action.ratingTypeId,
+//         ratingtypeId: action.ratingTypeId,
 //         path: action.path
 //       }
 //     );

@@ -11,40 +11,40 @@ module.exports = {
         });
     },
 
-    createSubCategory(name, description, CategoryId, SubCategoryId) {
+    createSubCategory(name, description, categoryId, subcategoryId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            if (CategoryId) {
-                const {count} = await models.subcategory.findAndCountAll({where: {CategoryId}, transaction: t});
-                return models.subcategory.create({name, description, position: count + 1, CategoryId}, {transaction: t});
+            if (categoryId) {
+                const {count} = await models.subcategory.findAndCountAll({where: {categoryId}, transaction: t});
+                return models.subcategory.create({name, description, position: count + 1, categoryId}, {transaction: t});
             } else {
-                const {count} = await models.subcategory.findAndCountAll({where: {SubCategoryId}, transaction: t});
-                const result = await models.subcategory.findOne({where: {id: SubCategoryId}, transaction: t});
+                const {count} = await models.subcategory.findAndCountAll({where: {subcategoryId}, transaction: t});
+                const result = await models.subcategory.findOne({where: {id: subcategoryId}, transaction: t});
                 let ancestors;
                 if (result.ancestors) {
-                    ancestors = "/" + SubCategoryId + result.ancestors;
+                    ancestors = "/" + subcategoryId + result.ancestors;
                 } else {
-                    ancestors = "/" + SubCategoryId + "/";
+                    ancestors = "/" + subcategoryId + "/";
                 }
-                return models.subcategory.create({name, description, position: count + 1, SubCategoryId, ancestors}, {transaction: t}); 
+                return models.subcategory.create({name, description, position: count + 1, subcategoryId, ancestors}, {transaction: t}); 
             }
         });
     },
 
-    createThread(name, content, UserId, SubCategoryId) {
+    createThread(name, content, userId, subcategoryId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const newThread = await models.thread.create({name, SubCategoryId}, {transaction: t});
-            const newPost = await models.post.create({content, position: 1, ThreadId: newThread.id, UserId}, {transaction: t});
-            const user = await models.user.findOne({where: {id: UserId}, transaction: t});
+            const newThread = await models.thread.create({name, subcategoryId}, {transaction: t});
+            const newPost = await models.post.create({content, position: 1, threadId: newThread.id, userId}, {transaction: t});
+            const user = await models.user.findOne({where: {id: userId}, transaction: t});
             return [newThread, newPost, user];
         });
     },
 
-    createPost(content, UserId, ThreadId) {
+    createPost(content, userId, threadId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const user = await models.user.findOne({where: {id: UserId}, transaction: t});
-            const thread = await models.thread.findOne({where: {id: ThreadId}, transaction: t});
-            const {count} = await models.post.findAndCountAll({where: {ThreadId}, transaction: t});
-            const newPost = await models.post.create({content, position: count + 1, ThreadId, UserId}, {transaction: t});
+            const user = await models.user.findOne({where: {id: userId}, transaction: t});
+            const thread = await models.thread.findOne({where: {id: threadId}, transaction: t});
+            const {count} = await models.post.findAndCountAll({where: {threadId}, transaction: t});
+            const newPost = await models.post.create({content, position: count + 1, threadId, userId}, {transaction: t});
             return {newPost, user, thread};
         });
     },
@@ -52,7 +52,7 @@ module.exports = {
     editPost(updatedContent, postId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
             const post = await models.post.findOne({where: {id: postId}, transaction: t});
-            const thread = models.thread.findOne({where: {id: post.ThreadId}, transaction: t});
+            const thread = await models.thread.findOne({where: {id: post.threadId}, transaction: t});
             const updatedPost = await post.updateAttributes({content: updatedContent}, {transaction: t});
             return {updatedPost, thread};
         });
@@ -62,14 +62,14 @@ module.exports = {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
             const post = await models.post.findOne({where: {id: postId}, transaction: t});
             if(post.position === 1){
-                const thread = await models.thread.findOne({where: {id: post.ThreadId}, transaction: t});
-                const subCategory = await models.subcategory.findOne({where: {id: thread.SubCategoryId}, transaction: t});
-                await models.thread.destroy({where: {id: post.ThreadId}, transaction: t});
+                const thread = await models.thread.findOne({where: {id: post.threadId}, transaction: t});
+                const subCategory = await models.subcategory.findOne({where: {id: thread.subcategoryId}, transaction: t});
+                await models.thread.destroy({where: {id: post.threadId}, transaction: t});
                 return [1, subCategory.id, subCategory.name];
             } else {
-                await models.sequelize.query("UPDATE Posts SET position = position - 1 WHERE position > ? AND ThreadId = ?;" , { replacements: [post.position, post.ThreadId], type: models.Sequelize.QueryTypes.UPDATE, transaction: t});
+                await models.sequelize.query("UPDATE Posts SET position = position - 1 WHERE position > ? AND threadId = ?;" , { replacements: [post.position, post.threadId], type: models.Sequelize.QueryTypes.UPDATE, transaction: t});
                 const post2 = await models.post.findOne({where: {id: postId}, transaction: t});
-                const thread = await models.thread.findOne({where: {id: post2.ThreadId}, transaction: t});
+                const thread = await models.thread.findOne({where: {id: post2.threadId}, transaction: t});
                 await models.post.destroy({where: {id: postId}, transaction: t});
                 return [2, thread.id, thread.name];
             }
@@ -79,45 +79,45 @@ module.exports = {
     createMessage(name, content, members, owner) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
             const newMessage = await models.message.create({name}, {transaction: t});
-            const user = await models.messagemember.create({permission: 2, UserId: owner, MessageId: newMessage.id}, {transaction: t});
+            const user = await models.messagemember.create({permission: 2, userId: owner, messageId: newMessage.id}, {transaction: t});
             await models.sequelize.Promise.map(members, (member) => {
-                return models.messagemember.create({permission: 1, UserId: member, MessageId: newMessage.id}, {transaction: t})
+                return models.messagemember.create({permission: 1, userId: member, messageId: newMessage.id}, {transaction: t})
             });
-            const messagepost = await models.messagepost.create({content, UserId: owner, MessageId: newMessage.id}, {transaction: t});
+            const messagepost = await models.messagepost.create({content, userId: owner, messageId: newMessage.id}, {transaction: t});
             return [newMessage, messagepost, user];
         });
     },
 
-    createMessagePost(content, UserId, MessageId) {
+    createMessagePost(content, userId, messageId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const user = await models.user.findOne({where: {id: UserId}, transaction: t});
-            const members = await models.messagemember.findAll({where: {MessageId: MessageId}, transaction: t});
-            const message = await models.message.findOne({where: {id: MessageId}, transaction: t});
-            const newPost = await models.messagepost.create({content, MessageId, UserId}, {transaction: t});
+            const user = await models.user.findOne({where: {id: userId}, transaction: t});
+            const members = await models.messagemember.findAll({where: {messageId: messageId}, transaction: t});
+            const message = await models.message.findOne({where: {id: messageId}, transaction: t});
+            const newPost = await models.messagepost.create({content, messageId, userId}, {transaction: t});
             return {newPost, user, message, members};                
         });
     },
 
-    editMessagePost(updatedContent, messagePostId) {
+    editMessagePost(updatedContent, messagepostId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const post = await models.messagepost.findOne({where: {id: messagePostId}, transaction: t});
-            const message = await models.message.findOne({where: {id: post.MessageId}, transaction: t});
-            const members = await models.messagemember.findAll({where: {MessageId: post.MessageId}, transaction: t});
+            const post = await models.messagepost.findOne({where: {id: messagepostId}, transaction: t});
+            const message = await models.message.findOne({where: {id: post.messageId}, transaction: t});
+            const members = await models.messagemember.findAll({where: {messageId: post.messageId}, transaction: t});
             const updatedMessagePost = await post.updateAttributes({content: updatedContent}, {transaction: t});
             return {updatedMessagePost, message, members};
         });
     },
 
-    deleteMessagePost(messagePostId) {
+    deleteMessagePost(messagepostId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const post = await models.messagepost.findOne({where: {id: messagePostId}, transaction: t});
-            const message = await models.message.findOne({where: {id: post.MessageId}, transaction: t});
-            const count = await models.messagepost.findAndCountAll({where: {MessageId: post.MessageId}, transaction: t});
+            const post = await models.messagepost.findOne({where: {id: messagepostId}, transaction: t});
+            const message = await models.message.findOne({where: {id: post.messageId}, transaction: t});
+            const count = await models.messagepost.findAndCountAll({where: {messageId: post.messageId}, transaction: t});
             if(count === 1){
-                await models.message.destroy({where: {id: post.MessageId}, transaction: t});
+                await models.message.destroy({where: {id: post.messageId}, transaction: t});
                 return [1];
             } else {
-                await models.messagepost.destroy({where: {id: messagePostId}, transaction: t});
+                await models.messagepost.destroy({where: {id: messagepostId}, transaction: t});
                 return [2, message];
             }
         });
@@ -141,18 +141,18 @@ module.exports = {
         });
     },
 
-    createRating(UserId, PostId, RatingTypeId) {
+    createRating(userId, postId, ratingtypeId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const newRating = await models.rating.create({UserId, PostId, RatingTypeId}, {transaction: t});
-            const post = await models.post.findOne({where: {id: PostId}, transaction: t});
-            return {newRating, threadId: post.ThreadId};
+            const newRating = await models.rating.create({userId, postId, ratingtypeId}, {transaction: t});
+            const post = await models.post.findOne({where: {id: postId}, transaction: t});
+            return {newRating, threadId: post.threadId};
         });
     },
 
-    getUserTotalPosts(UserId) {
+    getUserTotalPosts(userId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
-            const {count} = await models.post.findAndCountAll({where: {UserId}, transaction: t});
-            const user = await models.user.findOne({where: {id: UserId}, transaction: t});
+            const {count} = await models.post.findAndCountAll({where: {userId}, transaction: t});
+            const user = await models.user.findOne({where: {id: userId}, transaction: t});
             return {user, count};
         });
     },
@@ -160,9 +160,9 @@ module.exports = {
     deleteRating(ratingId) {
         return models.sequelize.transaction({isolationLevel: models.Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE}, async (t) => {
             const rating = await models.rating.findOne({where: {id: ratingId}, transaction: t});
-            const post = await models.post.findOne({where: {id: rating.PostId}, transaction: t});
+            const post = await models.post.findOne({where: {id: rating.postId}, transaction: t});
             await models.rating.destroy({where: {id: ratingId}, transaction: t});
-            return post.ThreadId;
+            return post.threadId;
         });
     },
 

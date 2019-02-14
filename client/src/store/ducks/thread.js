@@ -398,7 +398,7 @@ export function* createThreadSaga(action) {
             "/api/forums/thread/create", {
                 name: action.name,
                 content: action.content,
-                subCategoryId: action.subCategoryId
+                subcategoryId: action.subCategoryId
             }
         );
         yield put(createThreadSuccess());
@@ -467,7 +467,7 @@ export function* createRatingSaga(action) {
         const response = yield axios.post(
             "/api/forums/rating/create", {
                 postId: action.postId,
-                ratingTypeId: action.ratingTypeId
+                ratingtypeId: action.ratingTypeId
             }
         );
         yield put(createRatingSuccess());

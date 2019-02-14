@@ -176,7 +176,7 @@ export function* createSubCategorySaga(action) {
           name: action.name,
           description: action.description,
           categoryId: action.categoryId,
-          subCategoryId: action.subCategoryId
+          subcategoryId: action.subCategoryId
         }
       );
       yield put(createSubCategorySuccess());

@@ -225,27 +225,25 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
     app.get('/api/forums', async (req, res) => {
         try {
             const result = await models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT});
-
             let convertedResult = [];
             let currentCatPosition = 0;
-
             result.forEach((row) => {
 
                 let lastUpdated = row.maxDate || 'none';
                 let lastThreadName = row.ThreadName || 'none';
                 let lastUser = row.UserName || 'none';
-                let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
+                let lastActiveThreadPath = row.threadId ? `/thread/${row.threadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
 
                 if (currentCatPosition !== row.categoryPosition) {
                     currentCatPosition = row.categoryPosition;
 
                     let subCategories = [];
 
-                    if (row.subCategoryId) {
+                    if (row.subcategoryId) {
                         subCategories = [{
-                            id: row.subCategoryId,
+                            id: row.subcategoryId,
                             name: row.subCategoryName,
-                            path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                            path: `/${row.subcategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
                             description: row.description,
                             totalPosts: row.totalPosts || 0,
                             lastActiveThread: {
@@ -268,9 +266,9 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     //has to have at least 2 subcategories to get to here
                     convertedResult[convertedResult.length - 1].subCategories.push(
                         {
-                            id: row.subCategoryId,
+                            id: row.subcategoryId,
                             name: row.subCategoryName,
-                            path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                            path: `/${row.subcategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
                             description: row.description,
                             totalPosts: row.totalPosts || 0,
                             lastActiveThread: {
@@ -323,13 +321,13 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 let lastUpdated = row.maxDate || 'none';
                 let lastThreadName = row.ThreadName || 'none';
                 let lastUser = row.UserName || 'none';
-                let lastActiveThreadPath = row.ThreadId ? `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
+                let lastActiveThreadPath = row.threadId ? `/thread/${row.threadId}/${slugify(row.ThreadName).toLowerCase()}#${row.postId}` : 'none';
 
                 convertedResult.push(
                     {
-                        id: row.subCategoryId,
+                        id: row.subcategoryId,
                         name: row.subCategoryName,
-                        path: `/${row.subCategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
+                        path: `/${row.subcategoryId}/${slugify(row.subCategoryName).toLowerCase()}`, 
                         description: row.description,
                         totalPosts: row.totalPosts || 0,
                         lastActiveThread: {
@@ -345,8 +343,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
             result2.forEach((row) => {
                 convertedResult2.push(
                     {
-                        id: row.ThreadId,
-                        path: `/thread/${row.ThreadId}/${slugify(row.ThreadName).toLowerCase()}`,
+                        id: row.threadId,
+                        path: `/thread/${row.threadId}/${slugify(row.ThreadName).toLowerCase()}`,
                         name: row.ThreadName,
                         creator: row.creatorName,
                         createdOn: row.ThreadMade,
@@ -386,7 +384,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
             let convertedPosts = [];
             let currentPostPosition = 0;
-            let currentRatingTypeId = 0;
+            let currentratingtypeId = 0;
 
             result.forEach((row) => {
 
@@ -399,8 +397,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                             {
                                 userName: row.ratingUserName, 
                                 ratingId: row.ratingId, 
-                                userId: row.ratingUserId, 
-                                path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
+                                userId: row.ratinguserId, 
+                                path: `/user/${row.ratinguserId}/${slugify(row.ratingUserName).toLowerCase()}`
                             }
                         ]
                     };
@@ -427,13 +425,13 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
                     if (rating) {
                         // add a new rating, reset current rating placeholder
-                        currentRatingTypeId = row.ratingTypeId;
+                        currentratingtypeId = row.ratingtypeId;
                         convertedPosts[convertedPosts.length - 1].ratings.push(rating);
                     }
                 } else {
                     //there has to be at least 1 rating to get to here, and user has to exist
-                    if (currentRatingTypeId !== row.ratingTypeId) {
-                        currentRatingTypeId = row.ratingTypeId;
+                    if (currentratingtypeId !== row.ratingtypeId) {
+                        currentratingtypeId = row.ratingtypeId;
                         // another rating type
                         convertedPosts[convertedPosts.length - 1].ratings.push(rating);
                     } else {
@@ -442,8 +440,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                         convertedPosts[convertedPosts.length - 1].ratings[lastRating].users.push({
                             userName: row.ratingUserName, 
                             ratingId: row.ratingId, 
-                            userId: row.ratingUserId, 
-                            path: `/user/${row.ratingUserId}/${slugify(row.ratingUserName).toLowerCase()}`
+                            userId: row.ratinguserId, 
+                            path: `/user/${row.ratinguserId}/${slugify(row.ratingUserName).toLowerCase()}`
                         });
                     }
                 }
@@ -498,7 +496,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                         content: row.postContent,
                         createdAt: row.postCreatedAt,
                         threadName: row.threadName,
-                        path: `/thread/${row.postThreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
+                        path: `/thread/${row.postthreadId}/${slugify(row.threadName).toLowerCase()}#${row.postId}`
                     }
                 );
                 
@@ -578,7 +576,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
                 convertedMessagePosts.push(
                     {
-                        id: row.messagePostId,
+                        id: row.messagepostId,
                         content: row.messagePostContent,
                         creatorId: row.messageCreatorId,
                         creatorName: row.messageCreatorName,
@@ -658,7 +656,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     app.post('/api/forums/subcategory/create', requireCSRF, requireLogin, async (req, res) => {
         try{
-            const newSubCategory = await controllers.createSubCategory(req.body.name, req.body.description, req.body.categoryId, req.body.subCategoryId);
+            const newSubCategory = await controllers.createSubCategory(req.body.name, req.body.description, req.body.categoryId, req.body.subcategoryId);
             res.send({
                 id: newSubCategory.id,
                 path: `/${newSubCategory.id}/${slugify(newSubCategory.name).toLowerCase()}`
@@ -670,7 +668,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     app.post('/api/forums/thread/create', requireCSRF, requireLogin, async (req, res) => {
         try{
-            const result = await controllers.createThread(req.body.name, req.body.content, req.session.passport.user, req.body.subCategoryId);
+            const result = await controllers.createThread(req.body.name, req.body.content, req.session.passport.user, req.body.subcategoryId);
             res.send({
                 threadId: result[0].id,
                 postId: result[1].id,
@@ -736,7 +734,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
             const result = await controllers.createMessage(req.body.name, req.body.content, members, req.session.passport.user);
             res.send({
                 message: result[0].id,
-                messagePostId: result[1].id,
+                messagepostId: result[1].id,
                 path: `/message/${result[0].id}/${slugify(result[0].name).toLowerCase()}`,
                 createdOn: result[0].createdAt,
                 lastUpdated: result[1].updatedAt
@@ -750,8 +748,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
         try{
             const {newPost, user, message, members} = await controllers.createMessagePost(req.body.content, req.session.passport.user, req.body.messageId);
             members.forEach((member) => {
-                if(member.UserId !== req.session.passport.user){
-                    const socketID = ioUsers.get(member.UserId);
+                if(member.userId !== req.session.passport.user){
+                    const socketID = ioUsers.get(member.userId);
                     if(socketID && socketID !== undefined){
                         io.to(socketID).emit('messages.update', req.body.messageId);
                     }
@@ -771,9 +769,9 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     app.post('/api/forums/messagepost/edit', requireCSRF, requireLogin, async (req, res) => {
         try{
-            const {updatedMessagePost, message} = await controllers.editMessagePost(req.body.content, req.body.messagePostId);
+            const {updatedMessagePost, message} = await controllers.editMessagePost(req.body.content, req.body.messagepostId);
             res.send({
-                messagePostId: updatedMessagePost.id,
+                messagepostId: updatedMessagePost.id,
                 path: `/message/${message.id}/${slugify(message.name).toLowerCase()}`,
             });
         }catch(err){
@@ -783,7 +781,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     app.post('/api/forums/messagepost/delete', requireCSRF, requireLogin, async (req, res) => {
         try{
-            const response = await controllers.deleteMessagePost(req.body.messagePostId); //response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
+            const response = await controllers.deleteMessagePost(req.body.messagepostId); //response = 1: post position was #1, thread deleted; response = 2: post deleted and positions updated
             let path;
             if(response[0] === 1){
                 path = `/message`
@@ -816,7 +814,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     app.post('/api/forums/rating/create', requireCSRF, requireLogin, checkCanRate, async (req, res) => {
         try{
-            const {newRating, threadId} = await controllers.createRating(req.session.passport.user, req.body.postId, req.body.ratingTypeId);
+            const {newRating, threadId} = await controllers.createRating(req.session.passport.user, req.body.postId, req.body.ratingtypeId);
             res.send({ratingId: newRating, threadId: threadId});
         }catch(err){
             res.status(500).send({ error: 'Something failed!' });

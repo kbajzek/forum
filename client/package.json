@@ -2,26 +2,16 @@
   "name": "forum",
   "version": "0.1.0",
   "private": true,
-  "proxy": {
-    "/auth/steam": {
-      "target": "http://localhost:5000"
-    },
-    "/api/*": {
-      "target": "http://localhost:5000"
-    },
-    "/socket.io/*": {
-      "target": "http://localhost:5000"
-    }
-  },
   "dependencies": {
     "axios": "^0.18.0",
+    "http-proxy-middleware": "^0.19.1",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-flip-move": "^3.0.2",
     "react-highlight": "^0.12.0",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.2.2",
-    "react-scripts-cssmodules": "1.0.171",
+    "react-scripts": "^2.1.5",
     "react-scrollable-anchor": "^0.6.1",
     "react-select": "^1.2.1",
     "react-transition-group": "^2.3.1",
@@ -37,5 +27,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
