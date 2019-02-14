@@ -89,16 +89,12 @@ class Forums extends Component {
     };
 
     onExit = () => {
-        this.props.populateNewData();
+        this.props.waitOnExitingPage(true);
+        this.props.hidePage(true);
     }
 
     onExited = () => {
-        this.props.populateNewDataReady();
-        window.scrollTo(0,0);
-    }
-
-    onExited2 = () => {
-        this.props.onFadeout();
+        this.props.waitOnExitingPage(false);
         window.scrollTo(0,0);
     }
 
@@ -387,7 +383,7 @@ class Forums extends Component {
         const duration = 400;
         let opac = 1;
         let vis = 'visible';
-        if(this.props.hidePage){
+        if(this.props.hidePageState){
             opac = 0;
             vis = 'hidden';
         }
@@ -399,7 +395,7 @@ class Forums extends Component {
             exited:   { opacity: 0, transition: `opacity ${duration}ms` }
         };
 
-        const fadeStyle = { opacity: `${this.props.fadeout ? 0 : 1}`, transition: `opacity ${duration}ms`, visibility: 'visible' };
+        const fadeStyle = { opacity: `${this.props.hidePageState ? 0 : 1}`, transition: `opacity ${duration}ms`, visibility: 'visible' };
 
         const defaultStyle = {
             transition: `opacity ${duration}ms`,
@@ -407,7 +403,8 @@ class Forums extends Component {
             position: 'relative'
         }
 
-        const locationKey = this.props.location.pathname;
+        let locationKey = this.props.location.pathname;
+        locationKey = locationKey.match(/^\/forums\/message/) ? "/forums/message" : locationKey;
 
         return (
             <div>
@@ -438,8 +435,7 @@ class Forums extends Component {
 
 const mapStateToProps = state => {
     return {
-        hidePage: state.forums.hidePage,
-        fadeout: state.forums.fadeout,
+        hidePageState: state.forums.hidePage,
         postValues: getFormValues('postForm')(state),
         categoryData: state.category,
         subCategoryData: state.subCategory,
@@ -461,10 +457,10 @@ const mapDispatchToProps = (dispatch) => {
         onDeletePost: (postId, history) => dispatch(threadActions.deletePostBegin(postId, history)),
         onDeleteMessagePost: (messagePostId, path, history) => dispatch(actions.deleteMessagePost(messagePostId, path, history)),
         fetchUser: () => dispatch(actions.fetchUserInit()),
-        populateNewData: () => dispatch(actions.populateNewData(true)),
-        populateNewDataReady: () => dispatch(actions.populateNewDataReady()),
+        waitOnExitingPage: (flag) => dispatch(actions.waitOnExitingPage(flag)),
+        hidePage: (flag) => dispatch(actions.hidePage(flag)),
 	}
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Forums));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Forums));

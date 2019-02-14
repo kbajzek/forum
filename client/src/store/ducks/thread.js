@@ -381,14 +381,14 @@ export function* fetchThreadDataSaga(action) {
             "/api/forums/thread/" + action.threadId
         );
         const state = yield select();
-        if(state.forums.populateNewData){
-            yield take(actionTypes.POPULATE_NEW_DATA_READY);
+        if(state.forums.waitOnExitingPage){
+            yield take(actionTypes.WAIT_ON_EXITING_PAGE);
         }
         yield put(fetchThreadDataSuccess(response.data));
-        yield put(actions.populateNewDataShow());
+        yield put(actions.hidePage(false));
     } catch (error) {
         yield put(fetchThreadDataFailed(error.response.data));
-        yield put(actions.populateNewDataShow());
+        yield put(actions.hidePage(false));
     }
 }
 

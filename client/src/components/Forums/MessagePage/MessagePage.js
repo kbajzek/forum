@@ -26,7 +26,7 @@ class MessagePage extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if(this.props.location !== prevProps.location && this.props.history.action === 'POP'){
+        if(this.props.location.pathname !== prevProps.location.pathname && (this.props.history.action === 'POP' || this.props.location.pathname === "/forums/message" )){
             if(this.props.id){
                 this.props.onInitMessageData("/message/" + this.props.id + "/" + this.props.slug);
             }else{
@@ -174,4 +174,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(MessagePage));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(MessagePage));

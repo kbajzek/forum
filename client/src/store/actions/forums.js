@@ -483,29 +483,17 @@ export const setMessageSidebarState = (state) => {
     };
 };
 
-export const populateNewData = (flag) => {
+export const waitOnExitingPage = (flag) => {
     return {
-        type: actionTypes.POPULATE_NEW_DATA,
-        flag: flag
+        type: actionTypes.WAIT_ON_EXITING_PAGE,
+        flag
     };
 };
 
-export const populateNewDataReady = () => {
+export const hidePage = (flag) => {
     return {
-        type: actionTypes.POPULATE_NEW_DATA_READY
-    };
-};
-
-export const populateNewDataShow = () => {
-    return {
-        type: actionTypes.POPULATE_NEW_DATA_SHOW
-    };
-};
-
-export const fadeout = (fadeout) => {
-    return {
-        type: actionTypes.FADEOUT,
-        fadeout
+        type: actionTypes.HIDE_PAGE,
+        flag
     };
 };
 

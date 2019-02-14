@@ -188,10 +188,10 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(
     reduxForm({
         values: {members: []},
         destroyOnUnmount: false,
         form: 'postForm'
-    })(withRouter(PostForm))
+    })(PostForm))
 );

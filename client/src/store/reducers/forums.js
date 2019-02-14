@@ -14,9 +14,8 @@ const initialState = {
     error: false,
     noRefreshFlag: false,
     messageSidebarState: 1,
-    populateNewData: false,
+    waitOnExitingPage: false,
     hidePage: false,
-    fadeout: false,
 };
 
 // const setCategoryData = (state, action) => {
@@ -313,35 +312,18 @@ const setMessageSidebarState = (state, action) => {
     return updatedState;
 }
 
-const populateNewData = (state, action) => {
+const waitOnExitingPage = (state, action) => {
     const updatedState = {
         ...state,
-        populateNewData: action.flag,
-        hidePage: true,
+        waitOnExitingPage: action.flag,
     }
     return updatedState;
 }
 
-const populateNewDataReady = (state, action) => {
+const hidePage = (state, action) => {
     const updatedState = {
         ...state,
-        populateNewData: false,
-    }
-    return updatedState;
-}
-
-const populateNewDataShow = (state, action) => {
-    const updatedState = {
-        ...state,
-        hidePage: false,
-    }
-    return updatedState;
-}
-
-const fadeout = (state, action) => {
-    const updatedState = {
-        ...state,
-        fadeout: action.fadeout
+        hidePage: action.flag,
     }
     return updatedState;
 }
@@ -393,10 +375,8 @@ const reducer = ( state = initialState, action ) => {
         case actionTypes.SET_NO_REFRESH_FLAG: return setNoRefreshFlag(state, action);
         case actionTypes.SET_MESSAGE_SIDEBAR_STATE: return setMessageSidebarState(state, action);
 
-        case actionTypes.POPULATE_NEW_DATA: return populateNewData(state, action);
-        case actionTypes.POPULATE_NEW_DATA_READY: return populateNewDataReady(state, action);
-        case actionTypes.POPULATE_NEW_DATA_SHOW: return populateNewDataShow(state, action);
-        case actionTypes.FADEOUT: return fadeout(state, action);
+        case actionTypes.WAIT_ON_EXITING_PAGE: return waitOnExitingPage(state, action);
+        case actionTypes.HIDE_PAGE: return hidePage(state, action);
 
         default: return state;
     }

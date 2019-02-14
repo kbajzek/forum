@@ -158,14 +158,14 @@ export function* fetchSubCategoryDataSaga(action) {
             "/api/forums/subcategory/" + action.subCategoryId
         );
         const state = yield select();
-        if(state.forums.populateNewData){
-            yield take(actionTypes.POPULATE_NEW_DATA_READY);
+        if(state.forums.waitOnExitingPage){
+            yield take(actionTypes.WAIT_ON_EXITING_PAGE);
         }
         yield put(fetchSubCategoryDataSuccess(response.data));
-        yield put(actions.populateNewDataShow());
+        yield put(actions.hidePage(false));
     } catch (error) {
         yield put(fetchSubCategoryDataFailed(error.response.data));
-        yield put(actions.populateNewDataShow());
+        yield put(actions.hidePage(false));
     }
 }
 

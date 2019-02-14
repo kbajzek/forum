@@ -19,14 +19,17 @@ class Layout extends Component {
 
     onForumNavClicked = () => {
         if(this.props.location.pathname === "/forums"){
-            this.props.fadeout();
+            this.props.hidePage(true);
             this.props.onInitCategoryData();
         }
     }
 
     onForumMessageClicked = () => {
-        this.props.onInitMessageData("/message");
-        this.props.setMessageSidebarState(1);
+        if(this.props.location.pathname === "/forums/message"){
+            this.props.hidePage(true);
+            this.props.onInitMessageData("/message");
+            this.props.setMessageSidebarState(1);
+        }
     }
 
     sideDrawerClosedHandler = () => {
@@ -122,8 +125,8 @@ const mapDispatchToProps = dispatch => {
         onInitMessageData: (path) => dispatch(actions.initMessageData(path)),
         setMessageSidebarState: (state) => dispatch(actions.setMessageSidebarState(state)),
         onLogout: () => dispatch(actions.logoutUserInit()),
-        fadeout: () => dispatch(actions.fadeout(true)),
+        hidePage: (flag) => dispatch(actions.hidePage(flag)),
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Layout));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Layout));

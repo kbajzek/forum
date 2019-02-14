@@ -3,6 +3,7 @@
     padding: 1rem;
     background-color: lightblue;
     align-items: center;
+    font-size: 1rem;
 }
 
 .SubCategory:not(:last-child) {

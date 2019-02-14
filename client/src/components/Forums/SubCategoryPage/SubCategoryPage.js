@@ -135,4 +135,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(SubCategoryPage));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SubCategoryPage));

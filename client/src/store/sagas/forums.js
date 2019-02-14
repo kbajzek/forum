@@ -1,9 +1,10 @@
-import { put } from "redux-saga/effects";
+import { put, take, select } from "redux-saga/effects";
 
 import axios from "../../axios-forums";
 
 import * as threadActions from '../ducks/thread';
 import * as actions from "../actions";
+import * as actionTypes from '../actions/actionTypes';
 
 // export function* initCategoryDataSaga(action) {
 //   try {
@@ -99,13 +100,19 @@ export function* refreshUserDataSaga(action) {
 
 export function* initMessageDataSaga(action) {
   try {
-    yield put(actions.setMessageData(null));
+    // yield put(actions.setMessageData(null));
     const response = yield axios.get(
       "/api/forums" + action.path
     );
+    const state = yield select();
+    if (state.forums.waitOnExitingPage) {
+      yield take(actionTypes.WAIT_ON_EXITING_PAGE);
+    }
     yield put(actions.setMessageData(response.data));
+    yield put(actions.hidePage(false));
   } catch (error) {
     yield put(actions.initMessageDataFailed(error.response.data));
+    yield put(actions.hidePage(false));
   }
 }
 
@@ -122,9 +129,9 @@ export function* refreshMessageDataSaga(action) {
 
 export function* selectMessageDataSaga(action) {
   try {
-    if(action.history){
+    if (action.history) {
       yield action.history.push("/forums" + action.path);
-      yield put(actions.setMessagePostData(null));
+      //yield put(actions.setMessagePostData(null));
     }
     const response = yield axios.get(
       "/api/forums" + action.path
