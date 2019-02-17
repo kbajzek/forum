@@ -225,6 +225,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
     app.get('/api/forums', async (req, res) => {
         try {
             const result = await models.sequelize.query(queries.getCategoriesQuery(), { type: models.Sequelize.QueryTypes.SELECT});
+            console.log(result)
             let convertedResult = [];
             let currentCatPosition = 0;
             result.forEach((row) => {

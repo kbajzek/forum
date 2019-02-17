@@ -51,7 +51,7 @@ module.exports = {
                                         join forum_test.threads as t on t.subcategoryId = s2.id
                                         join forum_test.posts as p on p.threadId = t.id
                                         join forum_test.users as u on p.userId = u.id
-                                GROUP BY categoryId, subcategoryId, threadId, threadName, userId, userName, postDate
+                                GROUP BY categoryId, subcategoryId
                             ) as q2 on q1.categoryId = q2.categoryId and q1.subcategoryId = q2.subcategoryId and q1.maxDate = q2.postDate
                         ) as q3 on q3.categoryId = c.id and q3.subcategoryId = s.id
             ORDER BY categoryPosition, subCategoryPosition;`
@@ -108,7 +108,7 @@ module.exports = {
                                         join forum_test.threads as t on t.subcategoryId = s2.id
                                         join forum_test.posts as p on p.threadId = t.id
                                         join forum_test.users as u on p.userId = u.id
-                                GROUP BY mainsubcategoryId, subcategoryId, threadId, threadName, userId, userName, postDate
+                                GROUP BY mainsubcategoryId, subcategoryId
                             ) as q2 on q1.mainsubcategoryId = q2.mainsubcategoryId and q1.subcategoryId = q2.subcategoryId and q1.maxDate = q2.postDate
                         ) as q3 on q3.mainsubcategoryId = c.id and q3.subcategoryId = s.id
             ORDER BY subCategoryPosition;`
@@ -142,7 +142,7 @@ module.exports = {
                             join forum_test.threads as t on t.subcategoryId = c.id
                             join forum_test.posts as p on p.threadId = t.id
                             join forum_test.users as u on p.userId = u.id
-                    GROUP BY mainsubcategoryId, mainSubCategoryName, threadId, ThreadName, ThreadMade, postDate, userId, userName
+                    GROUP BY mainsubcategoryId, threadId
                 ) as q1
             join (  SELECT  c.id as mainsubcategoryId,
                             t.id as threadId,
