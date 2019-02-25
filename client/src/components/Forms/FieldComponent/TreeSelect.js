@@ -11,8 +11,19 @@ class TreeSelect extends Component {
     }
 
     render(){
+        let tree = <div>loading...</div>;
+        if(!this.props.loading){
+            tree = this.props.treeHierarchyData.map(elt => {
+                return (
+                    <div
+                        key={elt.categoryId}>
+                        {elt.categoryName}
+                    </div>
+                );
+            });
+        }
         return(
-            <div>hi</div>
+            <div>{tree}</div>
         )
     }
 }
