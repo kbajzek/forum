@@ -267,5 +267,62 @@ module.exports = {
             WHERE mm.messageId = ${messageId}
             ORDER BY memberPermission DESC, userName ASC;`
         );
+    },
+    getCatHierarchy() {
+        return (
+            `SELECT id as categoryId,
+                    name as categoryName
+            FROM forum_test.categories
+            ORDER BY position;`
+        );
+    },
+    getSubcatHierarchy(threadId) {
+        return (
+              `(SELECT  s2.id as subcategoryId,
+                        s2.name as subcategoryName,
+                        s2.subcategoryId as parentSubcategoryId,
+                        s2.categoryId as parentCategoryId,
+                        s2.ancestors as ancestors,
+                        s2.position as position,
+                        1 as expanded
+                FROM forum_test.subcategories as s
+                join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
+                join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id))
+                UNION
+                (SELECT  s2.id as subcategoryId,
+                        s2.name as subcategoryName,
+                        s2.subcategoryId as parentSubcategoryId,
+                        s2.categoryId as parentCategoryId,
+                        s2.ancestors as ancestors,
+                        s2.position as position,
+                        0 as expanded
+                FROM forum_test.subcategories as s
+                join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
+                join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.subcategoryId, "/%") or s.id = s2.subcategoryId)
+                or s2.categoryId IN (SELECT  s2.categoryId
+                                    FROM forum_test.subcategories as s
+                                    join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
+                                    join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id) and s2.categoryId IS NOT NULL)
+                )
+                and not ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id))
+                ORDER BY CHAR_LENGTH(ancestors), position`
+        );
+    },
+    getChildThreadHierarchy(threadId) {
+        return (
+            `SELECT  t2.id as threadId,
+                    t2.name as threadName,
+                    t2.subcategoryId as parentSubcategoryId
+            FROM forum_test.subcategories as s
+            join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
+            join forum_test.threads as t2 on (s.ancestors like CONCAT("%/", t2.subcategoryId, "/%") or s.id = t2.subcategoryId)
+            join forum_test.subcategories as s2 on s2.id = t2.subcategoryId
+            join (  SELECT  max(updatedAt) as maxDate,
+                            threadId
+                    FROM 	forum_test.posts
+                    GROUP BY threadId
+                ) as q1 on t2.id = q1.threadId
+            ORDER BY CHAR_LENGTH(s2.ancestors), q1.maxDate DESC;`
+        );
     }
 }

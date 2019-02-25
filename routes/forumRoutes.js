@@ -643,6 +643,78 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
         }
     });
 
+    app.get('/api/forums/treelist/:id', async (req, res) => {
+        try{
+            let threadId = Number(req.params.id);
+
+            const cat = await models.sequelize.query(queries.getCatHierarchy(), { type: models.Sequelize.QueryTypes.SELECT});
+            const subcat = await models.sequelize.query(queries.getSubcatHierarchy(threadId), { type: models.Sequelize.QueryTypes.SELECT});
+            const childThread = await models.sequelize.query(queries.getChildThreadHierarchy(threadId), { type: models.Sequelize.QueryTypes.SELECT});
+
+            let subcatPlace = 0;
+            let childThreadPlace = 0;
+
+            let finalTree = cat.map(category => {
+                let subcatChildren = [];
+                let threadChildren = [];
+                let subcatRef = null;
+                while(subcatPlace < subcat.length && subcat[subcatPlace].parentCategoryId === category.categoryId){
+                    const subcatChild = {
+                        subcategoryId: subcat[subcatPlace].subcategoryId,
+                        subcategoryName: subcat[subcatPlace].subcategoryName,
+                        subcatChildren: [],
+                        threadChildren: [],
+                        expanded: !!subcat[subcatPlace].expanded,
+                    }
+                    subcatChildren.push(subcatChild);
+                    if(!!subcat[subcatPlace].expanded){
+                        subcatRef = subcatChild;
+                    }
+                    subcatPlace++;
+                }
+                while(subcatPlace < subcat.length){
+                    let tempSubcatRef = null;
+                    while(subcatPlace < subcat.length && subcat[subcatPlace].parentSubcategoryId === subcatRef.subcategoryId){
+                        const subcatChild = {
+                            subcategoryId: subcat[subcatPlace].subcategoryId,
+                            subcategoryName: subcat[subcatPlace].subcategoryName,
+                            subcatChildren: [],
+                            threadChildren: [],
+                            expanded: !!subcat[subcatPlace].expanded,
+                        }
+                        subcatRef.subcatChildren.push(subcatChild);
+                        if(!!subcat[subcatPlace].expanded){
+                            tempSubcatRef = subcatChild;
+                        }
+                        subcatPlace++;
+                    }
+                    while(childThreadPlace < childThread.length && childThread[childThreadPlace].parentSubcategoryId === subcatRef.subcategoryId){
+                        const threadChild = {
+                            threadId: childThread[childThreadPlace].threadId,
+                            threadName: childThread[childThreadPlace].threadName,
+                        }
+                        subcatRef.threadChildren.push(threadChild);
+                        childThreadPlace++;
+                    }
+                    subcatRef = tempSubcatRef;
+                }
+                return {
+                    categoryId: category.categoryId,
+                    categoryName: category.categoryName,
+                    subcatChildren,
+                    threadChildren
+                }
+            });
+
+            // console.log(JSON.stringify(finalTree, null, 2))
+
+            res.send({tree: finalTree});
+        }catch(err){
+            console.log(err)
+            res.status(500).send({ error: 'Something failed!' })
+        }
+    });
+
     app.post('/api/forums/category/create', requireCSRF, requireLogin, async (req, res) => {
         try{
             const newCategory = await controllers.createCategory(req.body.name);
