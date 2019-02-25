@@ -710,7 +710,6 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
             res.send({tree: finalTree});
         }catch(err){
-            console.log(err)
             res.status(500).send({ error: 'Something failed!' })
         }
     });

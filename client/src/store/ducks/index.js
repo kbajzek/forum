@@ -14,6 +14,8 @@ import subCategoryReducer from "./subCategory";
 import {watchSubCategory} from "./subCategory";
 import threadReducer from "./thread";
 import {watchThread} from "./thread";
+import treeHierarchyReducer from "./treeHierarchy";
+import {watchTreeHierarchy} from "./treeHierarchy";
 
 const composeEnhancers =
 (process.env.NODE_ENV === "development"
@@ -28,6 +30,7 @@ const rootReducer = combineReducers({
   category: categoryReducer,
   subCategory: subCategoryReducer,
   thread: threadReducer,
+  treeHierarchy: treeHierarchyReducer,
 });
 
 const sagaMiddleware = createSagaMiddleware();
@@ -44,5 +47,6 @@ sagaMiddleware.run(watchSockets);
 sagaMiddleware.run(watchCategory);
 sagaMiddleware.run(watchSubCategory);
 sagaMiddleware.run(watchThread);
+sagaMiddleware.run(watchTreeHierarchy);
 
 export default store;

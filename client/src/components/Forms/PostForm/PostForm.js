@@ -7,6 +7,7 @@ import * as threadActions from '../../../store/ducks/thread';
 import * as actions from '../../../store/actions';
 import FieldComponent from '../FieldComponent/FieldComponent';
 import MultiSelect from '../FieldComponent/MultiSelect';
+import TreeSelect from '../FieldComponent/TreeSelect';
 
 const CREATE_THREAD = 1;
 const CREATE_POST = 2;
@@ -98,7 +99,7 @@ class PostForm extends Component {
                     <Field
                         key='threadId'
                         name='threadId'
-                        component={FieldComponent}
+                        component={TreeSelect}
                         type='text'
                         validate={this.validate}/>
                 );
