@@ -650,6 +650,9 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
             const cat = await models.sequelize.query(queries.getCatHierarchy(), { type: models.Sequelize.QueryTypes.SELECT});
             const subcat = await models.sequelize.query(queries.getSubcatHierarchy(threadId), { type: models.Sequelize.QueryTypes.SELECT});
             const childThread = await models.sequelize.query(queries.getChildThreadHierarchy(threadId), { type: models.Sequelize.QueryTypes.SELECT});
+            // console.log(cat);
+            // console.log(subcat);
+            // console.log(childThread);
 
             let subcatPlace = 0;
             let childThreadPlace = 0;
@@ -672,7 +675,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     }
                     subcatPlace++;
                 }
-                while(subcatPlace < subcat.length){
+                while(subcatPlace < subcat.length || childThreadPlace < childThread.length){
                     let tempSubcatRef = null;
                     while(subcatPlace < subcat.length && subcat[subcatPlace].parentSubcategoryId === subcatRef.subcategoryId){
                         const subcatChild = {
@@ -702,7 +705,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     categoryId: category.categoryId,
                     categoryName: category.categoryName,
                     subcatChildren,
-                    threadChildren
+                    threadChildren,
+                    expanded: subcatChildren.length > 0 | threadChildren.length > 0
                 }
             });
 
