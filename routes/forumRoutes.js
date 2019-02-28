@@ -668,6 +668,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                         subcatChildren: [],
                         threadChildren: [],
                         expanded: !!subcat[subcatPlace].expanded,
+                        loaded: !!subcat[subcatPlace].expanded,
+                        fullAncestry: subcat[subcatPlace].fullAncestry,
                     }
                     subcatChildren.push(subcatChild);
                     if(!!subcat[subcatPlace].expanded){
@@ -684,6 +686,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                             subcatChildren: [],
                             threadChildren: [],
                             expanded: !!subcat[subcatPlace].expanded,
+                            loaded: !!subcat[subcatPlace].expanded,
+                            fullAncestry: subcat[subcatPlace].fullAncestry,
                         }
                         subcatRef.subcatChildren.push(subcatChild);
                         if(!!subcat[subcatPlace].expanded){
@@ -705,14 +709,57 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     categoryId: category.categoryId,
                     categoryName: category.categoryName,
                     subcatChildren,
-                    threadChildren,
-                    expanded: subcatChildren.length > 0 | threadChildren.length > 0
+                    threadChildren, //this isnt populated, remove?
+                    expanded: subcatChildren.length > 0 | threadChildren.length > 0,
+                    loaded: subcatChildren.length > 0 | threadChildren.length > 0,
                 }
             });
 
             // console.log(JSON.stringify(finalTree, null, 2))
 
             res.send({tree: finalTree});
+        }catch(err){
+            res.status(500).send({ error: 'Something failed!' })
+        }
+    });
+
+    app.get('/api/forums/treesingle/:type/:id', async (req, res) => {
+        try{
+            let type = req.params.type === 'category' ? 1 : 2; // either category or subcategory
+            let component = Number(req.params.id);
+
+            let subcat;
+            let thread;
+            if(type === 1){
+                subcat = await models.sequelize.query(queries.getCatHierarchy_SubcatChildren(component), { type: models.Sequelize.QueryTypes.SELECT});
+            }else{
+                subcat = await models.sequelize.query(queries.getSubcatHierarchy_SubcatChildren(component), { type: models.Sequelize.QueryTypes.SELECT});
+                thread = await models.sequelize.query(queries.getSubcatHierarchy_ThreadChildren(component), { type: models.Sequelize.QueryTypes.SELECT});
+            }
+
+            let subcatChildren = subcat.map(subcat => {
+                return {
+                    subcategoryId: subcat.subcategoryId,
+                    subcategoryName: subcat.subcategoryName,
+                    subcatChildren: [],
+                    threadChildren: [],
+                    expanded: false,
+                    loaded: false,
+                    fullAncestry: subcat.fullAncestry,
+                };
+            });
+
+            let threadChildren = thread && thread.map(thread => {
+                return {
+                    threadId: thread.threadId,
+                    threadName: thread.threadName
+                };
+            });
+
+            res.send({
+                subcatChildren,
+                threadChildren
+            });
         }catch(err){
             res.status(500).send({ error: 'Something failed!' })
         }

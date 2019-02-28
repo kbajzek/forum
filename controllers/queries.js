@@ -276,6 +276,42 @@ module.exports = {
             ORDER BY position;`
         );
     },
+    getCatHierarchy_SubcatChildren(categoryId) {
+        return (
+            `SELECT id as subcategoryId,
+                    name as subcategoryName,
+                    ancestors,
+                    CONCAT("/", categoryId, "/") as fullAncestry
+            FROM 	forum_test.subcategories
+            WHERE 	categoryId = ${categoryId}
+            ORDER BY position;`
+        );
+    },
+    getSubcatHierarchy_SubcatChildren(subcategoryId) {
+        return (
+            `SELECT s.id as subcategoryId,
+                    s.name as subcategoryName,
+                    s.ancestors as ancestors,
+                    CONCAT(IFNULL(s.ancestors,"/"), s2.categoryId, "/") as fullAncestry
+            FROM 	forum_test.subcategories as s
+            join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/")) or (s.ancestors is null and s.id = s2.id))
+            WHERE 	s.subcategoryId = ${subcategoryId}
+            ORDER BY s.position;`
+        );
+    },
+    getSubcatHierarchy_ThreadChildren(subcategoryId) {
+        return (
+            `SELECT t.id as threadId,
+                    t.name as threadName
+            FROM 	forum_test.threads as t
+            join (  SELECT  max(updatedAt) as maxDate,
+                            threadId
+                    FROM 	forum_test.posts
+                    GROUP BY threadId
+                ) as q1 on t.id = q1.threadId and t.subcategoryId = ${subcategoryId}
+            ORDER BY q1.maxDate;`
+        );
+    },
     getSubcatHierarchy(threadId) {
         return (
               `(SELECT  s2.id as subcategoryId,
@@ -284,10 +320,12 @@ module.exports = {
                         s2.categoryId as parentCategoryId,
                         s2.ancestors as ancestors,
                         s2.position as position,
-                        1 as expanded
+                        1 as expanded,
+                        CONCAT(IFNULL(s2.ancestors,"/"), s3.categoryId, "/") as fullAncestry
                 FROM forum_test.subcategories as s
                 join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
-                join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id))
+                join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id)
+                join forum_test.subcategories as s3 on ((s2.ancestors like CONCAT("%/", s3.id, "/")) or (s2.ancestors is null and s2.id = s3.id)))
                 UNION
                 (SELECT  s2.id as subcategoryId,
                         s2.name as subcategoryName,
@@ -295,7 +333,8 @@ module.exports = {
                         s2.categoryId as parentCategoryId,
                         s2.ancestors as ancestors,
                         s2.position as position,
-                        0 as expanded
+                        0 as expanded,
+                        CONCAT(IFNULL(s2.ancestors,"/"), s3.categoryId, "/") as fullAncestry
                 FROM forum_test.subcategories as s
                 join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
                 join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.subcategoryId, "/%") or s.id = s2.subcategoryId)
@@ -304,8 +343,9 @@ module.exports = {
                                     join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
                                     join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id) and s2.categoryId IS NOT NULL)
                 )
-                and not ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id))
-                ORDER BY CHAR_LENGTH(ancestors), position`
+                and not ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id)
+                join forum_test.subcategories as s3 on ((s2.ancestors like CONCAT("%/", s3.id, "/")) or (s2.ancestors is null and s2.id = s3.id)))
+                ORDER BY CHAR_LENGTH(ancestors), position;`
         );
     },
     getChildThreadHierarchy(threadId) {

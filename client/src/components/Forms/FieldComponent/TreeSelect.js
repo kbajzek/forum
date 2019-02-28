@@ -11,21 +11,20 @@ class TreeSelect extends Component {
     }
 
     recursiveCreateSubcat(subcatData){
-        const subcatChildren = subcatData.subcatChildren.map(subcat => {
+        const subcatChildren = subcatData.expanded ? subcatData.subcatChildren.map(subcat => {
             return this.recursiveCreateSubcat(subcat);
-        });
+        }) : [];
         const threadChildren = subcatData.threadChildren.map(thread => {
             return (
                 <div
-                    style={{paddingLeft: '.8rem'}}
+                    style={{paddingLeft: '1rem'}}
                     key={thread.threadId}>
                     <div
-                        style={{display: 'flex', flexDirection: 'row'}}>
-                        <div>
-                            { '\u00A0\u2022\u00A0\u00A0' }
-                        </div>
-                        <div>
-                            {thread.threadName}
+                        style={{position: 'relative'}}>
+                        {thread.threadName}
+                        <div
+                            style={{position: 'absolute', top: '0', left: '-.8rem'}}>
+                            { '\u2022' }
                         </div>
                     </div>
                 </div>
@@ -33,15 +32,15 @@ class TreeSelect extends Component {
         });
         return (
             <div
-                style={{paddingLeft: '.8rem'}}
+                style={{paddingLeft: '1rem'}}
                 key={subcatData.subcategoryId}>
                 <div
-                    style={{display: 'flex', flexDirection: 'row'}}>
-                    <div>
-                        {subcatData.expanded ? '\u25BC\u00A0' : '\u25B6\u00A0' }
-                    </div>
-                    <div>
-                        {subcatData.subcategoryName}
+                    style={{position: 'relative'}}
+                    onClick={() => this.props.onFetchExtraTreeHierarchyData(null, subcatData.subcategoryId, subcatData.fullAncestry)}>
+                    {subcatData.subcategoryName}
+                    <div
+                        style={{position: 'absolute', top: '0', left: '-1.1rem'}}>
+                        {subcatData.expanded ? '\u25BC' : '\u25B6' }
                     </div>
                 </div>
                 {subcatChildren}
@@ -54,19 +53,19 @@ class TreeSelect extends Component {
         let tree = <div>loading...</div>;
         if(!this.props.loading){
             tree = this.props.treeHierarchyData.map(elt => {
-                const subcatChildren = elt.subcatChildren.map(subcat => {
+                const subcatChildren = elt.expanded ? elt.subcatChildren.map(subcat => {
                     return this.recursiveCreateSubcat(subcat);
-                });
+                }) : [];
                 return (
                     <div
                         key={elt.categoryId}>
                         <div
-                            style={{display: 'flex', flexDirection: 'row'}}>
-                            <div>
-                                {elt.expanded ? '\u25BC\u00A0' : '\u25B6\u00A0' }
-                            </div>
-                            <div>
-                                {elt.categoryName}
+                            style={{position: 'relative'}}
+                            onClick={() => this.props.onFetchExtraTreeHierarchyData(elt.categoryId, null, elt.fullAncestry)}>
+                            {elt.categoryName}
+                            <div
+                                style={{position: 'absolute', top: '0', left: '-1.1rem'}}>
+                                {elt.expanded ? '\u25BC' : '\u25B6' }
                             </div>
                         </div>
                         {subcatChildren}
@@ -94,7 +93,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onFetchTreeHierarchyData: (threadId) => dispatch(actions.fetchTreeHierarchyDataBegin(threadId))
+        onFetchTreeHierarchyData: (threadId) => dispatch(actions.fetchTreeHierarchyDataBegin(threadId)),
+        onFetchExtraTreeHierarchyData: (categoryId, subcategoryId, fullAncestry) => dispatch(actions.fetchExtraTreeHierarchyDataBegin(categoryId, subcategoryId, fullAncestry))
     }
 }
 
