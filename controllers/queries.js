@@ -343,7 +343,7 @@ module.exports = {
                                     join forum_test.threads as t on s.id = t.subcategoryId and t.id = ${threadId}
                                     join forum_test.subcategories as s2 on ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id) and s2.categoryId IS NOT NULL)
                 )
-                and not ((s.ancestors like CONCAT("%/", s2.id, "/%")) or s.id = s2.id)
+                and s.id != s2.id and (s.ancestors is null or s.ancestors not like CONCAT("%/", s2.id, "/%"))
                 join forum_test.subcategories as s3 on ((s2.ancestors like CONCAT("%/", s3.id, "/")) or (s2.ancestors is null and s2.id = s3.id)))
                 ORDER BY CHAR_LENGTH(ancestors), position;`
         );

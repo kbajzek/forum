@@ -23,11 +23,13 @@ export const fetchTreeHierarchyDataSuccess = (result) => ({type: FETCH_TREE_HIER
 export const fetchTreeHierarchyDataFailed = (error) => ({type: FETCH_TREE_HIERARCHY_DATA_FAILED, error});
 export const fetchTreeHierarchyDataDismissError = () => ({type: FETCH_TREE_HIERARCHY_DATA_DISMISS_ERROR});
 
-export const fetchExtraTreeHierarchyDataBegin = (categoryId, subcategoryId, fullAncestry, expanded, loaded) => ({
-    type: FETCH_EXTRA_TREE_HIERARCHY_DATA_BEGIN, categoryId, subcategoryId, fullAncestry, expanded, loaded
-});
-export const fetchExtraTreeHierarchyDataSuccess = (loaded, expanded, result, componentType, id, fullAncestry) => ({
-    type: FETCH_EXTRA_TREE_HIERARCHY_DATA_SUCCESS, loaded, expanded, result, componentType, id, fullAncestry
+export const fetchExtraTreeHierarchyDataBegin = (categoryId, subcategoryId, fullAncestry, expanded, loaded) => {
+    const componentType = categoryId ? 1 : 2;
+    const id = categoryId || subcategoryId;
+    return {type: FETCH_EXTRA_TREE_HIERARCHY_DATA_BEGIN, componentType, id, fullAncestry, expanded, loaded};
+};
+export const fetchExtraTreeHierarchyDataSuccess = (result, componentType, id, fullAncestry, expanded, loaded) => ({
+    type: FETCH_EXTRA_TREE_HIERARCHY_DATA_SUCCESS, result, componentType, id, fullAncestry, expanded, loaded
 });
 export const fetchExtraTreeHierarchyDataFailed = (error) => ({type: FETCH_EXTRA_TREE_HIERARCHY_DATA_FAILED, error});
 export const fetchExtraTreeHierarchyDataDismissError = () => ({type: FETCH_EXTRA_TREE_HIERARCHY_DATA_DISMISS_ERROR});
@@ -64,24 +66,45 @@ export const fetchExtraTreeHierarchyDataDismissError = () => ({type: FETCH_EXTRA
 
 // Reducer
 
-const recursiveSubcatCreate = (ancestorArray, ancestorArrayPlace, currentSubcatChildren, result, loaded, expanded) => {
+const recursiveSubcatCreate = (ancestorArray, ancestorArrayPlace, currentSubcatChildren, result, loaded, expanded, setLoading) => {
     let newSubcatChildren = currentSubcatChildren.map(subcat => {
         if(subcat.subcategoryId === ancestorArray[ancestorArrayPlace]){
             ancestorArrayPlace++;
-            let newSubcat = {
-                ...subcat,
-                subcatChildren: ancestorArray.length === ancestorArrayPlace 
+            let updatedSubcatChildren;
+            let updatedThreadChildren;
+            let updatedExpanded;
+            let updatedLoading;
+            let updatedLoaded;
+            if(setLoading){
+                updatedSubcatChildren = ancestorArray.length === ancestorArrayPlace 
+                    ? subcat.subcatChildren
+                    : recursiveSubcatCreate(ancestorArray, ancestorArrayPlace, subcat.subcatChildren, result, loaded, expanded, setLoading);
+                updatedThreadChildren = subcat.threadChildren;
+                updatedExpanded = subcat.expanded;
+                updatedLoading = ancestorArray.length === ancestorArrayPlace ? true : subcat.loading;
+                updatedLoaded = subcat.loaded;
+            }else{
+                updatedSubcatChildren = ancestorArray.length === ancestorArrayPlace 
                     ? (loaded 
                         ? subcat.subcatChildren 
                         : result.subcatChildren) 
-                    : recursiveSubcatCreate(ancestorArray, ancestorArrayPlace, subcat.subcatChildren, result, loaded, expanded),
-                threadChildren: ancestorArray.length === ancestorArrayPlace 
+                    : recursiveSubcatCreate(ancestorArray, ancestorArrayPlace, subcat.subcatChildren, result, loaded, expanded, setLoading);
+                updatedThreadChildren = ancestorArray.length === ancestorArrayPlace 
                     ? (loaded
                         ? subcat.threadChildren
                         : result.threadChildren)
-                    : subcat.threadChildren,
-                expanded: ancestorArray.length === ancestorArrayPlace ? !expanded : true,
-                loaded: true
+                    : subcat.threadChildren;
+                updatedExpanded = ancestorArray.length === ancestorArrayPlace ? !expanded : subcat.expanded;
+                updatedLoading = false;
+                updatedLoaded = true;
+            }
+            let newSubcat = {
+                ...subcat,
+                subcatChildren: updatedSubcatChildren,
+                threadChildren: updatedThreadChildren,
+                expanded: updatedExpanded,
+                loading: updatedLoading,
+                loaded: updatedLoaded,
             }
             return newSubcat;
         }else{
@@ -101,6 +124,8 @@ const initialState = {
 const reducer = ( state = initialState, action ) => {
 
     let updatedState;
+    let ancestors;
+    let newTree;
 
     switch ( action.type ) {
 
@@ -134,14 +159,7 @@ const reducer = ( state = initialState, action ) => {
             }
             return updatedState;
         case FETCH_EXTRA_TREE_HIERARCHY_DATA_BEGIN: 
-            updatedState = {
-                ...state,
-                loading: true,
-                errors: []
-            }
-            return updatedState;
-        case FETCH_EXTRA_TREE_HIERARCHY_DATA_SUCCESS: 
-            let ancestors;
+            ancestors = null;
             if(action.componentType === 2){ //1 = category, 2 = subcategory
                 ancestors = action.fullAncestry.split("/");
                 ancestors.pop();
@@ -150,7 +168,35 @@ const reducer = ( state = initialState, action ) => {
                 ancestors = ancestors.map(elt => parseInt(elt));
                 ancestors.push(action.id);
             }
-            let newTree = state.tree.map(cat => {
+            newTree = state.tree.map(cat => {
+                if((action.componentType === 1 && cat.categoryId === action.id) || (action.componentType === 2 && cat.categoryId === ancestors[0])){
+                    return {
+                        ...cat,
+                        subcatChildren: action.componentType === 1 
+                        ? cat.subcatChildren
+                        : recursiveSubcatCreate(ancestors, 1, cat.subcatChildren, action.result, action.loaded, action.expanded, true),
+                        loading: action.componentType === 1 ? true : cat.loading,
+                    }
+                }else{
+                    return cat;
+                }
+            })
+            updatedState = {
+                ...state,
+                tree: newTree
+            }
+            return updatedState;
+        case FETCH_EXTRA_TREE_HIERARCHY_DATA_SUCCESS: 
+            ancestors = null;
+            if(action.componentType === 2){ //1 = category, 2 = subcategory
+                ancestors = action.fullAncestry.split("/");
+                ancestors.pop();
+                ancestors.shift();
+                ancestors.reverse();
+                ancestors = ancestors.map(elt => parseInt(elt));
+                ancestors.push(action.id);
+            }
+            newTree = state.tree.map(cat => {
                 if((action.componentType === 1 && cat.categoryId === action.id) || (action.componentType === 2 && cat.categoryId === ancestors[0])){
                     return {
                         ...cat,
@@ -160,6 +206,7 @@ const reducer = ( state = initialState, action ) => {
                             : action.result.subcatChildren) 
                         : recursiveSubcatCreate(ancestors, 1, cat.subcatChildren, action.result, action.loaded, action.expanded),
                         expanded: action.componentType === 1 ? !action.expanded : true,
+                        loading: false,
                         loaded: true
                     }
                 }else{
@@ -204,17 +251,15 @@ export function* fetchTreeHierarchyDataSaga(action) {
 
 export function* fetchExtraTreeHierarchyDataSaga(action) {
     try {
-        const type = action.categoryId ? 1 : 2;
-        const id = action.categoryId || action.subcategoryId;
         let result;
         if(!action.loaded){
+            console.log('responding')
             const response = yield axios.get(
-                "/api/forums/treesingle/" + type + "/" + id
+                "/api/forums/treesingle/" + action.componentType + "/" + action.id
             );
             result = response.data;
         }
-        
-        yield put(fetchExtraTreeHierarchyDataSuccess(action.loaded, action.expanded, result, type, id, action.fullAncestry));
+        yield put(fetchExtraTreeHierarchyDataSuccess(result, action.componentType, action.id, action.fullAncestry, action.expanded, action.loaded));
     } catch (error) {
         yield put(fetchExtraTreeHierarchyDataFailed(error.response.data));
     }

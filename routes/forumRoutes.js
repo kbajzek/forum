@@ -668,6 +668,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                         subcatChildren: [],
                         threadChildren: [],
                         expanded: !!subcat[subcatPlace].expanded,
+                        loading: false,
                         loaded: !!subcat[subcatPlace].expanded,
                         fullAncestry: subcat[subcatPlace].fullAncestry,
                     }
@@ -686,6 +687,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                             subcatChildren: [],
                             threadChildren: [],
                             expanded: !!subcat[subcatPlace].expanded,
+                            loading: false,
                             loaded: !!subcat[subcatPlace].expanded,
                             fullAncestry: subcat[subcatPlace].fullAncestry,
                         }
@@ -711,6 +713,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     subcatChildren,
                     threadChildren, //this isnt populated, remove?
                     expanded: subcatChildren.length > 0 | threadChildren.length > 0,
+                    loading: false,
                     loaded: subcatChildren.length > 0 | threadChildren.length > 0,
                 }
             });
@@ -744,6 +747,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     subcatChildren: [],
                     threadChildren: [],
                     expanded: false,
+                    loading: false,
                     loaded: false,
                     fullAncestry: subcat.fullAncestry,
                 };

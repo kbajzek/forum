@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import debounce from 'lodash/debounce';
 import {connect} from 'react-redux';
 
 import * as actions from '../../../store/ducks/treeHierarchy';
+import TreeHierarchy from './TreeHierarchy/TreeHierarchy';
 
 class TreeSelect extends Component {
 
@@ -10,75 +10,32 @@ class TreeSelect extends Component {
         this.props.onFetchTreeHierarchyData(this.props.input.value);
     }
 
-    recursiveCreateSubcat(subcatData){
-        const subcatChildren = subcatData.expanded ? subcatData.subcatChildren.map(subcat => {
-            return this.recursiveCreateSubcat(subcat);
-        }) : [];
-        const threadChildren = subcatData.expanded ? subcatData.threadChildren.map(thread => {
-            return (
-                <div
-                    style={{paddingLeft: '1rem'}}
-                    key={thread.threadId}>
-                    <div
-                        style={{position: 'relative'}}>
-                        {thread.threadName}
-                        <div
-                            style={{position: 'absolute', top: '0', left: '-.8rem'}}>
-                            { '\u2022' }
-                        </div>
-                    </div>
-                </div>
-            );
-        }) : null;
-        return (
-            <div
-                style={{paddingLeft: '1rem'}}
-                key={subcatData.subcategoryId}>
-                <div
-                    style={{position: 'relative'}}
-                    onClick={() => this.props.onFetchExtraTreeHierarchyData(null, subcatData.subcategoryId, subcatData.fullAncestry, subcatData.expanded, subcatData.loaded)}>
-                    {subcatData.subcategoryName}
-                    <div
-                        style={{position: 'absolute', top: '0', left: '-1.1rem'}}>
-                        {subcatData.expanded ? '\u25BC' : '\u25B6' }
-                    </div>
-                </div>
-                {subcatChildren}
-                {threadChildren}
-            </div>
-        );
+    changeValues = (newSelections) => {
+        this.props.input.onChange(newSelections);
+    }
+
+    selectNewDestination = (newLocation) => {
+        this.changeValues(newLocation);
     }
 
     render(){
-        let tree = <div>loading...</div>;
-        if(!this.props.loading){
-            tree = this.props.treeHierarchyData.map(elt => {
-                const subcatChildren = elt.expanded ? elt.subcatChildren.map(subcat => {
-                    return this.recursiveCreateSubcat(subcat);
-                }) : [];
-                return (
-                    <div
-                        key={elt.categoryId}>
-                        <div
-                            style={{position: 'relative'}}
-                            onClick={() => this.props.onFetchExtraTreeHierarchyData(elt.categoryId, null, elt.fullAncestry, elt.expanded, elt.loaded)}>
-                            {elt.categoryName}
-                            <div
-                                style={{position: 'absolute', top: '0', left: '-1.1rem'}}>
-                                {elt.expanded ? '\u25BC' : '\u25B6' }
-                            </div>
-                        </div>
-                        {subcatChildren}
-                    </div>
-                );
-            });
-        }
         return(
             <div
-                style={{fontSize: '1rem'}}
-                >{tree}
+                style={{position: 'relative'}}>
+                <div
+                    style={{position: 'absolute', right: '0', bottom: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}>
+                    <TreeHierarchy
+                        treeHierarchyData={this.props.treeHierarchyData}
+                        loading={this.props.loading}
+                        error={this.props.error}
+                        auth={this.props.auth}
+                        selectNewDestination={this.selectNewDestination}
+                        onFetchTreeHierarchyData={this.props.onFetchTreeHierarchyData}
+                        onFetchExtraTreeHierarchyData={this.props.onFetchExtraTreeHierarchyData} />
+                </div>
             </div>
-        )
+            
+        );
     }
 }
 
