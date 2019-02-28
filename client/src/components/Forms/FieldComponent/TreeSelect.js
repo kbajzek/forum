@@ -6,8 +6,12 @@ import TreeHierarchy from './TreeHierarchy/TreeHierarchy';
 
 class TreeSelect extends Component {
 
+    state = {
+        SelectOpen: false
+    }
+
     componentDidMount(){
-        this.props.onFetchTreeHierarchyData(this.props.input.value);
+        this.props.onFetchTreeHierarchyData(this.props.input.value.id);
     }
 
     changeValues = (newSelections) => {
@@ -16,12 +20,34 @@ class TreeSelect extends Component {
 
     selectNewDestination = (newLocation) => {
         this.changeValues(newLocation);
+        this.toggleSelect();
+    }
+
+    toggleSelect = () => {
+        this.setState((prevState) => {
+            return {SelectOpen: !prevState.SelectOpen}
+        })
     }
 
     render(){
-        return(
+
+        let selectComponent = (
             <div
-                style={{position: 'relative'}}>
+                style={{display: 'flex', maxWidth: '30rem', minWidth: '10rem', padding: '.3rem', backgroundColor: '#ddd', justifyContent: 'space-between'}}
+                onClick={this.toggleSelect}>
+                <div>
+                    {this.props.input.value.name}
+                </div>
+                <div
+                    style={{border: '1px solid grey', width: '2rem', height: '100%', marginLeft: '.3rem'}}>
+                    {'\u25BC'}
+                </div>
+            </div>
+            
+        );
+
+        if(this.state.SelectOpen){
+            selectComponent = (
                 <div
                     style={{position: 'absolute', right: '0', bottom: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}>
                     <TreeHierarchy
@@ -29,10 +55,18 @@ class TreeSelect extends Component {
                         loading={this.props.loading}
                         error={this.props.error}
                         auth={this.props.auth}
+                        selectedId={this.props.input.value.id}
                         selectNewDestination={this.selectNewDestination}
                         onFetchTreeHierarchyData={this.props.onFetchTreeHierarchyData}
                         onFetchExtraTreeHierarchyData={this.props.onFetchExtraTreeHierarchyData} />
                 </div>
+            );
+        }
+
+        return(
+            <div
+                style={{position: 'relative'}}>
+                {selectComponent}
             </div>
             
         );

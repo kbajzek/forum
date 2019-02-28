@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 
 import Spinner from '../../../UI/Spinner2/Spinner2';
 
+import * as classes from './TreeHierarchy.module.css';
+
 class TreeHierarchy extends Component {
 
     recursiveCreateSubcat(subcatData){
@@ -9,13 +11,18 @@ class TreeHierarchy extends Component {
             return this.recursiveCreateSubcat(subcat);
         }) : [];
         const threadChildren = subcatData.expanded ? subcatData.threadChildren.map(thread => {
+            let hoveredStyle = {position: 'relative'};
+            if(thread.threadId === this.props.selectedId){
+                hoveredStyle = {position: 'relative', backgroundColor: 'rgb(138, 117, 208)'};
+            }
             return (
                 <div
                     style={{paddingLeft: '1rem'}}
                     key={thread.threadId}>
                     <div
-                        style={{position: 'relative'}}
-                        onClick={() => this.selectNewDestination(thread.threadId)}>
+                        className={classes.ThreadSelection}
+                        style={hoveredStyle}
+                        onClick={() => this.props.selectNewDestination({id: thread.threadId, name: thread.threadName})}>
                         {thread.threadName}
                         <div
                             style={{position: 'absolute', top: '0', left: '-.8rem'}}>
@@ -30,6 +37,7 @@ class TreeHierarchy extends Component {
                 style={{paddingLeft: '1rem'}}
                 key={subcatData.subcategoryId}>
                 <div
+                    className={classes.NodeSelection}
                     style={{position: 'relative'}}
                     onClick={() => this.props.onFetchExtraTreeHierarchyData(null, subcatData.subcategoryId, subcatData.fullAncestry, subcatData.expanded, subcatData.loaded)}>
                     {subcatData.subcategoryName}
@@ -44,14 +52,6 @@ class TreeHierarchy extends Component {
         );
     }
 
-    changeValues = (newSelections) => {
-        this.props.input.onChange(newSelections);
-    }
-
-    selectNewDestination = (newLocation) => {
-        this.changeValues(newLocation);
-    }
-
     render(){
         let tree = <div>loading...</div>;
         if(!this.props.loading){
@@ -63,6 +63,7 @@ class TreeHierarchy extends Component {
                     <div
                         key={elt.categoryId}>
                         <div
+                            className={classes.NodeSelection}
                             style={{position: 'relative'}}
                             onClick={() => this.props.onFetchExtraTreeHierarchyData(elt.categoryId, null, elt.fullAncestry, elt.expanded, elt.loaded)}>
                             {elt.categoryName}

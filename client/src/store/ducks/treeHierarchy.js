@@ -253,7 +253,6 @@ export function* fetchExtraTreeHierarchyDataSaga(action) {
     try {
         let result;
         if(!action.loaded){
-            console.log('responding')
             const response = yield axios.get(
                 "/api/forums/treesingle/" + action.componentType + "/" + action.id
             );

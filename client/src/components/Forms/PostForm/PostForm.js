@@ -37,7 +37,7 @@ class PostForm extends Component {
                 this.props.onCreateThread(this.props.titleValue, this.props.contentValue, this.props.subCategoryIdValue, this.props.history); //fix userid eventually
                 break;
             case CREATE_POST:
-                this.props.onCreatePost(this.props.contentValue, this.props.threadIdValue, this.props.history, this.props.location); //fix userid eventually
+                this.props.onCreatePost(this.props.contentValue, this.props.threadValue.id, this.props.history, this.props.location); //fix userid eventually
                 break;
             case EDIT_POST:
                 this.props.onEditPost(this.props.contentValue, this.props.postIdValue, this.props.history, this.props.location);
@@ -94,11 +94,11 @@ class PostForm extends Component {
                 );
                 break;
             case CREATE_POST:
-                description = 'Replying to thread \'' + this.props.threadIdValue + '\'';
+                description = 'Replying to thread \'' + this.props.threadValue.name + '\'';
                 threadField = (
                     <Field
-                        key='threadId'
-                        name='threadId'
+                        key='thread'
+                        name='thread'
                         component={TreeSelect}
                         type='text'
                         validate={this.validate}/>
@@ -158,7 +158,7 @@ const selector = formValueSelector('postForm');
 const mapStateToProps = state => {
     const modeValue = selector(state, 'mode');
     const subCategoryIdValue = selector(state, 'subCategoryId');
-    const threadIdValue = selector(state, 'threadId');
+    const threadValue = selector(state, 'thread');
     const postIdValue = selector(state, 'postId');
     const messageIdValue = selector(state, 'messageId');
     const messagePostIdValue = selector(state, 'messagePostId');
@@ -168,7 +168,7 @@ const mapStateToProps = state => {
     return {
         modeValue,
         subCategoryIdValue,
-        threadIdValue,
+        threadValue,
         postIdValue,
         messageIdValue,
         messagePostIdValue,

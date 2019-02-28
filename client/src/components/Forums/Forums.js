@@ -98,9 +98,9 @@ class Forums extends Component {
         window.scrollTo(0,0);
     }
 
-    handlePostEdit = (postId, postContent, threadId) => {
+    handlePostEdit = (postId, postContent, threadId, threadSlug, threadName) => {
         this.props.changeWriterMode(EDIT_POST);
-        this.props.changeWriterThreadId(threadId);
+        this.props.changeWriterThread({id: threadId, name: threadName});
         this.props.changeWriterPostId(postId);
         this.props.changeWriterContent(postContent);
         this.setState({
@@ -120,7 +120,7 @@ class Forums extends Component {
         ) {
 
             this.props.changeWriterMode(CREATE_POST);
-            this.props.changeWriterThreadId(threadId);
+            this.props.changeWriterThread({id: threadId, name: threadName});
         }
         
 
@@ -141,7 +141,7 @@ class Forums extends Component {
 
     handlePostReply = (userName, postId, threadId, threadSlug, threadName, postContent) => {
         this.props.changeWriterMode(CREATE_POST);
-        this.props.changeWriterThreadId(threadId);
+        this.props.changeWriterThread({id: threadId, name: threadName});
 
         let beginning = '\n\n';
         if(!this.props.postValues || !this.props.postValues.content || this.props.postValues.content === '') {
@@ -249,9 +249,9 @@ class Forums extends Component {
         });
     }
 
-    handlePostCreate = (threadId) => {
+    handlePostCreate = (threadId, threadSlug, threadName) => {
         this.props.changeWriterMode(CREATE_POST);
-        this.props.changeWriterThreadId(threadId);
+        this.props.changeWriterThread({id: threadId, name: threadName});
         this.props.changeWriterContent('');
         this.setState({
             writerOpen: true,
@@ -447,7 +447,7 @@ const mapDispatchToProps = (dispatch) => {
 	return {
         changeWriterMode : (value) => dispatch(change('postForm', 'mode', value)),
         changeWriterSubCategoryId : (value) => dispatch(change('postForm', 'subCategoryId', value)),
-        changeWriterThreadId : (value) => dispatch(change('postForm', 'threadId', value)),
+        changeWriterThread : (value) => dispatch(change('postForm', 'thread', value)),
         changeWriterPostId : (value) => dispatch(change('postForm', 'postId', value)),
         changeWriterMessageId : (value) => dispatch(change('postForm', 'messageId', value)),
         changeWriterMessagePostId : (value) => dispatch(change('postForm', 'messagePostId', value)),
