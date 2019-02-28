@@ -725,7 +725,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
     app.get('/api/forums/treesingle/:type/:id', async (req, res) => {
         try{
-            let type = req.params.type === 'category' ? 1 : 2; // either category or subcategory
+            
+            let type = Number(req.params.type);
             let component = Number(req.params.id);
 
             let subcat;
@@ -736,7 +737,6 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 subcat = await models.sequelize.query(queries.getSubcatHierarchy_SubcatChildren(component), { type: models.Sequelize.QueryTypes.SELECT});
                 thread = await models.sequelize.query(queries.getSubcatHierarchy_ThreadChildren(component), { type: models.Sequelize.QueryTypes.SELECT});
             }
-
             let subcatChildren = subcat.map(subcat => {
                 return {
                     subcategoryId: subcat.subcategoryId,
