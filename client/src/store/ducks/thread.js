@@ -120,6 +120,10 @@ export const getThreadUsersViewing = (threadData) => {
     return threadData.usersViewing
 }
 
+export const getThreadBreadcrumb = (threadData) => {
+    return threadData.breadcrumb
+}
+
 // Reducer
 
 const initialState = {
@@ -131,6 +135,7 @@ const initialState = {
     path: null,
     loading: false,
     loaded: false,
+    breadcrumb: null,
     usersViewing: [],
     errors: []
 };

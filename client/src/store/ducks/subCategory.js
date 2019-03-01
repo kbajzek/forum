@@ -64,6 +64,10 @@ export const getSubCategoryErrors = (subCategoryData) => {
     return subCategoryData.errors
 }
 
+export const getSubCategoryBreadcrumb = (subCategoryData) => {
+    return subCategoryData.breadcrumb
+}
+
 // Reducer
 
 const initialState = {
@@ -72,6 +76,7 @@ const initialState = {
     slug: null,
     subCategories: null,
     threads: null,
+    breadcrumb: null,
     path: null,
     loading: false,
     loaded: false,

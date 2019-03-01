@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {withRouter} from 'react-router-dom';
+import {withRouter, Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 import * as subCategoryActions from '../../../store/ducks/subCategory';
@@ -39,6 +39,7 @@ class SubCategoryPage extends Component {
     render() {
 
         let subCatForm;
+        let subCatBreadcrumb;
 
         let subCatButton = this.props.auth ? <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
 
@@ -51,6 +52,7 @@ class SubCategoryPage extends Component {
         const subCategoryThreads = subCategoryActions.getSubCategoryThreads(this.props.subCategoryData);
         const subCategoryName = subCategoryActions.getSubCategoryName(this.props.subCategoryData);
         const subCategoryId = subCategoryActions.getSubCategoryId(this.props.subCategoryData);
+        const subCategoryBreadcrumb = subCategoryActions.getSubCategoryBreadcrumb(this.props.subCategoryData);
 
         let subcategorypage;
 
@@ -63,6 +65,45 @@ class SubCategoryPage extends Component {
         //     subcategorypage = <Spinner />
 
         }else if(subCategoryLoaded){
+
+            subCatBreadcrumb = subCategoryBreadcrumb.reduce((array, crumb, index) => {
+                if(crumb.categoryId){
+                    return array.concat([(
+                        <Link
+                            style={{textDecoration: 'none', fontSize: '1.6rem'}}
+                            key={crumb.categoryId  + " (category)"}
+                            to={{
+                                pathname: "/forums"
+                            }}>
+                            {crumb.categoryName}
+                        </Link>
+                    )]);
+                }else{
+                    return array.concat([(
+                        <div
+                            key={crumb.subcategoryId + "/"}
+                            style={{fontSize: '1.6rem', padding: '0 .3rem'}}
+                            >
+                            /
+                        </div>
+                    ),(
+                        subCategoryBreadcrumb.length - 1 !== index
+                        ? <Link
+                            style={{textDecoration: 'none', fontSize: '1.6rem'}}
+                            key={crumb.subcategoryId}
+                            to={{
+                                pathname: "/forums" + crumb.subcategoryPath
+                            }}>
+                            {crumb.subcategoryName}
+                        </Link> 
+                        : <div
+                            style={{fontSize: '1.6rem'}}
+                            key={crumb.subcategoryId}>
+                            {crumb.subcategoryName}
+                        </div> 
+                    )]);
+                }
+            }, []);
 
             if(this.state.showSubCatForm) {
                 subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} subCategoryId={subCategoryId} path={"/" + this.props.id + "/" + this.props.slug} />
@@ -100,6 +141,9 @@ class SubCategoryPage extends Component {
                     {subCatForm}
                     {threadButton}
                     <div className={classes.Header}>{subCategoryName}</div>
+                    <div
+                        style={{display: 'flex', flexDirection: 'row', margin: '2rem'}}
+                        >{subCatBreadcrumb}</div>
                     <div className={classes.SubCat}>{subcat_markup}</div>
                     <div>{thread_markup}</div>
         

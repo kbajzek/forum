@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {withRouter} from 'react-router-dom';
+import {withRouter, Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 import * as threadActions from '../../../store/ducks/thread';
@@ -35,9 +35,11 @@ class Thread extends Component {
         const threadSlug = threadActions.getThreadSlug(this.props.threadData);
         const threadRatingTypes = threadActions.getThreadRatingTypes(this.props.threadData);
         const threadUsersViewing = threadActions.getThreadUsersViewing(this.props.threadData);
+        const threadBreadcrumb = threadActions.getThreadBreadcrumb(this.props.threadData);
 
         let threadpage;
         let usersViewing;
+        let threadBreadcrumbComponent;
 
         if(threadErrors.length > 0){
 
@@ -48,6 +50,45 @@ class Thread extends Component {
         //     threadpage = <Spinner />
 
         }else if(threadLoaded){
+
+            threadBreadcrumbComponent = threadBreadcrumb.reduce((array, crumb, index) => {
+                if(crumb.categoryId){
+                    return array.concat([(
+                        <Link
+                            style={{textDecoration: 'none', fontSize: '1.6rem'}}
+                            key={crumb.categoryId + " (category)"}
+                            to={{
+                                pathname: "/forums"
+                            }}>
+                            {crumb.categoryName}
+                        </Link>
+                    )]);
+                }else{
+                    return array.concat([(
+                        <div
+                            key={crumb.subcategoryId + "/"}
+                            style={{fontSize: '1.6rem', padding: '0 .3rem'}}
+                            >
+                            /
+                        </div>
+                    ),(
+                        threadBreadcrumb.length - 1 !== index
+                        ? <Link
+                            style={{textDecoration: 'none', fontSize: '1.6rem'}}
+                            key={crumb.subcategoryId}
+                            to={{
+                                pathname: "/forums" + crumb.subcategoryPath
+                            }}>
+                            {crumb.subcategoryName}
+                        </Link> 
+                        : <div
+                            style={{fontSize: '1.6rem'}}
+                            key={crumb.threadId + " (thread)"}>
+                            {crumb.threadName}
+                        </div> 
+                    )]);
+                }
+            }, []);
 
             const postList = threadPosts.map(({id, content, ratings, creator}) => {
                 return (
@@ -85,6 +126,9 @@ class Thread extends Component {
                 <div>
                     {threadButton}
                     <div className={classes.Header}>{threadName}</div>
+                    <div
+                        style={{display: 'flex', flexDirection: 'row', margin: '2rem'}}
+                        >{threadBreadcrumbComponent}</div>
                     <div className={classes.Thread}>
                         {/* <FlipMove
                             duration={500}

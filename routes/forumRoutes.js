@@ -102,7 +102,9 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
             let result1 = await models.sequelize.query(queries.getSubCategoriesQuery(subcatid), { type: models.Sequelize.QueryTypes.SELECT});
             let result2 = await models.sequelize.query(queries.getThreadsQuery(subcatid), { type: models.Sequelize.QueryTypes.SELECT});
             let result3 = await models.sequelize.query(`SELECT name FROM forum_test.subcategories as s WHERE s.id =  ${subcatid}`, { type: models.Sequelize.QueryTypes.SELECT});
-                
+            let breadcrumb = await models.sequelize.query(queries.getSubcatBreadcrumb(subcatid), { type: models.Sequelize.QueryTypes.SELECT});
+            let catBreadcrumbResult = await models.sequelize.query(queries.getCatBreadcrumb(subcatid), { type: models.Sequelize.QueryTypes.SELECT});
+
             let convertedResult = [];
             let convertedResult2 = [];
 
@@ -149,6 +151,22 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 );
             });
 
+            let subcatBreadcrumb = breadcrumb.length > 0 ? breadcrumb.map(crumb => {
+                return {
+                    subcategoryId: crumb.subcategoryId,
+                    subcategoryName: crumb.subcategoryName,
+                    subcategoryPath: `/${crumb.subcategoryId}/${slugify(crumb.subcategoryName).toLowerCase()}`
+                }
+            }) : [];
+
+            let catBreadcrumb = {
+                categoryId: catBreadcrumbResult[0].categoryId,
+                categoryName: catBreadcrumbResult[0].categoryName,
+                categoryPath: `/${catBreadcrumbResult[0].categoryId}/${slugify(catBreadcrumbResult[0].categoryName).toLowerCase()}`
+            };
+
+            subcatBreadcrumb.unshift(catBreadcrumb);
+
             const finalResult = {
                 id: subcatid,
                 name: result3[0].name,
@@ -156,6 +174,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 subCategories: convertedResult,
                 threads: convertedResult2,
                 path: `/${subcatid}/${slugify(result3[0].name).toLowerCase()}`,
+                breadcrumb: subcatBreadcrumb
             }
             if(req.session && req.session.passport && req.session.passport.user){
                 setUserLocation(req.session.passport.user,'1/'+subcatid);
@@ -171,6 +190,8 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
             let threadId = Number(req.params.id);
             const ratingTypes = await models.ratingtype.findAll({ type: models.Sequelize.QueryTypes.SELECT});
             const result = await models.sequelize.query(queries.getThreadQuery(threadId), { type: models.Sequelize.QueryTypes.SELECT});
+            let breadcrumb = await models.sequelize.query(queries.getSubcatBreadcrumb_Thread(threadId), { type: models.Sequelize.QueryTypes.SELECT});
+            let catBreadcrumbResult = await models.sequelize.query(queries.getCatBreadcrumb_Thread(threadId), { type: models.Sequelize.QueryTypes.SELECT});
 
             let convertedPosts = [];
             let currentPostPosition = 0;
@@ -254,7 +275,31 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     name: user.name,
                     avatar: user.avatar
                 }
-            })
+            });
+
+            let subcatBreadcrumb = breadcrumb.length > 0 ? breadcrumb.map(crumb => {
+                return {
+                    subcategoryId: crumb.subcategoryId,
+                    subcategoryName: crumb.subcategoryName,
+                    subcategoryPath: `/${crumb.subcategoryId}/${slugify(crumb.subcategoryName).toLowerCase()}`
+                }
+            }) : [];
+
+            let catBreadcrumb = {
+                categoryId: catBreadcrumbResult[0].categoryId,
+                categoryName: catBreadcrumbResult[0].categoryName,
+                categoryPath: `/${catBreadcrumbResult[0].categoryId}/${slugify(catBreadcrumbResult[0].categoryName).toLowerCase()}`
+            };
+
+            let threadBreadcrumb = {
+                threadId: result[0].threadId,
+                threadName: result[0].threadName,
+                threadPath: `/${result[0].threadId}/${slugify(result[0].threadName).toLowerCase()}`
+            };
+
+            subcatBreadcrumb.unshift(catBreadcrumb);
+            subcatBreadcrumb.push(threadBreadcrumb);
+
             const finalResult = {
                 id: result[0].threadId,
                 name: result[0].threadName,
@@ -263,6 +308,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                 ratingTypes: ratings,
                 path: `/thread/${result[0].threadId}/${slugify(result[0].threadName).toLowerCase()}`,
                 usersViewing,
+                breadcrumb: subcatBreadcrumb,
             }
             
             res.send(finalResult);

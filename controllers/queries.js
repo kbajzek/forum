@@ -364,5 +364,43 @@ module.exports = {
                 ) as q1 on t2.id = q1.threadId
             ORDER BY CHAR_LENGTH(s2.ancestors), q1.maxDate DESC;`
         );
+    },
+    getSubcatBreadcrumb(subcategoryId){
+        return (
+            `SELECT s2.id as subcategoryId,
+                    s2.name as subcategoryName
+            FROM forum_test.subcategories as s
+            join forum_test.subcategories as s2 on s.id = ${subcategoryId} and (s.ancestors like CONCAT("%/",s2.id,"/%") or s.id = s2.id)
+            ORDER BY CHAR_LENGTH(s2.ancestors);`
+        );
+    },
+    getCatBreadcrumb(subcategoryId){
+        return (
+            `SELECT c.id as categoryId,
+                    c.name as categoryName
+            FROM forum_test.subcategories as s
+            join forum_test.subcategories as s2 on s.id = ${subcategoryId} and (s.ancestors like CONCAT("%/",s2.id,"/") or (s.ancestors IS NULL and s.id = s2.id))
+            join forum_test.categories as c on c.id = s2.categoryId;`
+        );
+    },
+    getSubcatBreadcrumb_Thread(threadId){
+        return (
+            `SELECT s2.id as subcategoryId,
+                    s2.name as subcategoryName
+            FROM forum_test.subcategories as s
+            join forum_test.threads as t on t.subcategoryId = s.id and t.id = ${threadId}
+            join forum_test.subcategories as s2 on (s.ancestors like CONCAT("%/",s2.id,"/%") or s.id = s2.id)
+            ORDER BY CHAR_LENGTH(s2.ancestors);`
+        );
+    },
+    getCatBreadcrumb_Thread(threadId){
+        return (
+            `SELECT c.id as categoryId,
+                    c.name as categoryName
+            FROM forum_test.subcategories as s
+            join forum_test.threads as t on t.subcategoryId = s.id and t.id = ${threadId}
+            join forum_test.subcategories as s2 on (s.ancestors like CONCAT("%/",s2.id,"/") or (s.ancestors IS NULL and s.id = s2.id))
+            join forum_test.categories as c on c.id = s2.categoryId;`
+        );
     }
 }
