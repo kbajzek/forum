@@ -2,12 +2,22 @@ import React from 'react';
 
 import classes from './Navbar.module.css';
 import DrawerToggle from './DrawerToggle/DrawerToggle';
+import GoogleButton from 'react-google-button';
+import {withRouter} from 'react-router-dom';
 
 const navbar = ( props ) => {
 
     const style = [classes.DesktopOnly, classes.NavItems].join(' ');
 
-    let authButton = <a href={'/auth/steam'}>LOGIN</a>;
+    // let authButton = <a href={'/auth/steam'}>LOGIN</a>;
+
+    let authButton = <GoogleButton
+        type="dark"
+        onClick={() => { 
+            props.history.push('/auth/google'); 
+            window.location.reload();
+        }}
+    />;
 
     if (props.auth) {
         authButton = <button onClick={props.logout}>LOGOUT</button>
@@ -29,4 +39,4 @@ const navbar = ( props ) => {
     );
 }
 
-export default navbar;
+export default withRouter(navbar);

@@ -125,7 +125,7 @@ class MessagePage extends Component {
             }
 
             messagepage = (
-                <div style={{height: 'calc(100vh - 5rem)'}}>
+                <div style={{height: 'calc(100vh - 7rem)'}}>
                     <div style={{backgroundColor: 'rgba(240,255,255,255)', height: '5rem', display: 'flex', flexDirection: 'row'}}>
                         {messageButton}
                         {messageReplyButton}

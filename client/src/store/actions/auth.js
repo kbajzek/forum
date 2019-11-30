@@ -14,9 +14,10 @@ export const fetchUserSuccess = (user, csrf) => {
     };
 };
 
-export const logoutUserInit = () => {
+export const logoutUserInit = (history) => {
     return {
-        type: actionTypes.LOGOUT_USER_INIT
+        type: actionTypes.LOGOUT_USER_INIT,
+        history: history,
     };
 };
 

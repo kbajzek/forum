@@ -2,15 +2,11 @@ const fs        = require('fs');
 const path      = require('path');
 const Sequelize = require('sequelize');
 const basename  = path.basename(__filename);
-const env       = process.env.NODE_ENV || 'development';
-const config    = require(__dirname + '/../config/keys.js').database;
 const db        = {};
+const config      = require(__dirname + '/../config/config.js');
+const databaseConfig = JSON.stringify(process.env.NODE_ENV) === JSON.stringify('development') ? config.development.database : config.production.database;
 
-if (config.use_env_variable) {
-  var sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  var sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+var sequelize = new Sequelize(databaseConfig.database, databaseConfig.username, databaseConfig.password, databaseConfig);
 
 fs
   .readdirSync(__dirname)

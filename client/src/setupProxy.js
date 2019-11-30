@@ -8,6 +8,9 @@ module.exports = function(app) {
         app.use(proxy('/auth/steam', {
             target: 'http://localhost:5000'
         }));
+        app.use(proxy('/auth/google', {
+            target: 'http://localhost:5000'
+        }));
         app.use(proxy('/socket.io/', {
             target: 'http://localhost:5000'
         }));

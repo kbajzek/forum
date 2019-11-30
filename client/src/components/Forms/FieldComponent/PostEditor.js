@@ -466,7 +466,7 @@ class PostEditor extends Component {
         //const { input, label, meta: { error, touched } } = this.props;
         const { input } = this.props;
         return (
-            <div style={{ flexGrow: '1', display: 'flex', flexDirection: 'column'}}>
+            <div style={{ flexGrow: '1', display: 'flex', flexDirection: 'column', height: '100%'}}>
                 <div>
                     <button onClick={this.handleBold}>B</button>
                     <button onClick={this.handleItalicize}>I</button>
@@ -486,7 +486,7 @@ class PostEditor extends Component {
                     <button onClick={this.handleOrderedList}>Ordered List</button>
                     <button onClick={this.handleUnorderedList}>Unordered List</button>
                 </div>
-                <div style={{'display': 'flex', flexGrow: '1'}}>
+                <div style={{'display': 'flex', flexGrow: '1', overflow: 'hidden'}}>
                     <div style={{flex: '0 0 50%', padding: '.5rem', 'boxSizing': 'border-box'}}>
                         <textarea ref={this.textarea} onScroll={this.handleScroll} {...input} 
                             style={{ fontFamily:'sans-serif', height: '100%', width: '100%', margin: '0', padding: '.5rem', resize: 'none', 'boxSizing': 'border-box', fontSize: '16px', backgroundColor: '#aaaaaa'}} />

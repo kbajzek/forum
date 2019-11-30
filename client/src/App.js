@@ -10,6 +10,13 @@ class App extends Component {
     const routes = (
       <Switch>
         <Route path="/forums" component={Forums} />
+        <Route path="/auth/google" exact render={() => {
+          return (
+              <div>
+                  Wait please...
+              </div>
+          )
+        }} />
         <Redirect from="/" exact to="/forums" />
         <Route path="/" render={(props) => <div style={{'margin': '20rem', 'fontSize': '10rem'}}>404 page dont exist</div>} />
       </Switch>

@@ -43,7 +43,7 @@ class Layout extends Component {
     }
 
     handleLogout = () => {
-        this.props.onLogout();
+        this.props.onLogout(this.props.history);
     }
 
     render () {
@@ -68,12 +68,12 @@ class Layout extends Component {
                     exact>
                     Messages
                 </NavigationItem> : null}
-                <NavigationItem 
+                {/* <NavigationItem 
                     clicked={() => {this.sideDrawerClosedHandler(); }}
                     link="https://steamcommunity.com/groups/ExoTerraGaming" 
                     anchor>
                     Steam
-                </NavigationItem>
+                </NavigationItem> */}
             </Auxiliary>
         );
 
@@ -124,7 +124,7 @@ const mapDispatchToProps = dispatch => {
         onInitCategoryData: () => dispatch(categoryActions.fetchCategoryDataBegin()),
         onInitMessageData: (path) => dispatch(actions.initMessageData(path)),
         setMessageSidebarState: (state) => dispatch(actions.setMessageSidebarState(state)),
-        onLogout: () => dispatch(actions.logoutUserInit()),
+        onLogout: (history) => dispatch(actions.logoutUserInit(history)),
         hidePage: (flag) => dispatch(actions.hidePage(flag)),
     }
 }
