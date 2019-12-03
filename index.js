@@ -12,8 +12,8 @@ const authRoutes = require('./routes/authRoutes');
 const models = require('./models');
 const keys = require('./config/keys');
 
-passport.serializeUser(function(id, done) {
-    done(null, id);
+passport.serializeUser(function(user, done) {
+    done(null, user.id);
 });
   
 passport.deserializeUser(function(obj, done) {
