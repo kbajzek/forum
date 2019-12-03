@@ -18,7 +18,7 @@ import treeHierarchyReducer from "./treeHierarchy";
 import {watchTreeHierarchy} from "./treeHierarchy";
 
 const composeEnhancers =
-(process.env.NODE_ENV === "development"
+(JSON.stringify(process.env.NODE_ENV) === JSON.stringify('development')
     ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
     : null) || compose;
 

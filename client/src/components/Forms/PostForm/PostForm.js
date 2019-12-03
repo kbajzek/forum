@@ -18,8 +18,29 @@ const EDIT_MESSAGE_POST = 6;
 
 class PostForm extends Component {
 
-    state = {
-        users: []
+    constructor(props){
+        super(props)
+        this.state = {
+            users: [],
+            height:  0
+        }
+        this.top = React.createRef();
+        this.bottom = React.createRef();
+        this.full = React.createRef();
+    }
+
+    componentDidMount() {
+        this.updateDimensions();
+        window.addEventListener("resize", this.updateDimensions);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.updateDimensions);
+    }
+
+    updateDimensions = () => {
+        let update_height  = this.full.current.offsetWidth - this.top.current.offsetWidth - this.bottom.current.offsetWidth;
+        this.setState({ height: update_height });
     }
 
     validate = (value) => {
@@ -134,17 +155,17 @@ class PostForm extends Component {
             default:
         }
         return(
-                <form onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', flexShrink: '0', padding: '1rem', paddingTop: '2rem', fontSize: '2rem', justifyContent: 'space-between'}}>
+                <form ref={this.full} onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+                    <div ref={this.top} style={{display: 'flex', flexShrink: '0', padding: '1rem', paddingTop: '2rem', fontSize: '2rem', justifyContent: 'space-between'}}>
                         <div>{description}</div>
                         {membersField}
                         {titleField}
                         {threadField}
                     </div>
-                    <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1'}}>
+                    <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1', height: `${this.state.height}px`}}>
                         {contentField}                        
                     </div>
-                    <div>
+                    <div ref={this.bottom}>
                         <button type="submit">SUBMIT</button>
                         <button onClick={this.onFormCancel}>CANCEL</button>
                     </div>

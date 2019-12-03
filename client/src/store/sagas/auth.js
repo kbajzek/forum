@@ -22,6 +22,7 @@ export function* logoutUserSaga(action) {
     if(response.data.logout === 1) {
       yield axios.defaults.headers.common['X-XSRF-TOKEN'] = null;
       yield put(actions.logoutUserSuccess());
+      window.location.reload();
     }
   } catch (error) {
   }

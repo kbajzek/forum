@@ -1,6 +1,7 @@
 const models = require('../models');
 const axios = require('axios');
-const keys = require('../config/keys');
+const keysFile = require('../config/config');
+const keys = JSON.stringify(process.env.NODE_ENV) === JSON.stringify('development') ? keysFile.development : keysFile.production;
 
 module.exports = {
 

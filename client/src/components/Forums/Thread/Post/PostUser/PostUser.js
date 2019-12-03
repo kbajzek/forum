@@ -11,7 +11,14 @@ const PostUser = (props) => {
         <div className={classes.PostUser}>
             <div>{props.name}</div>
             <div className={classes.ProfileLinkContainer}>
-                <Link
+                <div
+                    className={classes.ProfileLink}>
+                    <img
+                        className={classes.ProfilePicture}
+                        src={props.pictureURL} 
+                        alt={props.name} />
+                </div>
+                {/* <Link
                     to={{
                         pathname: "/forums" + props.path
                     }}
@@ -20,7 +27,7 @@ const PostUser = (props) => {
                         className={classes.ProfilePicture}
                         src={props.pictureURL} 
                         alt={props.name} />
-                </Link>
+                </Link> */}
             </div>
             
             <div className={classes.TotalPosts}>{props.totalPosts} <span> POSTS</span></div>
