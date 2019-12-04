@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require('express-session');
-const redis = require("redis").createClient();
-const RedisStore = require('connect-redis')(session);
+// const redis = require("redis").createClient();
+// const RedisStore = require('connect-redis')(session);
 const passport = require('passport');
 const util = require('util');
 const SteamStrategy = require('passport-steam').Strategy;
