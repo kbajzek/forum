@@ -24,7 +24,7 @@ module.exports = {
         steamAPIKey: 'CF1AE94B18F1E3282342ED1886995157',
         database: {
             username: 'root',
-            password: 'password',
+            password: passwords.production.sql_password,
             database: 'forum_test',
             dialect: 'mysql',
             operatorsAliases: false,
@@ -34,8 +34,8 @@ module.exports = {
             client_id: passwords.production.oauth_client_id,
             client_secret: passwords.production.oauth_client_secret,
             redirect_url: 'https://forum.kevinbajzek.com/auth/google/callback',
-            return_url: 'https://forum.kevinbajzek.appspot.com',
-            fail_return_url: 'https://forum.kevinbajzek.appspot.com/login'
+            return_url: 'https://forum.kevinbajzek.com',
+            fail_return_url: 'https://forum.kevinbajzek.com/login'
         },
         session_secret: passwords.production.session_secret,
     }
