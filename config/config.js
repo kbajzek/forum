@@ -2,6 +2,7 @@ const passwords = require('./passwords');
 
 module.exports = {
     development: {
+        port: 5000,
         steamAPIKey: 'CF1AE94B18F1E3282342ED1886995157',
         database: {
             username: 'root',
@@ -21,6 +22,7 @@ module.exports = {
         session_secret: passwords.development.session_secret,
     },
     production: {
+        port: 8081,
         steamAPIKey: 'CF1AE94B18F1E3282342ED1886995157',
         database: {
             username: 'root',

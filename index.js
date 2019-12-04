@@ -248,7 +248,7 @@ models.sequelize
 
         forumRoutes(app, io, socketUsers, socketLocations, setUserLocation);
 
-        // if (process.env.NODE_ENV === 'production') {
+        if (JSON.stringify(process.env.NODE_ENV) !== JSON.stringify('development')) {
             // Express will serve up production assets
             // like our main.js file, or main.css file!
             app.use(express.static('client/build'));
@@ -259,9 +259,9 @@ models.sequelize
             app.get('*', (req, res) => {
                 res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
             });
-        // }
+        }
 
-        const PORT = 8081;
+        const PORT = config.port;
         server.listen(PORT);
 
     })
