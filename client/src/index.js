@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 
 import "./index.css";
 import App from "./App";
-import registerServiceWorker from "./registerServiceWorker";
+import {unregister} from "./registerServiceWorker";
 import store from './store/ducks/index';
 
 const app = (
@@ -17,4 +17,4 @@ const app = (
 );
 
 ReactDOM.render(app, document.getElementById("root"));
-registerServiceWorker.unregister();
+unregister();
