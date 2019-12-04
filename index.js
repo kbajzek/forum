@@ -97,7 +97,6 @@ models.sequelize
         ));
 
         const app = express();
-        app.set('subdomain offset', config.subdomain_offset);
         const server = require('http').Server(app);
         const io = require('socket.io')(server);
 
