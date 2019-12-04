@@ -7,7 +7,7 @@ import * as categoryActions from '../ducks/category';
 import * as subCategoryActions from '../ducks/subCategory';
 import * as threadActions from '../ducks/thread';
 import configFile from '../../config/config';
-
+const config = JSON.stringify(process.env.NODE_ENV) === JSON.stringify('development') ? configFile.development : configFile.production;
 
 import * as actionTypes from "../actions/actionTypes";
 import {
@@ -76,8 +76,7 @@ export function* watchAuth() {
 }
 
 function connect() {
-  const config = JSON.stringify(process.env.NODE_ENV) === JSON.stringify('development') ? configFile.development : configFile.production;
-  const socket = io(config.socket_io_url);
+  const socket = io(config.base_url);
   return new Promise(resolve => {
     socket.on('connect', () => {
       resolve(socket);
