@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         
         data: {
-            type: DataTypes.STRING(50000)
+            type: DataTypes.TEXT
         }
     },
     {
