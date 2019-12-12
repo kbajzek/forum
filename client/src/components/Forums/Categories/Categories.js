@@ -5,7 +5,7 @@ import * as categoryActions from '../../../store/ducks/category';
 
 import ErrorPage from '../ErrorPage/ErrorPage';
 import Category from './Category/Category';
-import Spinner from '../../UI/Spinner/Spinner';
+// import Spinner from '../../UI/Spinner/Spinner';
 import CategoryForm from '../../Forms/CategoryForm/CategoryForm';
 
 class Categories extends Component {
@@ -30,7 +30,7 @@ class Categories extends Component {
         let catButton = this.props.auth ? <button onClick={this.toggleCategoryCreator}>CREATE CATEGORY</button> : null;
 
         const categoryErrors = categoryActions.getCategoryErrors(this.props.categoryData);
-        const categoryLoading = categoryActions.getCategoryLoading(this.props.categoryData);
+        // const categoryLoading = categoryActions.getCategoryLoading(this.props.categoryData);
         const categoryLoaded = categoryActions.getCategoryLoaded(this.props.categoryData);
         const categoryCategories = categoryActions.getCategoryCategories(this.props.categoryData);
         const categoryUsersViewing = categoryActions.getCategoryUsersViewing(this.props.categoryData);

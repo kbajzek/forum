@@ -7,7 +7,6 @@ import * as subCategoryActions from '../../../store/ducks/subCategory';
 import ErrorPage from '../ErrorPage/ErrorPage';
 import SubCategory from './../Categories/Category/SubCategory/SubCategory';
 import ThreadPreview from '../ThreadPreview/ThreadPreview';
-import Spinner from '../../UI/Spinner/Spinner';
 import SubCategoryForm from '../../Forms/SubCategoryForm/SubCategoryForm';
 
 import classes from './SubCategoryPage.module.css';
@@ -46,7 +45,7 @@ class SubCategoryPage extends Component {
         let threadButton = this.props.auth ? <button onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
 
         const subCategoryErrors = subCategoryActions.getSubCategoryErrors(this.props.subCategoryData);
-        const subCategoryLoading = subCategoryActions.getSubCategoryLoading(this.props.subCategoryData);
+        // const subCategoryLoading = subCategoryActions.getSubCategoryLoading(this.props.subCategoryData);
         const subCategoryLoaded = subCategoryActions.getSubCategoryLoaded(this.props.subCategoryData);
         const subCategorySubCategories = subCategoryActions.getSubCategorySubCategories(this.props.subCategoryData);
         const subCategoryThreads = subCategoryActions.getSubCategoryThreads(this.props.subCategoryData);

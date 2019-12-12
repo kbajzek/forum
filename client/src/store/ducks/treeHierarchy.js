@@ -1,8 +1,8 @@
-import { put, takeEvery, take, select } from "redux-saga/effects";
+import { put, takeEvery } from "redux-saga/effects";
 import axios from "../../axios-forums";
 
-import * as actions from '../actions/forums';
-import * as actionTypes from '../actions/actionTypes';
+// import * as actions from '../actions/forums';
+// import * as actionTypes from '../actions/actionTypes';
 
 // Action Types
 

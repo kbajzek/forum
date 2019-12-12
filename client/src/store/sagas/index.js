@@ -1,5 +1,5 @@
-import { takeEvery, take, put, call, apply, fork, select } from 'redux-saga/effects'
-import { eventChannel, delay, buffers } from 'redux-saga'
+import { takeEvery, take, put, call, fork, select } from 'redux-saga/effects'
+import { eventChannel, buffers } from 'redux-saga'
 import io from 'socket.io-client'
 import * as actions from '../actions/index';
 
@@ -98,7 +98,7 @@ function* updateMessages(socket) {
   while (true) {
     const messageId = yield take(channel);
     const state = yield select();
-    if(state.forums.messageData && state.forums.messageData.messageSelected && state.forums.messageData.messageSelected.messageId == messageId){
+    if(state.forums.messageData && state.forums.messageData.messageSelected && Number(state.forums.messageData.messageSelected.messageId) === Number(messageId)){
       yield put(actions.selectMessageData("/message/" + messageId + '/' + state.forums.messageData.messageSelected.messageName));
     }
   }
@@ -106,8 +106,8 @@ function* updateMessages(socket) {
 
 export function* watchSockets() {
   const socket = yield call(connect)
-  const messageTask = yield fork(updateMessages, socket);
-  const locationTask = yield fork(handleLocationChange, socket);
+  yield fork(updateMessages, socket);
+  yield fork(handleLocationChange, socket);
 }
 
 export function* handleLocationChange(socket) {

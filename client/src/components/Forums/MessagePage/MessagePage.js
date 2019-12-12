@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
-import slugify from 'slugify';
+// import slugify from 'slugify';
 
-import classes from './MessagePage.module.css';
+// import classes from './MessagePage.module.css';
 
 import * as actions from '../../../store/actions';
 
@@ -74,7 +74,7 @@ class MessagePage extends Component {
         </button>) : null;
 
         let messageReplyButton = null;
-        let replyProps = this.props.id;
+        // let replyProps = this.props.id;
 
         let messagepage = this.props.error ? <ErrorPage error = {this.props.error}/> : <Spinner />;
 

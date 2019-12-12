@@ -5,12 +5,12 @@ import {connect} from 'react-redux';
 import * as threadActions from '../../../store/ducks/thread';
 
 import Post from './Post/Post';
-import Spinner from '../../UI/Spinner/Spinner';
+// import Spinner from '../../UI/Spinner/Spinner';
 import ErrorPage from '../ErrorPage/ErrorPage';
 
 import classes from './Thread.module.css';
 
-import FlipMove from 'react-flip-move';
+// import FlipMove from 'react-flip-move';
 
 class Thread extends Component {
     
@@ -27,7 +27,7 @@ class Thread extends Component {
 
         let threadButton = this.props.auth ? <button onClick={this.handlePostCreator}>CREATE POST</button> : null;
         const threadErrors = threadActions.getThreadErrors(this.props.threadData);
-        const threadLoading = threadActions.getThreadLoading(this.props.threadData);
+        // const threadLoading = threadActions.getThreadLoading(this.props.threadData);
         const threadLoaded = threadActions.getThreadLoaded(this.props.threadData);
         const threadPosts = threadActions.getThreadPosts(this.props.threadData);
         const threadName = threadActions.getThreadName(this.props.threadData);

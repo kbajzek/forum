@@ -300,7 +300,7 @@ class Forums extends Component {
                         style={{width: '3rem', height: '3rem', borderRadius: '50%', backgroundColor: 'black', touchAction: 'none', position: 'absolute', top: '-1.5rem', left: '1rem'}}
                         onMouseDown={this.handleMouseDown}
                         onTouchStart={this.handleTouchStart}>
-                        <img src={doubleArrow} style={{width: '2rem', height: '2rem', marginTop: '.5rem', marginLeft: '.5rem'}}/>
+                        <img src={doubleArrow} style={{width: '2rem', height: '2rem', marginTop: '.5rem', marginLeft: '.5rem'}} alt="Double Arrow Symbol"/>
                     </div>
                     <PostForm closeForm={this.closeWriter}/>
                 </div>

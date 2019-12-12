@@ -2,7 +2,7 @@ import { put, take, select } from "redux-saga/effects";
 
 import axios from "../../axios-forums";
 
-import * as threadActions from '../ducks/thread';
+// import * as threadActions from '../ducks/thread';
 import * as actions from "../actions";
 import * as actionTypes from '../actions/actionTypes';
 

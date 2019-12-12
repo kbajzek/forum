@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import Spinner from '../../../UI/Spinner/Spinner';
+// import Spinner from '../../../UI/Spinner/Spinner';
 
 import classes from './MessageSideBar.module.css';
 
@@ -22,7 +22,8 @@ class MessageSideBar extends Component{
             );
         });
 
-        let memberList = <Spinner />;
+        // let memberList = <Spinner />;
+        let memberList = <div></div>;
         
         if(this.props.messageData.messageSelected){
             memberList = this.props.messageData.messageSelected.members.map(({userId, userName, permission, id}) => {

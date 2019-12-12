@@ -219,29 +219,29 @@ const fetchUserlistFailed = (state, action) => {
 // };
 
 
-const createPostFailed = (state, action) => {
-    const updatedState = {
-        ...state,
-        error: action.error
-    }
-    return updatedState;
-};
+// const createPostFailed = (state, action) => {
+//     const updatedState = {
+//         ...state,
+//         error: action.error
+//     }
+//     return updatedState;
+// };
 
-const editPostFailed = (state, action) => {
-    const updatedState = {
-        ...state,
-        error: action.error
-    }
-    return updatedState;
-};
+// const editPostFailed = (state, action) => {
+//     const updatedState = {
+//         ...state,
+//         error: action.error
+//     }
+//     return updatedState;
+// };
 
-const deletePostFailed = (state, action) => {
-    const updatedState = {
-        ...state,
-        error: action.error
-    }
-    return updatedState;
-};
+// const deletePostFailed = (state, action) => {
+//     const updatedState = {
+//         ...state,
+//         error: action.error
+//     }
+//     return updatedState;
+// };
 
 const createMessageFailed = (state, action) => {
     const updatedState = {
@@ -276,13 +276,13 @@ const deleteMessagePostFailed = (state, action) => {
     return updatedState;
 };
 
-const createRatingFailed = (state, action) => {
-    const updatedState = {
-        ...state,
-        error: action.error
-    }
-    return updatedState;
-};
+// const createRatingFailed = (state, action) => {
+//     const updatedState = {
+//         ...state,
+//         error: action.error
+//     }
+//     return updatedState;
+// };
 
 // MESSAGE MEMBER
 

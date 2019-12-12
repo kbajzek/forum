@@ -176,7 +176,7 @@ export function* fetchSubCategoryDataSaga(action) {
 
 export function* createSubCategorySaga(action) {
     try {
-      const response = yield axios.post(
+      yield axios.post(
         "/api/forums/subcategory/create", {
           name: action.name,
           description: action.description,

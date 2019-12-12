@@ -18,6 +18,7 @@ const navigationItem = ( props ) => {
         link = (
             <a  
                 target="_blank"
+                rel="noopener noreferrer"
                 href={props.link}>{props.children}</a>
         );
     }

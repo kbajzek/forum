@@ -261,7 +261,7 @@ models.sequelize
             });
         // }
 
-        const PORT = 8081;
+        const PORT = JSON.stringify(process.env.NODE_ENV) === JSON.stringify('development') ? 5000 : 8081;
         server.listen(PORT);
 
     })
