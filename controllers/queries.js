@@ -232,18 +232,18 @@ module.exports = {
     },
     getMessageQuery(messageId) {
         return (
-            `SELECT mp.id		as messagepostId,
-                mp.content 		as messagePostContent,
-                mp.createdAt    as messagePostCreatedAt,
-                u.name          as messageCreatorName,
-                u.id            as messageCreatorId,
-                qc.postCount	as messageCreatorPostCount,
-                m.name          as messageName,
-                m.id            as messageId
+            `SELECT mp.id		        as messagepostId,
+                mp.content 		        as messagePostContent,
+                mp.createdAt            as messagePostCreatedAt,
+                u.name                  as messageCreatorName,
+                u.id                    as messageCreatorId,
+                IFNULL(qc.postCount,0)	as messageCreatorPostCount,
+                m.name                  as messageName,
+                m.id                    as messageId
             FROM forum_test.messages as m
                 join forum_test.messageposts as mp on mp.messageId = m.id
                 left join forum_test.users as u on mp.userId = u.id
-                join (
+                left join (
                     SELECT count(*) as postCount, p.userId as userId
                     FROM forum_test.posts as p 
                     WHERE p.userId in ( 

@@ -49,7 +49,7 @@ class TreeSelect extends Component {
         if(this.state.SelectOpen){
             selectComponent = (
                 <div
-                    style={{position: 'absolute', right: '0', bottom: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}>
+                    style={{position: 'absolute', right: '0', top: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}>
                     <TreeHierarchy
                         treeHierarchyData={this.props.treeHierarchyData}
                         loading={this.props.loading}

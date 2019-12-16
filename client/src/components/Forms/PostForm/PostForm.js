@@ -171,7 +171,7 @@ class PostForm extends Component {
                         <div>{description}</div>
                         {membersField}
                         <div style={{marginLeft: 'auto', marginTop: '1rem'}}>{titleField}</div>
-                        {threadField}
+                        <div style={{marginLeft: 'auto', marginTop: '1rem'}}>{threadField}</div>
                     </div>
                     <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1', height: `${this.state.height}px`}}>
                         {contentField}                        

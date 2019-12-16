@@ -3,7 +3,7 @@ const models  = require('../models');
 module.exports = (req, res, next) => {
     return models.messagemember.findOne({where: {id: req.body.memberId}}) //Check if the message member exists
         .then(function (member) {
-            return models.messagemember.findOne({where: {UserId: req.session.passport.user, MessageId: member.MessageId}}) //Check if the user is a member of the message
+            return models.messagemember.findOne({where: {userId: req.session.passport.user, MessageId: member.messageId}}) //Check if the user is a member of the message
                 .then(function (member2) {
                     if(!member){
                         return res.status(401).send({ errorType: 3, error: 'Message member does not exist!' })
