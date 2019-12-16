@@ -712,8 +712,10 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
             members.forEach((member) => {
                 if(member.userId !== req.session.passport.user){
                     const socketID = ioUsers.get(member.userId);
+                    // console.log(member.userId)
+                    // console.log(socketID)
                     if(socketID && socketID !== undefined){
-                        io.to(socketID).emit('messages.update', req.body.messageId);
+                        io.to(socketID.id).emit('messages.update', req.body.messageId);
                     }
                 }
             })
