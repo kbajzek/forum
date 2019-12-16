@@ -9,7 +9,7 @@ const PostUser = (props) => {
     
     return (
         <div className={classes.PostUser}>
-            <div>{props.name}</div>
+            
             <div className={classes.ProfileLinkContainer}>
                 <div
                     className={classes.ProfileLink}>
@@ -29,8 +29,11 @@ const PostUser = (props) => {
                         alt={props.name} />
                 </Link> */}
             </div>
+            <div className={classes.Content}>
+                <div className={classes.Name}>{props.name}</div>
+                <div className={classes.TotalPosts}>{props.totalPosts} <span> POSTS</span></div>
+            </div>
             
-            <div className={classes.TotalPosts}>{props.totalPosts} <span> POSTS</span></div>
         </div>
     );
     

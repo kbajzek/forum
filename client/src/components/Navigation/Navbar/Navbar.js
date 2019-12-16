@@ -20,7 +20,7 @@ const navbar = ( props ) => {
     />;
 
     if (props.auth) {
-        authButton = <button onClick={props.logout}>LOGOUT</button>
+        authButton = <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={props.logout}>LOGOUT</button>
     }
 
     return (

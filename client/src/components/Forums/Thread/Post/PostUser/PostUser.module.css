@@ -32,5 +32,39 @@
 }
 
 .TotalPosts {
-    padding: 1rem;
+    padding-top: 1rem;
+    text-align: center;
+}
+
+.Content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.Name {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+@media (max-width: 750px){
+    .PostUser {
+        flex-flow: row;
+        padding: 0;
+    }
+    .TotalPosts {
+        padding: 0;
+        padding-top: .5rem;
+        text-align: left;
+    }
+
+    .Content {
+        justify-content: flex-start;
+    }
+
+    .Name {
+        text-align: left;
+    }
+    
 }

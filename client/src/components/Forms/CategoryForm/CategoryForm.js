@@ -34,7 +34,7 @@ class CategoryForm extends Component {
         return (
             <div>
                 <div onClick={this.props.closeForm} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: '500', backgroundColor: 'rgba(0,0,0,.7)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <div onClick={this.handleClick} style={{ backgroundColor: '#fff', padding: '1rem' }}>
+                    <div onClick={this.handleClick} style={{ backgroundColor: '#fff', padding: '1rem', boxSizing: 'border-box' }}>
                         <form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
                             {this.renderFields()}
                             <button style={{color: '#fff', backgroundColor: '#2FADDF', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>

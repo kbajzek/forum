@@ -6,6 +6,8 @@
 }
 
 .NavigationItem a {
+    font-size: 1.5rem;
+    font-weight: 700;
     color: white;
     height: 100%;
     padding: 16px 10px;

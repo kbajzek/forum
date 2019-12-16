@@ -1,0 +1,60 @@
+.TextArea {
+    flex: 0 0 50%;
+    padding: .5rem;
+    box-sizing: border-box;
+}
+
+.PostContent {
+    flex: 0 0 50%;
+    padding: .5rem;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.TextAreaPreview {
+    flex: 0 0 50%;
+    padding: .5rem;
+    box-sizing: border-box;
+}
+
+.PostContentPreview {
+    flex: 0 0 50%;
+    padding: .5rem;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.styleButton {
+    display: inline-block;
+    color: #fff;
+    background-color: #1E5ECF;
+    margin: .5rem;
+    border: none;
+    padding: .5rem;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px){
+    .TextArea {
+        flex: 0 0 100%;
+    }
+
+    .PostContent {
+        display: none;
+    }
+
+    .TextAreaPreview {
+        display: none;
+    }
+
+    .PostContentPreview {
+        flex: 0 0 100%;
+    }
+}
+
+@media (max-width: 600px){
+    .styleButton {
+        font-size: 1.2rem;
+    }
+}

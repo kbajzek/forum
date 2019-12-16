@@ -1,0 +1,16 @@
+.Preview {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .Preview {
+        display: inline-block;
+        color: #fff;
+        background-color: #E78A33;
+        margin: .5rem;
+        border: none;
+        padding: .5rem;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+}

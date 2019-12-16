@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 
 import PostContent from '../../Forums/Thread/Post/PostContent/PostContent';
 
+import * as classes from './PostEditor.module.css';
+
 class PostEditor extends Component {
 
     constructor(props) {
@@ -468,30 +470,30 @@ class PostEditor extends Component {
         return (
             <div style={{ flexGrow: '1', display: 'flex', flexDirection: 'column', height: '100%'}}>
                 <div>
-                    <button onClick={this.handleBold}>B</button>
-                    <button onClick={this.handleItalicize}>I</button>
-                    <button onClick={this.handleUnderline}>U</button>
-                    <button onClick={this.handleStrikethrough}>S</button>
-                    <button onClick={this.handleLeft}>Left</button>
-                    <button onClick={this.handleRight}>Right</button>
-                    <button onClick={this.handleCenter}>Center</button>
-                    <button onClick={this.handleJustify}>Justify</button>
-                    <button onClick={this.handleIndent}>Indent</button>
-                    <button onClick={this.handleColor}>Color</button>
-                    <button onClick={this.handleSize}>Size</button>
-                    <button onClick={this.handleUrl}>Link</button>
-                    <button onClick={this.handleImage}>Image</button>
-                    <button onClick={this.handleYoutube}>Youtube</button>
-                    <button onClick={this.handleCode}>Code</button>
-                    <button onClick={this.handleOrderedList}>Ordered List</button>
-                    <button onClick={this.handleUnorderedList}>Unordered List</button>
+                    <button className={classes.styleButton} onClick={this.handleBold}>B</button>
+                    <button className={classes.styleButton} onClick={this.handleItalicize}>I</button>
+                    <button className={classes.styleButton} onClick={this.handleUnderline}>U</button>
+                    <button className={classes.styleButton} onClick={this.handleStrikethrough}>S</button>
+                    <button className={classes.styleButton} onClick={this.handleLeft}>Left</button>
+                    <button className={classes.styleButton} onClick={this.handleRight}>Right</button>
+                    <button className={classes.styleButton} onClick={this.handleCenter}>Center</button>
+                    <button className={classes.styleButton} onClick={this.handleJustify}>Justify</button>
+                    <button className={classes.styleButton} onClick={this.handleIndent}>Indent</button>
+                    <button className={classes.styleButton} onClick={this.handleColor}>Color</button>
+                    <button className={classes.styleButton} onClick={this.handleSize}>Size</button>
+                    <button className={classes.styleButton} onClick={this.handleUrl}>Link</button>
+                    <button className={classes.styleButton} onClick={this.handleImage}>Image</button>
+                    <button className={classes.styleButton} onClick={this.handleYoutube}>Youtube</button>
+                    <button className={classes.styleButton} onClick={this.handleCode}>Code</button>
+                    <button className={classes.styleButton} onClick={this.handleOrderedList}>Ordered List</button>
+                    <button className={classes.styleButton} onClick={this.handleUnorderedList}>Unordered List</button>
                 </div>
                 <div style={{'display': 'flex', flexGrow: '1', overflow: 'hidden'}}>
-                    <div style={{flex: '0 0 50%', padding: '.5rem', 'boxSizing': 'border-box'}}>
+                    <div className={!this.props.preview ? classes.TextArea : classes.TextAreaPreview}>
                         <textarea ref={this.textarea} onScroll={this.handleScroll} {...input} 
                             style={{ fontFamily:'sans-serif', height: '100%', width: '100%', margin: '0', padding: '.5rem', resize: 'none', 'boxSizing': 'border-box', fontSize: '16px', backgroundColor: '#aaaaaa'}} />
                     </div>
-                    <div style={{flex: '0 0 50%', padding: '.5rem', 'boxSizing': 'border-box', minWidth: '0'}}>
+                    <div className={!this.props.preview ? classes.PostContent : classes.PostContentPreview}>
                         <div ref={this.postPreview} style={{fontSize: '16px', height: '100%', width: '100%', backgroundColor: '#aaaaaa', overflow: 'auto'}}>
                             <PostContent content={this.props.contentValue}/>
                         </div>

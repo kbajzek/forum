@@ -3,12 +3,13 @@ import {connect} from 'react-redux';
 import {Link} from 'react-router-dom';
 
 import * as threadActions from '../../../../../store/ducks/thread';
-//import classes from './Ratings.module.css';
+import * as classes from './Ratings.module.css';
 
 class Ratings extends Component {
 
     state = {
-        expanded: false
+        expanded: false,
+        ratingsOpen: false,
     }
 
     toggleExpand = () => {
@@ -17,25 +18,57 @@ class Ratings extends Component {
         })
     }
 
-    handleRate = (ratingTypeId) => {
-        this.props.onCreateRating(ratingTypeId, this.props.postId); // fix userid eventually
-    }
-
     handleUndoRating = (ratingId) => {
         this.props.onDeleteRating(ratingId); // fix userid eventually
+    }
+
+    handleRate = (ratingTypeId) => {
+        this.props.onCreateRating(ratingTypeId, this.props.postId); // fix userid eventually
+        this.handleCloseRatings();
+    }
+
+    handleOpenRatings = () => {
+        this.setState({ratingsOpen: true});
+    }
+
+    handleCloseRatings = () => {
+        this.setState({ratingsOpen: false});
     }
     
     render() {
 
         let ratingUser;
+        let ratingDialog;
+
+        if(this.state.ratingsOpen){
+            ratingDialog = <div onClick={this.handleCloseRatings} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: '500', backgroundColor: 'rgba(0,0,0,.7)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: '#fff', padding: '1rem', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{display: 'flex'}}>
+                        {this.props.ratingTypes.map(({id, name}) => {
+                            return (
+                                <button className={classes.Button3} key={id} onClick={() => {this.handleRate(id)}}>
+                                    {name}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer', marginLeft: 'auto'}} onClick={this.handleCloseRatings}>CANCEL</button>
+                </div>
+            </div>;
+        }
 
         const ratingButtonList = this.props.ratingTypes.map(({id, name}) => {
             return (
-                <button key={id} onClick={() => {this.handleRate(id)}}>
+                <button className={classes.Button3} key={id} onClick={() => {this.handleRate(id)}}>
                     {name}
                 </button>
             );
         });
+
+        const ratingButtonList2 = 
+                <button className={classes.Button3} onClick={this.handleOpenRatings}>
+                    {'Rate'}
+                </button>;
 
         const ratingList = this.props.ratings.map(({ratingName, users}) => {
 
@@ -50,12 +83,12 @@ class Ratings extends Component {
                 const userList = users.map((user) => {
                     return (
                         <div key={user.ratingId}>
-                            <Link
+                            {/* <Link
                                 to={{
                                     pathname: "/forums" + user.path
-                                }}>
+                                }}> */}
                                 {user.userName}
-                            </Link>
+                            {/* </Link> */}
                             
                         </div>
                     );
@@ -81,15 +114,19 @@ class Ratings extends Component {
         return (
             <div style={{display: 'flex', padding: '.5rem 0', alignItems: 'flexStart'}}>
                 {ratingList}
-                <div>
-                    {this.props.ratings.length > 0 && <button onClick={this.toggleExpand}>TOGGLE EXPAND</button>}
+                <div style={{display: 'flex', alignItems: 'center'}}>
+                    {this.props.ratings.length > 0 && <button className={classes.Button} onClick={this.toggleExpand}>{this.state.expanded ? '▲' : '▼'}</button>}
                 </div>
                 <div>
-                    {this.props.auth && ratingUser && <button onClick={() => this.handleUndoRating(ratingUser.ratingId)}>UNDO RATING</button>}
+                    {this.props.auth && ratingUser && <button className={classes.Button2} onClick={() => this.handleUndoRating(ratingUser.ratingId)}>UNDO</button>}
                 </div>
-                <div style={{marginLeft: 'auto'}}>
+                <div className={classes.ratingList1} style={{marginLeft: 'auto'}}>
                     {this.props.auth && !ratingUser && this.props.userId !== this.props.auth && ratingButtonList}
                 </div>
+                <div className={classes.ratingList2} style={{marginLeft: 'auto'}}>
+                    {this.props.auth && !ratingUser && this.props.userId !== this.props.auth && ratingButtonList2}
+                </div>
+                {ratingDialog}
             </div>
         );
     }

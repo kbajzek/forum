@@ -9,6 +9,8 @@ import FieldComponent from '../FieldComponent/FieldComponent';
 import MultiSelect from '../FieldComponent/MultiSelect';
 import TreeSelect from '../FieldComponent/TreeSelect';
 
+import * as classes from './PostForm.module.css';
+
 const CREATE_THREAD = 1;
 const CREATE_POST = 2;
 const EDIT_POST = 3;
@@ -22,7 +24,8 @@ class PostForm extends Component {
         super(props)
         this.state = {
             users: [],
-            height:  0
+            height:  0,
+            preview: false,
         }
         this.top = React.createRef();
         this.bottom = React.createRef();
@@ -49,6 +52,10 @@ class PostForm extends Component {
             errors = 'You must provide a value';
         }
         return errors;
+    }
+
+    onPreview = () => {
+        this.setState({preview: !this.state.preview});
     }
 
     onFormSubmit = () => {
@@ -97,6 +104,7 @@ class PostForm extends Component {
                 name='content'
                 component={PostEditor}
                 type='text'
+                preview={this.state.preview}
                 change={this.props.change}
                 contentValue={this.props.contentValue}
                 validate={this.validate}/>
@@ -109,6 +117,7 @@ class PostForm extends Component {
                     <Field
                         key='title'
                         name='title'
+                        label='Title'
                         component={FieldComponent}
                         type='text'
                         validate={this.validate}/>
@@ -134,6 +143,7 @@ class PostForm extends Component {
                     <Field
                         key='members'
                         name='members'
+                        label='Members'
                         component={MultiSelect}
                         type='text'/>
                 );
@@ -141,6 +151,7 @@ class PostForm extends Component {
                     <Field
                         key='title'
                         name='title'
+                        label='Title'
                         component={FieldComponent}
                         type='text'
                         validate={this.validate}/>
@@ -156,18 +167,19 @@ class PostForm extends Component {
         }
         return(
                 <form ref={this.full} onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div ref={this.top} style={{display: 'flex', flexShrink: '0', padding: '1rem', paddingTop: '2rem', fontSize: '2rem', justifyContent: 'space-between'}}>
+                    <div ref={this.top} style={{display: 'flex', flexDirection: 'column', flexShrink: '0', padding: '1rem', paddingTop: '2rem', fontSize: '2rem', justifyContent: 'space-between'}}>
                         <div>{description}</div>
                         {membersField}
-                        {titleField}
+                        <div style={{marginLeft: 'auto', marginTop: '1rem'}}>{titleField}</div>
                         {threadField}
                     </div>
                     <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1', height: `${this.state.height}px`}}>
                         {contentField}                        
                     </div>
                     <div ref={this.bottom}>
-                        <button type="submit">SUBMIT</button>
-                        <button onClick={this.onFormCancel}>CANCEL</button>
+                        <button style={{color: '#fff', backgroundColor: '#2FADDF', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>
+                        <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="button" onClick={this.onFormCancel}>CANCEL</button>
+                        <button className={classes.Preview} type="button" onClick={this.onPreview}>{this.state.preview ? 'TEXT' : 'PREVIEW'}</button>
                     </div>
                 </form>
         );

@@ -31,7 +31,7 @@ class Forums extends Component {
         writerActive: false,
         writerOpen: false,
         topDeltaY: 0,
-        writerY: 500
+        writerY: 70
     }
 
     componentDidMount() {
@@ -51,7 +51,7 @@ class Forums extends Component {
     handleTouchMove = ({touches: [{ screenY }] }) => {
         const { isPressed, topDeltaY } = this.state;
         if (isPressed) {
-            const mouseY = Math.max(Math.min(screenY-topDeltaY,window.innerHeight-250),50);
+            const mouseY = Math.max(Math.min(screenY-topDeltaY,window.innerHeight-250),70);
             this.setState({ writerY: mouseY })
         }
     }
@@ -77,7 +77,7 @@ class Forums extends Component {
         const screenY = e.screenY;
         const { isPressed, topDeltaY } = this.state;
         if (isPressed) {
-            const mouseY = Math.max(Math.min(screenY-topDeltaY,window.innerHeight-250),50);
+            const mouseY = Math.max(Math.min(screenY-topDeltaY,window.innerHeight-250),70);
             this.setState({ writerY: mouseY })
         }
     }
@@ -283,8 +283,8 @@ class Forums extends Component {
         if (this.state.writerActive) {
             editorButton = (
                 <button 
-                    onClick={this.toggleWriter} 
-                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '1001'}}>
+                    onClick={this.toggleWriter}
+                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '1001', color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}}>
                     EDITOR
                 </button>
             );

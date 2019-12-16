@@ -16,7 +16,7 @@
     border-radius: .25rem;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 501px) {
     .DrawerToggleMain {
         display: none;
     }
