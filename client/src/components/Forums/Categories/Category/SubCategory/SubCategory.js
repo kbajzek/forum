@@ -18,19 +18,19 @@ class SubCategory extends Component {
                         to={{
                             pathname: "/forums" + this.props.lastActiveThread.path
                         }}
-                        className={classes.Name}>
-                        {this.props.lastActiveThread.name}
+                        className={classes.lastThreadLink}>
+                        <div className={classes.Name}>{this.props.lastActiveThread.name}</div>
+                        <div className={classes.User}>{this.props.lastActiveThread.user}</div>
+                        <div className={classes.Date}>{timeago.ago(new Date(this.props.lastActiveThread.lastUpdated))}</div>
                     </Link>
-                    <div>{this.props.lastActiveThread.user}</div>
-                    <div>{timeago.ago(new Date(this.props.lastActiveThread.lastUpdated))}</div>
                 </div>
             );
         } else {
             lastThread = (
                 <div className={classes.LastThreadInfo}>
-                    <div>{this.props.lastActiveThread.name}</div>
-                    <div>{this.props.lastActiveThread.user}</div>
-                    <div>{timeago.ago(new Date(this.props.lastActiveThread.lastUpdated))}</div>
+                    <div className={classes.NameNone}>{this.props.lastActiveThread.name}</div>
+                    <div className={classes.User}>{this.props.lastActiveThread.user}</div>
+                    <div className={classes.Date}>{timeago.ago(new Date(this.props.lastActiveThread.lastUpdated))}</div>
                 </div>
             );
         }
@@ -42,7 +42,7 @@ class SubCategory extends Component {
                         to={{
                             pathname: "/forums" + this.props.pathName
                         }}
-                        className={classes.Name}>
+                        className={classes.Title}>
                         {this.props.name}
                     </Link>
                     <div>{this.props.description}</div>

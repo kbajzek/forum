@@ -41,7 +41,7 @@ class Category extends Component {
 
         let subCatForm;
 
-        let subCatButton = this.props.auth ? <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
+        let subCatButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
 
         if(this.state.showSubCatForm) {
             subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} categoryId={this.props.categoryId} />

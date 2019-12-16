@@ -6,6 +6,8 @@
     font-size: 1rem;
 }
 
+
+
 .SubCategory:not(:last-child) {
     border-bottom: 2px solid rgb(73, 136, 187);
 }
@@ -24,21 +26,88 @@
 }
 
 .LastThreadInfo {
-    width: 12rem;
+    width: 22rem;
     height: 100%;
     display: flex;
     flex-flow: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: flex-start;
 }
 
-.Name {
-    font-size: 1.5rem;
+.lastThreadLink, .Title {
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
 }
 
+.lastThreadLink:hover .Name, .Title:hover {
+    color: #0059A7;
+}
+
+
+.Name, .Title {
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 2.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+/* .Name:hover {
+    color: #0059A7;
+} */
+
 .Part1 {
+    width: 35rem;
     display: flex;
     flex-flow: column;
     justify-content: space-between;
+}
+
+@media (max-width: 750px){
+    .PostCount {
+        display: none;
+    }
+}
+
+@media (max-width: 700px){
+    .Part1 {
+        width: 25rem;
+    }
+
+    .LastThreadInfo {
+        width: 17rem;
+    }
+}
+
+@media (max-width: 550px){
+    .SubCategory {
+        flex-direction: column;
+    }
+
+    .LastThreadInfo {
+        margin-top: 1rem;
+        margin-left: auto;
+        width: max-content;
+        margin-right: 2rem;
+    }
+
+    .User, .Name, .NameNone {
+        display: none;
+    }
+
+    .Date {
+        text-decoration: underline;
+    }
+
+    .Date:hover {
+        color: #0059A7;
+    }
+
+    .Part1 {
+        width: 100%;
+    }
 }

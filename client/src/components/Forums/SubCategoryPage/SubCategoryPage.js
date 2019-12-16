@@ -14,7 +14,16 @@ import classes from './SubCategoryPage.module.css';
 class SubCategoryPage extends Component {
 
     state = {
-        showSubCatForm: false
+        showSubCatForm: false,
+        collapseBreadcrumb: false,
+    }
+
+    handleResize = () => {
+        if (window.innerWidth < 600) {
+            this.setState({ collapseBreadcrumb: true });
+        } else {
+            this.setState({ collapseBreadcrumb: false });
+        }
     }
 
     toggleSubCategoryCreator = () => {
@@ -33,6 +42,12 @@ class SubCategoryPage extends Component {
 
     componentDidMount() {
         this.props.onInitSubCategoryPageData(this.props.id);
+        this.handleResize();
+        window.addEventListener("resize", this.handleResize);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.handleResize);
     }
     
     render() {
@@ -40,9 +55,9 @@ class SubCategoryPage extends Component {
         let subCatForm;
         let subCatBreadcrumb;
 
-        let subCatButton = this.props.auth ? <button onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
+        let subCatButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
 
-        let threadButton = this.props.auth ? <button onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
+        let threadButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
 
         const subCategoryErrors = subCategoryActions.getSubCategoryErrors(this.props.subCategoryData);
         // const subCategoryLoading = subCategoryActions.getSubCategoryLoading(this.props.subCategoryData);
@@ -103,6 +118,28 @@ class SubCategoryPage extends Component {
                     )]);
                 }
             }, []);
+
+            if(this.state.collapseBreadcrumb){
+                    
+                let path = "/forums";
+                let name = subCategoryBreadcrumb[subCategoryBreadcrumb.length-2].categoryName;
+
+                if(!subCategoryBreadcrumb[subCategoryBreadcrumb.length-2].categoryId){
+                    path = "/forums" + subCategoryBreadcrumb[subCategoryBreadcrumb.length-2].subcategoryPath
+                    name = subCategoryBreadcrumb[subCategoryBreadcrumb.length-2].subcategoryName;
+                }
+
+                subCatBreadcrumb = [
+                    <Link
+                        style={{textDecoration: 'none', fontSize: '1.5rem', fontWeight: 700, marginRight: '1rem'}}
+                        key={subCategoryBreadcrumb[subCategoryBreadcrumb.length-2].categoryId  + " (category)"}
+                        to={{
+                            pathname: path
+                        }}>
+                        {'< ' + name}
+                    </Link>
+                ];
+            }
 
             if(this.state.showSubCatForm) {
                 subCatForm = <SubCategoryForm closeForm={this.closeSubCategoryCreator} subCategoryId={subCategoryId} path={"/" + this.props.id + "/" + this.props.slug} />

@@ -1,19 +1,23 @@
-import React, {Component} from 'react';
-import {reduxForm, Field} from 'redux-form';
-import {connect} from 'react-redux';
+import React, { Component } from 'react';
+import { reduxForm, Field } from 'redux-form';
+import { connect } from 'react-redux';
 import fields from './fields';
 import FieldComponent from '../FieldComponent/FieldComponent';
 import * as categoryActions from '../../../store/ducks/category';
 
 class CategoryForm extends Component {
 
-    onFormSubmit = ({name}) => {
+    onFormSubmit = ({ name }) => {
         this.props.onCreateCategory(name);
         this.props.closeForm();
     }
 
+    handleClick = (e) => {
+        e.stopPropagation();
+    }
+
     renderFields = () => {
-        return fields.map( ({label, name})  => {
+        return fields.map(({ label, name }) => {
             return (
                 <Field
                     key={name}
@@ -27,25 +31,33 @@ class CategoryForm extends Component {
     }
 
     render() {
-        return(
-            <form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
-                {this.renderFields()}
-                <button type="submit">SUBMIT</button>
-                <button onClick={this.props.closeForm}>CANCEL</button>
-            </form>
+        return (
+            <div>
+                <div onClick={this.props.closeForm} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: '500', backgroundColor: 'rgba(0,0,0,.7)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div onClick={this.handleClick} style={{ backgroundColor: '#fff', padding: '1rem' }}>
+                        <form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
+                            {this.renderFields()}
+                            <button style={{color: '#fff', backgroundColor: '#2FADDF', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>
+                            <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.props.closeForm}>CANCEL</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
         );
     }
 };
 
 const validate = (values) => {
     const errors = {};
-    
+
     fields.forEach(({ name }) => {
         if (!values[name]) {
-        errors[name] = 'You must provide a value';
+            errors[name] = 'You must provide a value';
         }
     });
-    
+
     return errors;
 }
 

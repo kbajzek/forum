@@ -13,9 +13,27 @@ import classes from './Thread.module.css';
 // import FlipMove from 'react-flip-move';
 
 class Thread extends Component {
+
+    state ={
+        collapseBreadcrumb: false,
+    }
+
+    handleResize = () => {
+        if (window.innerWidth < 600) {
+            this.setState({ collapseBreadcrumb: true });
+        } else {
+            this.setState({ collapseBreadcrumb: false });
+        }
+    }
     
     componentDidMount() {
         this.props.onInitThreadData(this.props.id, true);
+        this.handleResize();
+        window.addEventListener("resize", this.handleResize);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.handleResize);
     }
 
     handlePostCreator = () => {
@@ -25,7 +43,7 @@ class Thread extends Component {
 
     render() {
 
-        let threadButton = this.props.auth ? <button onClick={this.handlePostCreator}>CREATE POST</button> : null;
+        let threadButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.handlePostCreator}>CREATE POST</button> : null;
         const threadErrors = threadActions.getThreadErrors(this.props.threadData);
         // const threadLoading = threadActions.getThreadLoading(this.props.threadData);
         const threadLoaded = threadActions.getThreadLoaded(this.props.threadData);
@@ -89,6 +107,28 @@ class Thread extends Component {
                     )]);
                 }
             }, []);
+
+            if(this.state.collapseBreadcrumb){
+                    
+                let path = "/forums";
+                let name = threadBreadcrumb[threadBreadcrumb.length-2].categoryName;
+
+                if(!threadBreadcrumb[threadBreadcrumb.length-2].categoryId){
+                    path = "/forums" + threadBreadcrumb[threadBreadcrumb.length-2].subcategoryPath
+                    name = threadBreadcrumb[threadBreadcrumb.length-2].subcategoryName;
+                }
+
+                threadBreadcrumbComponent = [
+                    <Link
+                        style={{textDecoration: 'none', fontSize: '1.5rem', fontWeight: 700, marginRight: '1rem'}}
+                        key={threadBreadcrumb[threadBreadcrumb.length-2].categoryId  + " (category)"}
+                        to={{
+                            pathname: path
+                        }}>
+                        {'< ' + name}
+                    </Link>
+                ];
+            }
 
             const postList = threadPosts.map(({id, content, ratings, creator}) => {
                 return (

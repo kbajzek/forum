@@ -30,7 +30,7 @@ const ThreadPreview = (props) => {
             </div>
             
 
-            <div className={classes.lastPost}>
+            <div className={classes.LastPost}>
                 <div>{props.lastPost.user}</div>
                 <div>{timeago.ago(new Date(props.lastPost.lastUpdated))}</div>
             </div>

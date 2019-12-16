@@ -32,22 +32,72 @@
     padding: 0 3rem;
 }
 
-.LastThreadInfo {
-    width: 8rem;
+.LastPost {
+    width: 22rem;
     height: 100%;
     display: flex;
     flex-flow: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: flex-start;
 }
 
 .Name {
+    font-weight: 600;
     font-size: 1.5rem;
+    line-height: 2.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+}
+
+.Name:hover {
+    color: #0059A7;
 }
 
 .Part1 {
+    width: 35rem;
     display: flex;
     flex-flow: column;
     justify-content: space-between;
+}
+
+@media (max-width: 900px){
+    .ReplyCount {
+        padding: 0;
+    }
+}
+
+@media (max-width: 750px){
+    .ReplyCount, .ViewCount {
+        display: none;
+    }
+}
+
+@media (max-width: 700px){
+    .Part1 {
+        width: 25rem;
+    }
+
+    .LastPost {
+        width: 17rem;
+    }
+}
+
+@media (max-width: 550px){
+    .ThreadPreview {
+        flex-direction: column;
+    }
+
+    .LastPost {
+        display: none;
+    }
+
+    .Part1 {
+        width: 100%;
+    }
 }
