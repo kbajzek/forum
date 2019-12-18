@@ -19,15 +19,15 @@ const ThreadPreview = (props) => {
                 <div>{props.creator}</div>
             </div>
             
-            <div className={classes.ReplyCount}>
+            <div className={classes.ViewCount}>
                 <div>{props.totalReplies}</div>
-                <div>{props.totalReplies === 1 ? "REPLY": "REPLIES"}</div>
+                <div>{props.totalReplies === 1 ? "\u00A0\u00A0REPLY\u00A0\u00A0": "REPLIES"}</div>
             </div>
 
-            <div className={classes.ViewCount}>
+            {/* <div className={classes.ViewCount}>
                 <div>{props.totalViews}</div>
                 <div>VIEWS</div>
-            </div>
+            </div> */}
             
 
             <div className={classes.LastPost}>
