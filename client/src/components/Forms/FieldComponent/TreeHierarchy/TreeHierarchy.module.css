@@ -1,10 +1,14 @@
 .NodeSelection{
     cursor: pointer;
     display: inline-block;
+    font-size: 1.5rem;
+    padding-bottom: .5rem;
 }
 .ThreadSelection{
     cursor: pointer;
     display: inline-block;
+    font-size: 1.5rem;
+    padding-bottom: .5rem;
 }
 .NodeSelection:hover{
     background-color: #bbb;

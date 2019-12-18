@@ -42,7 +42,7 @@ class TreeHierarchy extends Component {
                     onClick={() => this.props.onFetchExtraTreeHierarchyData(null, subcatData.subcategoryId, subcatData.fullAncestry, subcatData.expanded, subcatData.loaded)}>
                     {subcatData.subcategoryName}
                     <div
-                        style={{position: 'absolute', top: '0', left: '-1.1rem', width: '.9rem', height: '100%'}}>
+                        style={{position: 'absolute', top: '0', left: '-1.6rem', width: '.9rem', height: '100%'}}>
                         {subcatData.loading ? <Spinner /> : (subcatData.expanded ? '▼' : '▶') }
                     </div>
                 </div>
@@ -68,7 +68,7 @@ class TreeHierarchy extends Component {
                             onClick={() => this.props.onFetchExtraTreeHierarchyData(elt.categoryId, null, elt.fullAncestry, elt.expanded, elt.loaded)}>
                             {elt.categoryName}
                             <div
-                                style={{position: 'absolute', top: '0', left: '-1.1rem', width: '.9rem', height: '100%'}}>
+                                style={{position: 'absolute', top: '0', left: '-1.6rem', width: '.9rem', height: '100%'}}>
                                 {elt.loading ? <Spinner /> : (elt.expanded ? '▼' : '▶') }
                             </div>
                         </div>
@@ -79,7 +79,7 @@ class TreeHierarchy extends Component {
         }
         return(
             <div
-                style={{fontSize: '1rem', paddingLeft: '1.5rem', paddingTop: '.5rem', paddingBottom: '.5rem'}}
+                style={{fontSize: '1rem', paddingLeft: '2.6rem', paddingTop: '1rem', paddingBottom: '1rem', paddingRight: '1rem'}}
                 >{tree}
             </div>
         )

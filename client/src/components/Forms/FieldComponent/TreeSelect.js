@@ -59,7 +59,7 @@ class TreeSelect extends Component {
                         {'▼'}
                     </div>
                     <div
-                        style={{position: 'absolute', right: '0', top: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}
+                        style={{position: 'absolute', right: '0', top: '0', minWidth: '15rem', backgroundColor: '#eeeeee', maxHeight: '50vh', overflow: 'auto'}}
                         onClick={(e) => e.stopPropagation()}>
                         <TreeHierarchy
                             treeHierarchyData={this.props.treeHierarchyData}

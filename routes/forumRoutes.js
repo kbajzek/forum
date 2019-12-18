@@ -514,7 +514,9 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
                     }
                     subcatPlace++;
                 }
-                while(subcatPlace < subcat.length || childThreadPlace < childThread.length){
+                // console.log(subcatChildren);
+                // console.log(subcatPlace);
+                while((subcatPlace < subcat.length || childThreadPlace < childThread.length) && subcatRef){
                     let tempSubcatRef = null;
                     while(subcatPlace < subcat.length && subcat[subcatPlace].parentSubcategoryId === subcatRef.subcategoryId){
                         const subcatChild = {
@@ -558,6 +560,7 @@ module.exports = (app,io,ioUsers,ioLocations,setUserLocation) => {
 
             res.send({tree: finalTree});
         }catch(err){
+            console.log(err)
             res.status(500).send({ error: 'Something failed!' })
         }
     });
