@@ -75,7 +75,7 @@ describe('Tests', () => {
                     let thread6 = result[0];
                     let post6 = result[1];
                     result = await controllers.createThread('Strawberry', 
-`[size=36][color=#826a1a][center]Heres a nice picture of a strawberry![/center][/color][/size]
+`[size=36][color=#826a1a][center]Here's a nice picture of a strawberry![/center][/color][/size]
 [image]https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/PerfectStrawberry.jpg/220px-PerfectStrawberry.jpg[/image]`
                     , user1.id, subCategory7.id);
                     let thread7 = result[0];
