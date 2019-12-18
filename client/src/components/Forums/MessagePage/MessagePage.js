@@ -3,7 +3,7 @@ import {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 // import slugify from 'slugify';
 
-// import classes from './MessagePage.module.css';
+import classes from './MessagePage.module.css';
 
 import * as actions from '../../../store/actions';
 
@@ -14,6 +14,10 @@ import Spinner from '../../UI/Spinner/Spinner';
 import ErrorPage from '../ErrorPage/ErrorPage';
 
 class MessagePage extends Component {
+
+    state = {
+        showSidebar: false
+    }
     
     componentDidMount() {
         if(this.props.id){
@@ -29,8 +33,10 @@ class MessagePage extends Component {
         if(this.props.location.pathname !== prevProps.location.pathname && (this.props.history.action === 'POP' || this.props.location.pathname === "/forums/message" )){
             if(this.props.id){
                 this.props.onInitMessageData("/message/" + this.props.id + "/" + this.props.slug);
+                this.props.setMessageSidebarState(1);
             }else{
                 this.props.onInitMessageData("/message");
+                this.props.setMessageSidebarState(1);
             }
         }
     }
@@ -45,6 +51,7 @@ class MessagePage extends Component {
 
     onSelectMessage = (id, name) => {
         this.props.onSelectMessageData("/message/" + id + "/" + name, this.props.history);
+        this.setState({showSidebar: false});
     }
 
     onMessageButtonClick = () => {
@@ -55,6 +62,15 @@ class MessagePage extends Component {
         this.props.setMessageSidebarState(2);
     }
 
+    onTopMembersButtonClick = () => {
+        this.props.setMessageSidebarState(2);
+        this.setState({showSidebar: !this.state.showSidebar});
+    }
+
+    onBackButtonClick = () => {
+        this.props.history.push("/forums/message");
+    }
+
     removeMessageMember = (memberId) => {
         this.props.removeMessageMember(memberId, "/message/" + this.props.id + "/" + this.props.slug);
     }
@@ -63,14 +79,21 @@ class MessagePage extends Component {
 
         let messageButton = this.props.auth ? (
         <button 
-            style={{background: 'none',
-                    color: 'inherit',
-                    border: 'none',
-                    font: 'inherit',
-                    cursor: 'pointer',
-                    outline: 'inherit'}}
+            className={classes.Button}
             onClick={this.handleMessageCreator}>
-            CREATE MESSAGE
+            Create
+        </button>) : null;
+
+        let messagesButton = this.props.id ? (<button 
+            className={classes.MessagesButton}
+            onClick={this.onTopMembersButtonClick}>
+            {this.state.showSidebar ? 'Posts' : 'Members'}
+        </button>) : null;
+
+        let backButton = this.props.id && (!this.state.showSidebar || this.props.messageSidebarState === 2) ? (<button 
+            className={classes.MessagesButton}
+            onClick={this.onBackButtonClick}>
+            {'←'}
         </button>) : null;
 
         let messageReplyButton = null;
@@ -88,8 +111,8 @@ class MessagePage extends Component {
             if(this.props.messageData.messageSelected){
                 messageContent = this.props.messageData.messageSelected.posts.map(({id, content, creatorName, creatorPath, creatorPictureURL, creatorPostCount}) => {
                     return (
-                        <div key={id}>
-                            <div style={{display: 'flex', margin: '1rem', boxShadow: '0 1rem 3rem rgba(0, 0, 0, .2)', flexDirection: 'row'}}>
+                        <div key={id} className={classes.PostWrapper}>
+                            <div className={classes.Post}>
                                 <PostUser 
                                     name={creatorName}
                                     pictureURL={creatorPictureURL}
@@ -100,10 +123,10 @@ class MessagePage extends Component {
                                         <PostContent content={content} />
                                     </div>
                                     <div style={{display: 'flex'}}>
-                                        <button onClick={() => {this.props.handleMessagePostEdit(id, content, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName)}}>EDIT</button>
-                                        <button onClick={() => {this.props.handleMessagePostDelete(id, this.props.id, this.props.slug)}}>DELETE</button>
-                                        <button onClick={() => {this.props.handleMessagePostQuote(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName, content)}}>QUOTE</button>
-                                        <button onClick={() => {this.props.handleMessagePostReply(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName, content)}}>REPLY</button>
+                                        <button className={classes.Button} onClick={() => {this.props.handleMessagePostEdit(id, content, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName)}}>EDIT</button>
+                                        <button className={classes.Button} onClick={() => {this.props.handleMessagePostDelete(id, this.props.id, this.props.slug)}}>DELETE</button>
+                                        <button className={classes.Button} onClick={() => {this.props.handleMessagePostQuote(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName, content)}}>QUOTE</button>
+                                        <button className={classes.Button} onClick={() => {this.props.handleMessagePostReply(creatorName, id, this.props.id, this.props.slug, this.props.messageData.messageSelected.messageName, content)}}>REPLY</button>
                                     </div>
                                 </div>
                             </div>
@@ -112,23 +135,20 @@ class MessagePage extends Component {
                 });
                 messageReplyButton = this.props.id ? (
                     <button  
-                        style={{background: 'none',
-                            color: 'inherit',
-                            border: 'none',
-                            font: 'inherit',
-                            cursor: 'pointer',
-                            outline: 'inherit'}} 
+                        className={classes.Button}
                         onClick={this.handleMessagePostCreate}>
-                        REPLY MESSAGE
+                        Reply
                     </button>
                 ) : null;
             }
 
             messagepage = (
                 <div style={{height: 'calc(100vh - 7rem)'}}>
-                    <div style={{backgroundColor: 'rgba(240,255,255,255)', height: '5rem', display: 'flex', flexDirection: 'row'}}>
+                    <div style={{backgroundColor: 'rgba(240,255,255,255)', height: '4rem', display: 'flex', flexDirection: 'row'}}>
+                        {backButton}
                         {messageButton}
                         {messageReplyButton}
+                        {messagesButton}
                     </div>
                     <div style={{display: 'flex', flexDirection: 'row', height: 'calc(100% - 5rem)'}}>
                         <MessageSideBar 
@@ -137,8 +157,13 @@ class MessagePage extends Component {
                             messageButtonClick={this.onMessageButtonClick}
                             membersButtonClick={this.onMembersButtonClick}
                             sideBarState={this.props.messageSidebarState}
-                            removeMessageMember={this.removeMessageMember} />
-                        <div style={{flexBasis: '75%', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto'}}>
+                            removeMessageMember={this.removeMessageMember}
+                            messageId={this.props.id}
+                            showSidebar={this.state.showSidebar} />
+                        <div className={!this.props.id ? classes.MessageContent : (this.state.showSidebar ? classes.MessageContent : classes.MessageContentShow)}>
+                            {this.props.id && 
+                            this.props.messageData.messageSelected && 
+                            <div style={{fontSize: '3rem', marginLeft: '1.5rem', marginTop: '1.5rem'}}>{this.props.messageData.messageSelected.messageName}</div>}
                             {messageContent}
                         </div>
                     </div>

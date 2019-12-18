@@ -36,8 +36,8 @@ class SubCategoryForm extends Component {
                 <div onClick={this.handleClick} style={{ backgroundColor: '#fff', padding: '1rem', boxSizing: 'border-box' }}>
                     <form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
                         {this.renderFields()}
-                        <button style={{color: '#fff', backgroundColor: '#2FADDF', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>
-                        <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.props.closeForm}>CANCEL</button>
+                        <button style={{color: '#fff', backgroundColor: '#197CA3', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>
+                        <button style={{color: '#fff', backgroundColor: '#DB2929', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.props.closeForm}>CANCEL</button>
                     </form>
                 </div>
             </div>

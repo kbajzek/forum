@@ -1,3 +1,11 @@
+.NodeSelection{
+    cursor: pointer;
+    display: inline-block;
+}
+.ThreadSelection{
+    cursor: pointer;
+    display: inline-block;
+}
 .NodeSelection:hover{
     background-color: #bbb;
 }

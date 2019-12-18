@@ -1,3 +1,60 @@
+.message {
+    cursor: pointer;
+}
+
 .message:hover{
     background-color: rgba(230,230,230,255);
+}
+
+.DeleteButton {
+    display: inline-block;
+    color: #fff;
+    background-color: #db2929;
+    margin: .5rem;
+    border: none;
+    padding: .5rem;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.Button {
+    display: inline-block;
+    color: #fff;
+    background-color: #1E5ECF;
+    margin: .5rem;
+    border: none;
+    padding: .5rem;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.SideBar, .SideBarClosed {
+    flex-basis: 25%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-right: 1px solid rgba(230,230,230,255);
+}
+
+.bottomButtons {
+    height: 4rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+@media (max-width: 768px){
+    .SideBar {
+        flex-basis: 100%;
+        width: 100%;
+    }
+
+    .SideBarClosed {
+        flex-basis: 0%;
+        display: none;
+    }
+
+    .bottomButtons {
+        display: none;
+    }
 }

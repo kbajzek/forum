@@ -43,7 +43,7 @@ class TreeHierarchy extends Component {
                     {subcatData.subcategoryName}
                     <div
                         style={{position: 'absolute', top: '0', left: '-1.1rem', width: '.9rem', height: '100%'}}>
-                        {subcatData.loading ? <Spinner /> : (subcatData.expanded ? '\u25BC' : '\u25B6') }
+                        {subcatData.loading ? <Spinner /> : (subcatData.expanded ? '▼' : '▶') }
                     </div>
                 </div>
                 {subcatChildren}
@@ -69,7 +69,7 @@ class TreeHierarchy extends Component {
                             {elt.categoryName}
                             <div
                                 style={{position: 'absolute', top: '0', left: '-1.1rem', width: '.9rem', height: '100%'}}>
-                                {elt.loading ? <Spinner /> : (elt.expanded ? '\u25BC' : '\u25B6') }
+                                {elt.loading ? <Spinner /> : (elt.expanded ? '▼' : '▶') }
                             </div>
                         </div>
                         {subcatChildren}

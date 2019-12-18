@@ -138,21 +138,22 @@ class MultiSelect extends Component {
 
         selectionList = this.props.input.value.map(({key, label}) => {
             return(
-                <div key={key} style={{display: 'flex', flexDirection: 'row', backgroundColor: 'blue'}}>
-                    <button onClick={(e) => this.removeSelection(key)}>X</button>
-                    <div>{label}</div>
+                <div key={key} style={{display: 'flex', flexDirection: 'row', backgroundColor: 'blue', color: 'white', padding: '.5rem', boxSizing: 'border-box', borderRadius: '3px', fontSize: '1.3rem', marginRight: '.5rem'}}>
+                    <button style={{border: 'none', backgroundColor: 'blue', color: 'white', fontWeight: 700, marginRight: '.5rem'}} onClick={(e) => this.removeSelection(key)}>X</button>
+                    <div style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>{label}</div>
                 </div>
             );
         });
 
         return (
-            <div>
+            <div style={{display: 'flex', alignItems: 'center'}}>
+                <label style={{marginRight: '.5rem', fontSize: '1.5rem'}}>{this.props.label + ':'}</label>
                 <div 
                     ref={this.outerTextInput} 
                     tabIndex="0" 
                     onFocus={this.handleOnClick} 
                     onClick={this.handleOnClick} 
-                    style={{padding: '1rem', backgroundColor: 'white', cursor: 'text', position: 'relative', display: 'flex', width: '30rem', flexDirection: 'row', flexWrap: 'wrap'}}>
+                    style={{padding: '.5rem', backgroundColor: 'white', cursor: 'text', position: 'relative', display: 'flex', width: '18rem', flexDirection: 'row', flexWrap: 'wrap'}}>
                     {selectionList}
                     <input 
                         onFocus={this.handleOnFocus} 
@@ -162,11 +163,11 @@ class MultiSelect extends Component {
                         ref={this.textInput} 
                         onChange={this.handleOnChange} 
                         autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"/> 
+                    <div ref={this.suggestions} tabIndex="0" style={{position: 'absolute', display: 'flex', flexDirection: 'column', backgroundColor: 'white', cursor: 'pointer', top: '100%', left: 0}}>
+                        {suggestionList}
+                    </div>
                 </div>
-                <div ref={this.suggestions} tabIndex="0" style={{position: 'absolute', display: 'flex', flexDirection: 'column', backgroundColor: 'white', cursor: 'pointer'}}>
-                    {suggestionList}
-                </div>
-                <input value={this.state.textValue} ref={this.sizeInput} style={{position: 'absolute', top: 0, left: 0, visibility: 'hidden', height: 0, width: 0}}/>
+                <input value={this.state.textValue} ref={this.sizeInput} style={{position: 'absolute', visibility: 'hidden', height: 0, width: 0}}/>
             </div>
         );
     }

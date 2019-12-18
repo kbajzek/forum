@@ -27,7 +27,7 @@ class Categories extends Component {
     render() {
 
         let catForm;
-        let catButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.toggleCategoryCreator}>CREATE CATEGORY</button> : null;
+        let catButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#458245', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.toggleCategoryCreator}>CREATE CATEGORY</button> : null;
 
         const categoryErrors = categoryActions.getCategoryErrors(this.props.categoryData);
         // const categoryLoading = categoryActions.getCategoryLoading(this.props.categoryData);

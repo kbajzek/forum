@@ -167,18 +167,18 @@ class PostForm extends Component {
         }
         return(
                 <form ref={this.full} onSubmit={this.props.handleSubmit(this.onFormSubmit)} style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div ref={this.top} style={{display: 'flex', flexDirection: 'column', flexShrink: '0', padding: '1rem', paddingTop: '2rem', fontSize: '2rem', justifyContent: 'space-between'}}>
+                    <div ref={this.top} style={{display: 'flex', flexDirection: 'column', flexShrink: '0', padding: '1rem', paddingTop: '2rem', paddingBottom: '0', fontSize: '2rem', justifyContent: 'space-between'}}>
                         <div>{description}</div>
-                        {membersField}
-                        <div style={{marginLeft: 'auto', marginTop: '1rem'}}>{titleField}</div>
-                        <div style={{marginLeft: 'auto', marginTop: '1rem'}}>{threadField}</div>
+                        <div style={{marginLeft: 'auto', marginTop: membersField ? '1rem' : '0'}}>{membersField}</div>
+                        <div style={{marginLeft: 'auto', marginTop: titleField ? '1rem' : '0'}}>{titleField}</div>
+                        <div style={{marginLeft: 'auto', marginTop: threadField ? '1rem' : '0'}}>{threadField}</div>
                     </div>
                     <div style={{display: 'flex', flexDirection: 'column', flexGrow: '1', height: `${this.state.height}px`}}>
                         {contentField}                        
                     </div>
                     <div ref={this.bottom}>
-                        <button style={{color: '#fff', backgroundColor: '#2FADDF', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>
-                        <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="button" onClick={this.onFormCancel}>CANCEL</button>
+                        <button style={{color: '#fff', backgroundColor: '#197CA3', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="submit">SUBMIT</button>
+                        <button style={{color: '#fff', backgroundColor: '#DB2929', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} type="button" onClick={this.onFormCancel}>CANCEL</button>
                         <button className={classes.Preview} type="button" onClick={this.onPreview}>{this.state.preview ? 'TEXT' : 'PREVIEW'}</button>
                     </div>
                 </form>

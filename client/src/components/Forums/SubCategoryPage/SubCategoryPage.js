@@ -55,9 +55,9 @@ class SubCategoryPage extends Component {
         let subCatForm;
         let subCatBreadcrumb;
 
-        let subCatButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
+        let subCatButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#458245', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.toggleSubCategoryCreator}>CREATE SUBCATEGORY</button> : null;
 
-        let threadButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
+        let threadButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#458245', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.handleThreadCreator}>CREATE THREAD</button> : null;
 
         const subCategoryErrors = subCategoryActions.getSubCategoryErrors(this.props.subCategoryData);
         // const subCategoryLoading = subCategoryActions.getSubCategoryLoading(this.props.subCategoryData);

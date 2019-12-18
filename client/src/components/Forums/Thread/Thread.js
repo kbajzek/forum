@@ -43,7 +43,7 @@ class Thread extends Component {
 
     render() {
 
-        let threadButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.handlePostCreator}>CREATE POST</button> : null;
+        let threadButton = this.props.auth ? <button style={{color: '#fff', backgroundColor: '#458245', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}} onClick={this.handlePostCreator}>CREATE POST</button> : null;
         const threadErrors = threadActions.getThreadErrors(this.props.threadData);
         // const threadLoading = threadActions.getThreadLoading(this.props.threadData);
         const threadLoaded = threadActions.getThreadLoaded(this.props.threadData);

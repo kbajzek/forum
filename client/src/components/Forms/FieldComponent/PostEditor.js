@@ -474,19 +474,20 @@ class PostEditor extends Component {
                     <button className={classes.styleButton} onClick={this.handleItalicize}>I</button>
                     <button className={classes.styleButton} onClick={this.handleUnderline}>U</button>
                     <button className={classes.styleButton} onClick={this.handleStrikethrough}>S</button>
-                    <button className={classes.styleButton} onClick={this.handleLeft}>Left</button>
-                    <button className={classes.styleButton} onClick={this.handleRight}>Right</button>
-                    <button className={classes.styleButton} onClick={this.handleCenter}>Center</button>
-                    <button className={classes.styleButton} onClick={this.handleJustify}>Justify</button>
-                    <button className={classes.styleButton} onClick={this.handleIndent}>Indent</button>
+                    <button className={classes.styleButton2} onClick={this.handleLeft}>Left</button>
+                    <button className={classes.styleButton3} onClick={this.handleRight}>Right</button>
+                    <button className={classes.styleButton6} onClick={this.handleCenter}>Center</button>
+                    <button className={classes.styleButton3} onClick={this.handleJustify}>Justify</button>
+                    <button className={classes.styleButton2} onClick={this.handleIndent}>Indent</button>
                     <button className={classes.styleButton} onClick={this.handleColor}>Color</button>
                     <button className={classes.styleButton} onClick={this.handleSize}>Size</button>
                     <button className={classes.styleButton} onClick={this.handleUrl}>Link</button>
-                    <button className={classes.styleButton} onClick={this.handleImage}>Image</button>
-                    <button className={classes.styleButton} onClick={this.handleYoutube}>Youtube</button>
-                    <button className={classes.styleButton} onClick={this.handleCode}>Code</button>
-                    <button className={classes.styleButton} onClick={this.handleOrderedList}>Ordered List</button>
-                    <button className={classes.styleButton} onClick={this.handleUnorderedList}>Unordered List</button>
+                    <button className={classes.styleButton7} onClick={this.handleImage}>Image</button>
+                    <button className={classes.styleButton3} onClick={this.handleYoutube}>Youtube</button>
+                    <button className={classes.styleButton6} onClick={this.handleCode}>Code</button>
+                    <button className={classes.styleButton5} onClick={this.handleOrderedList}>List</button>
+                    <button className={classes.styleButton4} onClick={this.handleOrderedList}>Ordered List</button>
+                    <button className={classes.styleButton4} onClick={this.handleUnorderedList}>Unordered List</button>
                 </div>
                 <div style={{'display': 'flex', flexGrow: '1', overflow: 'hidden'}}>
                     <div className={!this.props.preview ? classes.TextArea : classes.TextAreaPreview}>

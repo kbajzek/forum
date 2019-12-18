@@ -52,7 +52,7 @@ class Ratings extends Component {
                             );
                         })}
                     </div>
-                    <button style={{color: '#fff', backgroundColor: '#DE3B3B', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer', marginLeft: 'auto'}} onClick={this.handleCloseRatings}>CANCEL</button>
+                    <button style={{color: '#fff', backgroundColor: '#DB2929', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer', marginLeft: 'auto'}} onClick={this.handleCloseRatings}>CANCEL</button>
                 </div>
             </div>;
         }

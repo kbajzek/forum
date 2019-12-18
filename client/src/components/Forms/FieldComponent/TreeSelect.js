@@ -33,14 +33,14 @@ class TreeSelect extends Component {
 
         let selectComponent = (
             <div
-                style={{display: 'flex', maxWidth: '30rem', minWidth: '10rem', padding: '.3rem', backgroundColor: '#ddd', justifyContent: 'space-between'}}
+                style={{display: 'flex', cursor: 'pointer', maxWidth: '30rem', minWidth: '10rem', padding: '.3rem', marginBottom: '.5rem', backgroundColor: '#ddd', justifyContent: 'space-between'}}
                 onClick={this.toggleSelect}>
                 <div>
                     {this.props.input.value.name}
                 </div>
                 <div
                     style={{border: '1px solid grey', width: '2rem', height: '100%', marginLeft: '.3rem'}}>
-                    {'\u25BC'}
+                    {'▼'}
                 </div>
             </div>
             
@@ -49,16 +49,28 @@ class TreeSelect extends Component {
         if(this.state.SelectOpen){
             selectComponent = (
                 <div
-                    style={{position: 'absolute', right: '0', top: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}>
-                    <TreeHierarchy
-                        treeHierarchyData={this.props.treeHierarchyData}
-                        loading={this.props.loading}
-                        error={this.props.error}
-                        auth={this.props.auth}
-                        selectedId={this.props.input.value.id}
-                        selectNewDestination={this.selectNewDestination}
-                        onFetchTreeHierarchyData={this.props.onFetchTreeHierarchyData}
-                        onFetchExtraTreeHierarchyData={this.props.onFetchExtraTreeHierarchyData} />
+                    style={{display: 'flex', maxWidth: '30rem', minWidth: '10rem', padding: '.3rem', marginBottom: '.5rem', backgroundColor: '#ddd', justifyContent: 'space-between', position: 'relative'}}
+                    onClick={this.toggleSelect}>
+                    <div>
+                        {this.props.input.value.name}
+                    </div>
+                    <div
+                        style={{border: '1px solid grey', width: '2rem', height: '100%', marginLeft: '.3rem'}}>
+                        {'▼'}
+                    </div>
+                    <div
+                        style={{position: 'absolute', right: '0', top: '0', minWidth: '15rem', backgroundColor: '#eeeeee'}}
+                        onClick={(e) => e.stopPropagation()}>
+                        <TreeHierarchy
+                            treeHierarchyData={this.props.treeHierarchyData}
+                            loading={this.props.loading}
+                            error={this.props.error}
+                            auth={this.props.auth}
+                            selectedId={this.props.input.value.id}
+                            selectNewDestination={this.selectNewDestination}
+                            onFetchTreeHierarchyData={this.props.onFetchTreeHierarchyData}
+                            onFetchExtraTreeHierarchyData={this.props.onFetchExtraTreeHierarchyData} />
+                    </div>
                 </div>
             );
         }

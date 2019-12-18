@@ -24,7 +24,7 @@
     min-width: 0;
 }
 
-.styleButton {
+.styleButton, .styleButton2, .styleButton3, .styleButton4, .styleButton5, .styleButton6, .styleButton7 {
     display: inline-block;
     color: #fff;
     background-color: #1E5ECF;
@@ -33,6 +33,22 @@
     padding: .5rem;
     border-radius: 3px;
     cursor: pointer;
+}
+
+.styleButton5 {
+    display: none;
+}
+
+@media (max-width: 950px){
+    .styleButton2 {
+        display: none;
+    }
+}
+
+@media (max-width: 850px){
+    .styleButton3 {
+        display: none;
+    }
 }
 
 @media (max-width: 768px){
@@ -53,8 +69,30 @@
     }
 }
 
+@media (max-width: 675px){
+    .styleButton4 {
+        display: none;
+    }
+
+    .styleButton5 {
+        display: inline-block;
+    }
+}
+
 @media (max-width: 600px){
     .styleButton {
         font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 475px){
+    .styleButton6 {
+        display: none;
+    }
+}
+
+@media (max-width: 375px){
+    .styleButton7 {
+        display: none;
     }
 }

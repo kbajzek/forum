@@ -284,7 +284,7 @@ class Forums extends Component {
             editorButton = (
                 <button 
                     onClick={this.toggleWriter}
-                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '1001', color: '#fff', backgroundColor: '#47AD43', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}}>
+                    style={{position: 'fixed', bottom: '0px', right: '0px', 'zIndex': '1001', color: '#fff', backgroundColor: '#458245', margin: '.5rem', border: 'none', padding: '.5rem', borderRadius: '3px', cursor: 'pointer'}}>
                     EDITOR
                 </button>
             );
@@ -295,9 +295,9 @@ class Forums extends Component {
         if(this.state.writerOpen){
             pad = `calc(100vh - ${this.state.writerY}px)`;
             editor=(
-                <div style={{zIndex: '1000', cursor: 'pointer', position: 'fixed', bottom: '0px', left: '0px', right: '0px', backgroundColor: '#778899', height: `calc(100vh - ${this.state.writerY}px)`}}>
+                <div style={{zIndex: '1000', position: 'fixed', bottom: '0px', left: '0px', right: '0px', backgroundColor: '#8E9BA9', height: `calc(100vh - ${this.state.writerY}px)`}}>
                     <div 
-                        style={{width: '3rem', height: '3rem', borderRadius: '50%', backgroundColor: 'black', touchAction: 'none', position: 'absolute', top: '-1.5rem', left: '1rem'}}
+                        style={{cursor: 'pointer', width: '3rem', height: '3rem', borderRadius: '50%', backgroundColor: 'black', touchAction: 'none', position: 'absolute', top: '-1.5rem', left: '1rem'}}
                         onMouseDown={this.handleMouseDown}
                         onTouchStart={this.handleTouchStart}>
                         <img src={doubleArrow} style={{width: '2rem', height: '2rem', marginTop: '.5rem', marginLeft: '.5rem'}} alt="Double Arrow Symbol"/>
